@@ -83,6 +83,7 @@ namespace SpacePlanning
         //normalize a list within an inout range
         public static List<double> NormalizeList(List<double> numList, double lowValue = 0, double highValue = 100)
         {
+            if (numList == null) return null;
             if (lowValue > highValue) { double temp = lowValue; lowValue = highValue; highValue = temp; }
             List<int> indexList = new List<int>();
             double outRange = highValue - lowValue;

@@ -121,7 +121,6 @@ namespace SpacePlanning
             double circulationFreq = 8;
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
-
             Dictionary<string, object> deptArrangement = new Dictionary<string, object>();
             double count = 0, eps = 5;
             Random rand = new Random();
@@ -129,7 +128,7 @@ namespace SpacePlanning
             Random ran = new Random(designSeed);
             bool stackOptionsDept = deptData[0].StackingOptions;
             bool stackOptionsProg = deptData[0].ProgramsInDept[0].StackingOptions;
-            while (deptPlaced == false && count < BuildLayout.MAXCOUNT)//MAXCOUNT
+            while (deptPlaced == false && count < BuildLayout.DEPTCOUNT)//MAXCOUNT
             {
                 double parameter = BasicUtility.RandomBetweenNumbers(ran, 0.9, 0.5);
                 if (!stackOptionsDept) parameter = 0;

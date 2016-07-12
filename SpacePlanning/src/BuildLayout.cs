@@ -19,7 +19,7 @@ namespace SpacePlanning
         internal static Random RANGENERATE = new Random();
         internal static double RECURSE = 0;
         internal static Point2d REFERENCEPOINT = new Point2d(0,0);
-        internal static int MAXCOUNT = 1;
+        internal static int DEPTCOUNT = 1;
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";
@@ -27,7 +27,7 @@ namespace SpacePlanning
         #region - Public Methods
 
         // adds a point2d to a provided polygon with a given line id
-        public static Polygon2d AddPointToPoly(Polygon2d poly, int lineId = 0, double parameter = 0.5)
+        internal static Polygon2d AddPointToPoly(Polygon2d poly, int lineId = 0, double parameter = 0.5)
         {
             if (parameter == 0) return poly;
             if(!ValidateObject.CheckPoly(poly)) return null;
@@ -76,8 +76,9 @@ namespace SpacePlanning
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
             double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false, 
-            bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2)
+            bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2, bool highIteration = false)
         {
+            if (highIteration == true) DEPTCOUNT = 5;
             List<DeptData> deptDataInp = deptData;
             Dictionary<string, object> obj = new Dictionary<string, object>();
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy

@@ -169,16 +169,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="src\Asset\OUTLINESCALEDDK.sat" />
-    <EmbeddedResource Include="src\Asset\ATORIGINDK.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\outdkNew.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\ProgramDocument.csv" />
-  </ItemGroup>
-  <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">
       <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
       <VersionMajor>2</VersionMajor>
@@ -208,34 +198,14 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="src\Asset\MayoProgram.csv" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\siteMayo.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\MayoProgram_1.csv" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\OtherProgram.csv" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\otherSite.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\site4.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\site3.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\site1.sat" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\ProgramDocument_Reg.csv" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="src\Asset\MULTIDEPT.csv" />
+    <EmbeddedResource Include="src\Asset\bedTowerProgramImp.csv" />
+    <EmbeddedResource Include="src\Asset\bedTowerSite.sat" />
+    <EmbeddedResource Include="src\Asset\hospbSite.sat" />
+    <EmbeddedResource Include="src\Asset\hospProgramImp.csv" />
+    <EmbeddedResource Include="src\Asset\mayoClinicSite.sat" />
+    <EmbeddedResource Include="src\Asset\mayoProgramImp.csv" />
+    <EmbeddedResource Include="src\Asset\stPaulProgramImp.csv" />
+    <EmbeddedResource Include="src\Asset\stPaulsSite.sat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

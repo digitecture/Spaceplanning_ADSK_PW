@@ -116,7 +116,7 @@ namespace SpacePlanning
         }
 
         [MultiReturn(new[] { "DisplayGeomList" })]
-        internal static Dictionary<string,object> ColorPrograms(List<DeptData> deptDataInp, double height = 0, int transparency = 255, int colorScheme = 0)
+        internal static Dictionary<string,object> ColorPrograms(List<DeptData> deptDataInp, double height = 0, int transparency = 255, int colorScheme = 0,int opacity = 10)
         {
             double heightPlan = 0 + height;
             if (deptDataInp == null) return null;
@@ -136,13 +136,14 @@ namespace SpacePlanning
                 List<int> indicesRandomList = BasicUtility.RandomizeList(indicesList, ran);
                 for (int i = 0; i < colorList.Count; i++) { colorListSelected.Add(colorList[indicesRandomList[i]]); }
             }
-
+            colorListSelected = SetTransparency(colorListSelected, transparency, opacity);
             //Color kpuColor = colorListSelected[0];
             List<List<List<Polygon2d>>> polyProgsList = new List<List<List<Polygon2d>>>();
             for (int i = 0; i < deptData.Count; i++)
             {
                 List<ProgramData> progsInDept = deptData[i].ProgramsInDept;
                 List<List<Polygon2d>> polyList = new List<List<Polygon2d>>();
+                if (progsInDept == null || progsInDept.Count < 1) continue;
                 for (int j = 0; j < progsInDept.Count; j++) polyList.Add(progsInDept[j].PolyAssignedToProg);
                 polyProgsList.Add(polyList);
             }
@@ -278,7 +279,7 @@ namespace SpacePlanning
             double heightPlan = 0 + height;
             List<DeptData> deptData = deptDataInp;
             deptDataInp = deptData.Select(x => new DeptData(x)).ToList(); // example of deep copy
-            if (colorProgramSeparate) return ColorPrograms(deptDataInp, height, transparency, colorScheme);
+            if (colorProgramSeparate) return ColorPrograms(deptDataInp, height, transparency, colorScheme, opacity);
 
             if (transparency < 0 || transparency > 255) transparency = 255;
 

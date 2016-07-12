@@ -23,6 +23,8 @@ namespace SpacePlanning
         private List<Point2d> _siteBoundingBox = new List<Point2d>();
         private double _dimX;
         private double _dimY;
+        internal static int FORMCOUNT = 1;
+
 
         private static int MINCELL = 250, MAXCELL = 550;
 
@@ -469,8 +471,9 @@ namespace SpacePlanning
         [MultiReturn(new[] { "BuildingOutline",  "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         public static Dictionary<string, object> FormBuildingOutline(Polygon2d orthoSiteOutline, 
             List<Cell> cellList, [DefaultArgument("null")]List<Point2d> attractorPoints, [DefaultArgument("null")]List<double> weightList,
-     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10)
+     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10, bool highIteration = false)
         {
+            if (highIteration == true) FORMCOUNT = 5;
             Trace.WriteLine("FORM BUILD OUTLINE STARTS+++++++++++++++++++++++++");
             if (designSeed < 1) designSeed = 1;
             int count = 0, maxTry = 1;
@@ -483,7 +486,7 @@ namespace SpacePlanning
             int dummy = 0;
             if (scanResolution == 0) dummy = (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed), 40, 3);
             else dummy = scanResolution;
-            while (count < maxTry && !worked)
+            while (count < FORMCOUNT && !worked)
             {
                 //if (attractorPoints.Count == 0 || weightList.Count == 0) { attractorPoints = null; weightList = null; }
                 count += 1;

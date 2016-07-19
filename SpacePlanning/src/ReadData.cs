@@ -123,7 +123,7 @@ namespace SpacePlanning
 
         }
 
-        public static List<DeptData> MakeDataStackNew(double circulationFactor = 1, int caseStudy = 0, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
+        internal static List<DeptData> MakeDataStackNew(double circulationFactor = 1, int caseStudy = 0, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
         {
             double dim = 5;
             StreamReader reader;

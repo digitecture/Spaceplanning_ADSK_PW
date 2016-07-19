@@ -186,24 +186,24 @@ namespace SpacePlanning
                  if (s.Length == 0) continue;              
                  var values = s.Split(',');
                  if (readCount == 0) { readCount += 1; continue; }
-    progIdList.Add(values[0]);
+                 progIdList.Add(values[0]);
                  programList.Add(values[1]);
                  deptNameList.Add(values[2]);
                  progQuantList.Add(values[3]);
                  prefValProgList.Add(values[5]);
                  progAdjList.Add(values[8]);
                  List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0, 0, true) };
-    //List<string> adjList = new List<string>();
-    //adjList.Add(values[8]);
-    ProgramData progData = new ProgramData(Convert.ToInt32(values[0]), values[1], values[2], Convert.ToInt32(Convert.ToDouble(values[3])),
-        Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim, Convert.ToString(values[7]), stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
-    programDataStack.Add(progData);
+                //List<string> adjList = new List<string>();
+                //adjList.Add(values[8]);
+                ProgramData progData = new ProgramData(Convert.ToInt32(values[0]), values[1], values[2], Convert.ToInt32(Convert.ToDouble(values[3])),
+                Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim, Convert.ToString(values[7]), stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
+                programDataStack.Add(progData);
              }// end of for each statement
 
-List<string> deptNames = GetDeptNames(deptNameList);
-List<DeptData> deptDataStack = new List<DeptData>();
-Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, casestudy = 0, programDocumentString, stackingOptionsProg,false);
-List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
+            List<string> deptNames = GetDeptNames(deptNameList);
+            List<DeptData> deptDataStack = new List<DeptData>();
+            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, casestudy = 0, programDocumentString, stackingOptionsProg,false);
+            List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
              for (int i = 0; i<deptNames.Count; i++)
              {
                  List<ProgramData> progInDept = new List<ProgramData>();
@@ -214,16 +214,16 @@ List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"]
                          progInDept.Add(programDataStack[j]);
                      }
                  List<ProgramData> programBasedOnQuanity = MakeProgramListBasedOnQuantity(progInDept);
-DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
-deptDataStack.Add(dept);
+            DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
+            deptDataStack.Add(dept);
              }// end of for loop statement
              Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, casestudy, programDocumentString, stackingOptionsDept,false);
-List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
-//sort the depts by high area
-deptDataStack = SortDeptData(deptDataStack, preferredDept);
+            List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
+            //sort the depts by high area
+            deptDataStack = SortDeptData(deptDataStack, preferredDept);
 
-//added to compute area percentage for each dept
-double totalDeptArea = 0;
+            //added to compute area percentage for each dept
+            double totalDeptArea = 0;
              for(int i = 0; i<deptDataStack.Count; i++) totalDeptArea += deptDataStack[i].DeptAreaNeeded;
              for (int i = 0; i<deptDataStack.Count; i++) deptDataStack[i].DeptAreaProportionNeeded = Math.Round((deptDataStack[i].DeptAreaNeeded / totalDeptArea), 3);
  
@@ -428,20 +428,7 @@ double totalDeptArea = 0;
             List<string> progTypeList = new List<string>();
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
-            /*
-            if (false) //programDocumentPath == ""
-            {
-                //string[] csvText = Properties.Resources.PROGRAMCSV.Split('\n'); 
-                if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.stPaulProgramImp.csv");//stpauls
-                else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.mayoProgramImp.csv"); // mayoHospital
-                else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.hospProgramImp.csv"); // hospital
-                else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.bedTowerProgramImp.csv"); // bedtower
-
-                reader = new StreamReader(res);
-            }
-            //else reader = new StreamReader(File.OpenRead(programDocumentString));
-          
-            */
+      
 
 
             string docInfo = "";

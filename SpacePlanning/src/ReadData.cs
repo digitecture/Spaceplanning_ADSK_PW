@@ -39,7 +39,7 @@ namespace SpacePlanning
         /// <search>
         /// make data stack, dept data object, program data object
         /// </search>
-        public static List<DeptData> MakeDataStack(double circulationFactor = 1, int caseStudy = 0, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg =false, int designSeed = 0)
+        public static List<DeptData> MakeDataStack(double circulationFactor = 1, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg =false, int designSeed = 0)
         {
             double dim = 5;
             StreamReader reader;
@@ -53,18 +53,7 @@ namespace SpacePlanning
 
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
-            Stream res;
-            if (programDocumentPath == "")
-            {               
-                //string[] csvText = Properties.Resources.PROGRAMCSV.Split('\n'); 
-                if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.stPaulProgramImp.csv");//stpauls
-                else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.mayoProgramImp.csv"); // mayoHospital
-                else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.hospProgramImp.csv"); // hospital
-                else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.bedTowerProgramImp.csv"); // bedtower
-
-                reader = new StreamReader(res);
-            }
-            else reader = new StreamReader(File.OpenRead(@programDocumentPath));
+            reader = new StreamReader(File.OpenRead(@programDocumentPath));
             int readCount = 0;
             
        
@@ -93,7 +82,7 @@ namespace SpacePlanning
 
             List<string> deptNames = GetDeptNames(deptNameList);
             List<DeptData> deptDataStack = new List<DeptData>();
-            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, caseStudy = 0, programDocumentPath,stackingOptionsProg);
+            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, programDocumentPath,stackingOptionsProg);
             List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
             for (int i = 0; i < deptNames.Count; i++)
             {
@@ -109,7 +98,7 @@ namespace SpacePlanning
                 DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
                 deptDataStack.Add(dept);
             }// end of for loop statement
-            Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, caseStudy, programDocumentPath,stackingOptionsDept);
+            Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, programDocumentPath,stackingOptionsDept);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
             //sort the depts by high area
             deptDataStack = SortDeptData(deptDataStack, preferredDept);
@@ -123,47 +112,19 @@ namespace SpacePlanning
 
         }
 
-        internal static List<DeptData> MakeDataStackNew(double circulationFactor = 1, int caseStudy = 0, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
-        {
-            double dim = 5;
-            StreamReader reader;
-            List < string > progIdList = new List<string>();
-            List < string > programList = new List<string>();
-            List < string > deptNameList = new List<string>();
-            List < string > progQuantList = new List<string>();
-            List < string > areaEachProgList = new List<string>();
-            List < string > prefValProgList = new List<string>();
-            List < string > progAdjList = new List<string>();
-
-            List < List < string >> dataStack = new List<List<string>>();
-            List < ProgramData > programDataStack = new List<ProgramData>();
-            Stream res;
-            if (programDocumentPath == "")
-            {
-                //string[] csvText = Properties.Resources.PROGRAMCSV.Split('\n'); 
-                if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.MayoProgram_1.csv");
-                else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.OtherProgram.csv");
-                else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.ProgramDocument_Reg.csv");
-                else if (caseStudy == 4) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.OtherProgram.csv");
-                else if (caseStudy == 5) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.MULTIDEPT.csv");
-                else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.ProgramDocument.csv");
-
-                reader = new StreamReader(res);
-            }
-            else reader = new StreamReader(File.OpenRead(@programDocumentPath));
-            int readCount = 0;
-            string programDocumentString = reader.ReadToEnd();
-            return MakeDataStackFromString(circulationFactor, programDocumentString, stackingOptionsDept, stackingOptionsProg, designSeed);
-
-        }
-
-
-
+     
+        /// <summary>
+        /// Make the data stack from the string node
+        /// </summary>
+        /// <param name="circulationFactor"></param>
+        /// <param name="programDocumentString"></param>
+        /// <param name="stackingOptionsDept"></param>
+        /// <param name="stackingOptionsProg"></param>
+        /// <param name="designSeed"></param>
+        /// <returns name ="DeptData"> List of Dept Data Object"</returns>
         public static List<DeptData> MakeDataStackFromString(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
  {
-            int casestudy = 0;
-
-             double dim = 5;
+           double dim = 5;
            StreamReader reader;
             List<string> progIdList = new List<string>();
             List<string> programList = new List<string>();
@@ -202,7 +163,7 @@ namespace SpacePlanning
 
             List<string> deptNames = GetDeptNames(deptNameList);
             List<DeptData> deptDataStack = new List<DeptData>();
-            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, casestudy = 0, programDocumentString, stackingOptionsProg,false);
+            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, programDocumentString, stackingOptionsProg,false);
             List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
              for (int i = 0; i<deptNames.Count; i++)
              {
@@ -217,7 +178,7 @@ namespace SpacePlanning
             DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
             deptDataStack.Add(dept);
              }// end of for loop statement
-             Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, casestudy, programDocumentString, stackingOptionsDept,false);
+             Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, programDocumentString, stackingOptionsDept,false);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
             //sort the depts by high area
             deptDataStack = SortDeptData(deptDataStack, preferredDept);
@@ -232,10 +193,7 @@ namespace SpacePlanning
          }
  
 
-
-
-
-
+        
 
 
           
@@ -255,7 +213,7 @@ namespace SpacePlanning
         [MultiReturn(new[] { "ProgIdList", "ProgramList","DeptNameList", "ProgQuantList","AreaEachProgList",
             "ProgPrefValList","ProgAdjList", "DeptTopoList", "DeptTopoAdjacency" , "EachDeptAdjDeptList",
             "DeptTopListTotal", "DeptNamesUnique", "MostFrequentDept", "MostFrequentDeptSorted"})]
-        internal static Dictionary<string, object> FindPreferredDepts(double circulationFactor = 1, int caseStudy = 0, string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
+        internal static Dictionary<string, object> FindPreferredDepts(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
         {
             double dim = 5;
             List<string> progIdList = new List<string>();
@@ -273,19 +231,7 @@ namespace SpacePlanning
             if(path == true)
             {
                 StreamReader reader;
-                Stream res;
-                if (programDocumentString == "")
-                {
-                    //string[] csvText = Properties.Resources.PROGRAMCSV.Split('\n'); 
-                    if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.stPaulProgramImp.csv");//stpauls
-                    else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.mayoProgramImp.csv"); // mayoHospital
-                    else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.hospProgramImp.csv"); // hospital
-                    else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.bedTowerProgramImp.csv"); // bedtower
-
-                    reader = new StreamReader(res);
-                }
-                else reader = new StreamReader(File.OpenRead(programDocumentString));
-                //reader = new StreamReader(res);
+                reader = new StreamReader(File.OpenRead(programDocumentString));
                 docInfo = reader.ReadToEnd();
             }
             else
@@ -413,7 +359,7 @@ namespace SpacePlanning
  
         [MultiReturn(new[] { "ProgIdList", "ProgramList","DeptNameList", "ProgQuantList","AreaEachProgList",
             "ProgPrefValList","ProgAdjList", "ProgAdjWeightList"})]
-        internal static Dictionary<string, object> FindPreferredProgs(double circulationFactor = 1, int caseStudy = 0, string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
+        internal static Dictionary<string, object> FindPreferredProgs(double circulationFactor = 1,  string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
         {
             
             //int caseStudy = 0;
@@ -435,18 +381,7 @@ namespace SpacePlanning
             if (path == true)
             {
                 StreamReader reader;
-                Stream res;
-                if (programDocumentString == "")
-                {
-                    //string[] csvText = Properties.Resources.PROGRAMCSV.Split('\n'); 
-                    if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.stPaulProgramImp.csv");//stpauls
-                    else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.mayoProgramImp.csv"); // mayoHospital
-                    else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.hospProgramImp.csv"); // hospital
-                    else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.bedTowerProgramImp.csv"); // bedtower
-
-                    reader = new StreamReader(res);
-                }
-                else reader = new StreamReader(File.OpenRead(programDocumentString));
+                reader = new StreamReader(File.OpenRead(programDocumentString));
                 //reader = new StreamReader(res);
                 docInfo = reader.ReadToEnd();
             }
@@ -601,38 +536,14 @@ namespace SpacePlanning
         /// <search>
         /// make site outline, site geometry, site.
         /// </search>
-        public static Geometry[] GetSiteOutlineFromSat(int caseStudy = 0, string siteOutlinePath = "")
+        public static Geometry[] GetSiteOutlineFromSat(string siteOutlinePath = "")
         {
             string path;
-            if (siteOutlinePath == "")
-            {
-              
-                Stream res;
-                if (caseStudy == 1) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.stPaulsSite.sat");
-                else if (caseStudy == 2) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.mayoClinicSite.sat");
-                else if (caseStudy == 3) res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.hospbSite.sat");
-                else res = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SpacePlanning.src.Asset.bedTowerSite.sat");
-                path = Path.GetTempFileName();
-                FileStream writeStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-
-                int Length = 256;
-                Byte[] buffer = new Byte[Length];
-                int bytesRead = res.Read(buffer, 0, Length);
-                while (bytesRead > 0)
-                {
-                    writeStream.Write(buffer, 0, bytesRead);
-                    bytesRead = res.Read(buffer, 0, Length);
-                }
-                writeStream.Close();
-                return Geometry.ImportFromSAT(path);
-                //return ConvertSiteOutlineToPolygon2d(Geometry.ImportFromSAT(path).ToList());
-            }
-            else path = siteOutlinePath;
-
+          
+            path = siteOutlinePath;
             if (path.IndexOf(".sat") != -1)
             {
                 return Geometry.ImportFromSAT(path);
-                //return ConvertSiteOutlineToPolygon2d(Geometry.ImportFromSAT(path).ToList());
             }
             else return null;
         }

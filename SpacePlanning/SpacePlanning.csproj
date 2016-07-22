@@ -198,14 +198,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="src\Asset\bedTowerProgramImp.csv" />
-    <EmbeddedResource Include="src\Asset\bedTowerSite.sat" />
-    <EmbeddedResource Include="src\Asset\hospbSite.sat" />
-    <EmbeddedResource Include="src\Asset\hospProgramImp.csv" />
-    <EmbeddedResource Include="src\Asset\mayoClinicSite.sat" />
-    <EmbeddedResource Include="src\Asset\mayoProgramImp.csv" />
-    <EmbeddedResource Include="src\Asset\stPaulProgramImp.csv" />
-    <EmbeddedResource Include="src\Asset\stPaulsSite.sat" />
+    <Folder Include="src\Asset\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

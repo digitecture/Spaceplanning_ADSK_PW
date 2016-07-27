@@ -25,15 +25,15 @@ namespace SpacePlanning
         /// <summary>
         /// Provides analytics on Department data after spaces has been assigned.
         /// </summary>
-        /// <param name="deptData">Department data object.</param>
+        /// <param name="deptData">List of Department data objects.</param>
         /// <returns name="DepartmentNames">Name of the departments.</returns>
         /// <returns name="NumCellsTaken">Number of cells assgined to each department.</returns>
-        /// <returns name="AreaSatisfied">If Department area is satisfied</returns>
+        /// <returns name="AreaSatisfied">Shows if Department area is satisfied</returns>
         /// <search>
         /// department analytics
         /// </search>
         [MultiReturn(new[] { "DepartmentNames", "NumCellsTaken", "AreaSatisfied", "AreaNeeded", "AreaProvided", "ProgramsInDepts", "PolyAssignedDepts" })]
-        public static Dictionary<string, object> AnalyticsDeptData(List<DeptData> deptData)
+        internal static Dictionary<string, object> AnalyticsDeptData(List<DeptData> deptData)
         {
 
             if (deptData == null) return null; 
@@ -66,7 +66,16 @@ namespace SpacePlanning
             };
         }
         //Provides information related to program data
-
+        /// <summary>
+        /// Visualizes circulation on site as colored poly surfaces.
+        /// </summary>
+        /// <param name="deptCirculationPoly">Circulation Polygon2d representing ciruclation between departments.</param>
+        /// <param name="progCirculationPoly">Circulation Polygon2d representing ciruclation between programs.</param>
+        /// <param name="height">Height of the polygons representing circulation.</param>
+        /// <returns name="DisplayGeomList">Color surfaces showing circulations</returns>
+        /// <search>
+        /// visualize circulation, circulation network
+        /// </search>
         [MultiReturn(new[] { "DisplayGeomList" })]
         public static Dictionary<string, object> VisualizeCirculation(List<Polygon2d> deptCirculationPoly, List<Polygon2d> progCirculationPoly, double height =0)
         {
@@ -272,10 +281,123 @@ namespace SpacePlanning
         }
 
         //Provides information related to program data
-        [MultiReturn(new[] { "DisplayGeomList" })]
-        public static Dictionary<string, object> VisualizeDeptPrograms(List<DeptData> deptDataInp, double height = 0, int transparency = 255, int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
+        /// <summary>
+        /// Visualizes departments and programs on site as colored poly surfaces.
+        /// </summary>
+        /// <param name="deptDataInp"> List of Department data object.</param>
+        /// <param name="height">Height of the surfaces.</param>
+        /// <param name="colorScheme">Integer value to toggle color scheme of the visualization.</param>
+        /// <param name="colorProgramSeparate">Color each program separetly.</param>
+        /// <param name="opacity">Opacity of the colored surfaces.</param>
+        /// <returns name="DisplayGeomList">Colored surfaces representing programs and departments.</returns>
+        /// <search>
+        /// visualize department and programs,color surfaces
+        /// </search>        
+        [MultiReturn(new[] { "DisplayGeomList", "DisplayPolyList" })]
+        public static Dictionary<string, object> VisualizeDepartments(List<DeptData> deptDataInp, double height = 0,
+            int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
         {
+            int transparency = 255;
+            double heightPlan = 0 + height;
+            List<DeptData> deptData = deptDataInp;
+            deptDataInp = deptData.Select(x => new DeptData(x)).ToList(); // example of deep copy
 
+            if (transparency < 0 || transparency > 255) transparency = 255;
+
+            List<int> indicesList = new List<int>();
+            List<Color> colorList = ProvideColorList(transparency), colorListSelected = new List<Color>();
+            for (int i = 0; i < colorList.Count; i++) indicesList.Add(i);
+            if (colorScheme == 0) colorListSelected = colorList;
+            else
+            {
+                Random ran = new Random(colorScheme);
+                List<int> indicesRandomList = BasicUtility.RandomizeList(indicesList, ran);
+                for (int i = 0; i < colorList.Count; i++) { colorListSelected.Add(colorList[indicesRandomList[i]]); }
+            }
+            colorListSelected = SetTransparency(colorListSelected, transparency, opacity);
+
+            if (deptDataInp == null) return null;
+            List<List<Polygon2d>> polyProgsList = new List<List<Polygon2d>>();
+            List<Polygon2d> polyFlattened = new List<Polygon2d>();
+            for (int i = 0; i < deptDataInp.Count; i++)
+            {
+                polyProgsList.Add(deptDataInp[i].PolyAssignedToDept);
+                polyFlattened.AddRange(deptDataInp[i].PolyAssignedToDept);
+            }
+
+            Color kpuColor = colorListSelected[0];
+            List<List<Surface>> srfListAll = new List<List<Surface>>();
+            List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
+            for (int i = 0; i < polyProgsList.Count; i++)
+            {
+                int numDeptFloor = deptDataInp[i].NumDeptPerFloor;
+                List<Polygon2d> polyProgs = polyProgsList[i];
+                int indexHeight = deptDataInp[i].DeptFloorLevel;
+                heightPlan = deptDataInp[i].FloorHeightList[indexHeight] + height;
+                //heightPlan = 100;
+                int index = i + 1;
+                if (index > colorList.Count - 1) index = 1;
+                Color col = colorListSelected[index];
+                DeptData deptItem = deptData[i];
+                //if (i == 0)
+                if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
+                deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)) col = kpuColor;
+                List<Surface> srfList = new List<Surface>();
+                List<Display.Display> displayList = new List<Display.Display>();
+                for (int j = 0; j < polyProgs.Count; j++)
+                {
+                    Polygon2d polyReduced = new Polygon2d(polyProgs[j].Points);
+                    List<Point2d> ptList = polyReduced.Points;
+                    List<Point> ptNewList = new List<Point>();
+                    for (int k = 0; k < ptList.Count; k++) ptNewList.Add(Point.ByCoordinates(ptList[k].X, ptList[k].Y));
+                    Surface srf;
+                    try { srf = Surface.ByPerimeterPoints(ptNewList); }
+                    catch { continue; }
+
+                    Geometry gm = srf.Translate(0, 0, heightPlan);
+                    Display.Display dis = Display.Display.ByGeometryColor(gm, col);
+                    displayList.Add(dis);
+                    srf.Dispose();
+                    ptNewList.Clear();
+                }
+                displayListAll.Add(displayList);
+            }
+
+            List<Polygon> polyList = new List<Polygon>();
+            for(int i = 0; i < polyFlattened.Count; i++)
+            {
+                polyList.Add(DynamoGeometry.PolygonByPolygon2d(polyFlattened[i], height));
+            }
+
+            return new Dictionary<string, object>
+            {
+                { "DisplayGeomList", (displayListAll) },
+                { "DisplayPolyList", (polyList) }
+            };
+
+        }
+
+
+
+
+        //Provides information related to program data
+        /// <summary>
+        /// Visualizes departments and programs on site as colored poly surfaces.
+        /// </summary>
+        /// <param name="deptDataInp"> List of Department data object.</param>
+        /// <param name="height">Height of the surfaces.</param>
+        /// <param name="colorScheme">Integer value to toggle color scheme of the visualization.</param>
+        /// <param name="colorProgramSeparate">Color each program separetly.</param>
+        /// <param name="opacity">Opacity of the colored surfaces.</param>
+        /// <returns name="DisplayGeomList">Colored surfaces representing programs and departments.</returns>
+        /// <search>
+        /// visualize department and programs,color surfaces
+        /// </search>        
+        [MultiReturn(new[] { "DisplayGeomList" })]
+        public static Dictionary<string, object> VisualizeDeptPrograms(List<DeptData> deptDataInp, double height = 0, 
+            int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
+        {
+            int transparency = 255;
             double heightPlan = 0 + height;
             List<DeptData> deptData = deptDataInp;
             deptDataInp = deptData.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -545,15 +667,18 @@ namespace SpacePlanning
         /// Provides analytics on Program data after spaces has been assigned.
         /// </summary>
         /// <param name="deptData">List of Department Data Object</param>
-        /// <param name="height">Z height of the geometry returned</param>
+        /// <param name="height">Height of the origin points.</param>
+        /// <param name="heightPolylines">Height of the polygon2d's.</param>
+        /// <param name="fullProgramNames">Boolean value to toggle full program names.</param>
         /// <returns name="progPolygons">Polygons representing programs.</returns>
-        /// <returns name="progPolyOrigin">Centroid of the polygons representing programs.</returns>
+        /// <returns name="progPolyOrigin">Centroid of the polygons representing program origins.</returns>
         /// <returns name="progNameAsText">Name of the programs.</returns>
         /// <search>
         /// visualize program polgons, program polylines
         /// </search>
         [MultiReturn(new[] { "progPolygons", "progPolyOrigin", "progNameAsText" })]
-        public static Dictionary<string, object> VisualizeProgramPolyLinesAndOrigin(List<DeptData> deptData, double height = 0, double heightPolylines = 0, bool fullProgramNames = true)
+        public static Dictionary<string, object> VisualizeProgramPolyLinesAndOrigin(List<DeptData> deptData, double height = 0, 
+            double heightPolylines = 0, bool fullProgramNames = true)
         {
             double heightPlan = 0 + height;
             if (deptData == null) return null;
@@ -682,7 +807,7 @@ namespace SpacePlanning
         /// program analytics
         /// </search>
         [MultiReturn(new[] { "ProgramNames", "NumCellsTaken", "AreaSatisfied", "AreaNeeded", "AreaProvided", "Quantity", "PolyAssignedProgs" })]
-        public static Dictionary<string, object> AnalyticsProgramData(List<ProgramData> progData)
+        internal static Dictionary<string, object> AnalyticsProgramData(List<ProgramData> progData)
         {
             if (progData == null) return null;
 
@@ -725,12 +850,12 @@ namespace SpacePlanning
         /// <param name="travelDistScore">Travel distance score of the space plan layout.</param>
         /// <param name="percKPUScore">Percentage KPU score of the space plan layout.</param>
         /// <param name="totalKPURoomsAdded">Total KPU rooms addded to the space plan layout.</param>
-        /// <param name="x">X coordinate of the visualization.</param>
-        /// <param name="y">Y coordinate of the visualization.</param>
-        /// <param name="spacingX">Spacing in the direction of X axis.</param>
-        /// <param name="spacingY">Spacing in the direction of Y axis.</param>
+        /// <param name="insetSiteOutLine">Inset site outline polygon2d.</param>
         /// <returns name="TextToWrite">String to visualize.</returns>
-        /// <returns name="Points">Point at visualiation.</returns>        
+        /// <returns name="Points">Origin points to place strings for visualization.</returns>
+        /// <returns name="SiteBoundingBox">Bounding box of the site outline.</returns>  
+        /// <returns name="ScoreBox">Polygon2d box to place visualization strings.</returns>  
+        /// <returns name="TextScale">Scale of the text strings for visualizations.</returns>  
         [MultiReturn(new[] { "TextToWrite", "Points", "SiteBoundingBox", "ScoreBox", "TextScale" })]
         public static Dictionary<string, object> SpacePlanFitnessVisualize(double totalScore, double programFitScore,
             double extViewScore, double travelDistScore, double percKPUScore, double totalKPURoomsAdded, Polygon2d insetSiteOutLine = null)
@@ -811,13 +936,13 @@ namespace SpacePlanning
         /// <summary>
         /// Scores the space plan layout based on four key metrics, program fitness score, external view score, travel distance score, percentage of key planning units score.
         /// </summary>
-        /// <param name="deptData">Department data object.</param>
+        /// <param name="deptData">List of Department data object.</param>
         /// <param name="cellList">List of cell objects for the building outline.</param>
         /// <param name="siteArea">Area of the site.</param>
         /// <param name="programFitWeight">User assigned weight for program fitness score.</param>
         /// <param name="extViewWeight">User assigned weight for external view score.</param>
         /// <param name="traveDistWeight">User assigned weight for travel distance score.</param>
-        /// <param name="percKPUWeight">User assigned weight for percentage of key planning units score.</param>
+        /// <param name="percKPUWeight">User assigned weight for percentage of key planning units placement score.</param>
         /// <returns name="TotalScore">Total score of the space plan layout.</returns>
         /// <returns name="ProgramFitScore">Program fitness score of the space plan layout.</returns>
         /// <returns name="ExtViewKPUScore">External view score of the space plan layout.</returns>
@@ -828,7 +953,8 @@ namespace SpacePlanning
         /// space plane scoring, space plan metrics
         /// </search>
         [MultiReturn(new[] { "TotalScore", "ProgramFitScore", "ExtViewKPUScore", "TravelDistanceScore", "PercentageKPUScore", "TotalKPURoomsAdded" })]
-        public static Dictionary<string, object> SpacePlanFitnessTest(List<DeptData> deptData, List<Cell> cellList, double siteArea = 0, double programFitWeight = 0.6, double extViewWeight = 1, double traveDistWeight = 0.8,
+        public static Dictionary<string, object> SpacePlanFitnessTest(List<DeptData> deptData, List<Cell> cellList, double siteArea = 0, double programFitWeight = 0.6, 
+            double extViewWeight = 1, double traveDistWeight = 0.8,
             double percKPUWeight = 0.70)
         {
             if (deptData == null) return null;
@@ -922,7 +1048,7 @@ namespace SpacePlanning
         /// <summary>
         /// Exports Cell Data in excel format.
         /// </summary>
-        /// <param name="deptData">List of Department data object.</param>
+        /// <param name="deptDataInp">List of Department data object.</param>
         /// <param name="cellList">List of Cell Object.</param>
         /// <param name="cellNeighborMatrix">List of list of integers representing cell neighboring matrix.</param>    
         /// <returns name="CellData">Export of cell data in excel format</returns> 
@@ -1022,7 +1148,7 @@ namespace SpacePlanning
         /// <summary>
         /// Exports Program Data in excel format.
         /// </summary>
-        /// <param name="deptData"> List of Department Data object.</param>
+        /// <param name="deptDataInp"> List of Department Data object.</param>
         /// <returns name="ProgramDataExport">Export of program data in excel format.</returns>
         /// <search>
         /// export data, program data

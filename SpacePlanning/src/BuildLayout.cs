@@ -59,17 +59,20 @@ namespace SpacePlanning
         /// </summary>
         /// <param name="deptData">List of DeptData object.</param>
         /// <param name="buildingOutline">Building outline polygon2d geometry.</param>
-        /// <param name="kpuDepthList">Depth of the main department.</param>
+        /// <param name="kpuDepthList">Depth list of the main department.</param>
+        /// <param name="kpuWidthList">Width list of the main department.</param>
         /// <param name="acceptableWidth">Acceptable width in meters while allocating area and polygon2d to each dept on site.</param>
-        /// <param name="minNotchDistance">Minimum distance below which an edge will be considered as a removable notch.</param>
-        /// <param name="circulationFreq">Value to consider while checking frequency of cirulation computation polygon2d.</param>
-        /// <param name="designSeed">Regardless of the recompute value, it is used to restart computing the node every time its value is changed.</param>
+        /// <param name="polyDivision">Point division of each polygon2d. Lower number represents high point count per polygon2d.</param>
+        /// <param name="designSeed">Values to restart dept placment algorithm and return another design output.</param>
         /// <param name="noExternalWall">Boolean toggle to turn on or off requirement of external wall for KPU.</param>
         /// <param name="unlimitedKPU">Boolean toggle to turn on or off unlimied KPU placement.</param>
+        /// <param name="mode3D">Boolean toggle to turn on or off 3d mode.</param>
+        /// <param name="totalBuildingHeight">Total height of the building.</param>
+        /// <param name="avgFloorHeight">Floor height of the building.</param>
+        /// <param name="numDeptPerFloor">Number of depts per floor.</param>
+        /// <param name="highIteration">Boolean to toggle high iteration to compute department placement.</param>
         /// <returns name="DeptData">Updated Dept Data object</returns>
         /// <returns name="LeftOverPolys">Polygon2d's not assigned to any department.</returns>
-        /// <returns name="CirculationPolys">Polygon2d's needed to compute circulation networks.</returns>
-        /// <returns name="OtherDeptMainPoly">Polygon2d for all other departments except for the primary department.</returns>
         /// <search>
         /// DeptData object, department arrangement on site
         /// </search>
@@ -397,10 +400,12 @@ namespace SpacePlanning
         /// <param name="deptData">List of Department Data Objects.</param>
         /// <param name="kpuProgramWidthList">Width of the program poly in the primary department</param>
         /// <param name="minAllowedDim">Minimum allowed dimension of the program space.</param>
+        /// <param name="designSeed">Values to restart program placment algorithm and return another design output.</param>
         /// <param name="checkAspectRatio">Boolean value to toggle check aspect ratio of the programs.</param>
         /// <returns name="DeptData">Updated department data object.</returns>
         [MultiReturn(new[] { "DeptData" })]
-        public static Dictionary<string, object> PlacePrograms(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, int designSeed = 5, bool checkAspectRatio = false)
+        public static Dictionary<string, object> PlacePrograms(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, 
+            int designSeed = 5, bool checkAspectRatio = false)
         {
             List<DeptData> deptDataInp = deptData;
             Dictionary<string, object> obj = new Dictionary<string, object>();

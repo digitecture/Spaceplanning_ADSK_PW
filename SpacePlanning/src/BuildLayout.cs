@@ -721,7 +721,9 @@ namespace SpacePlanning
             }
             kpuPlaced = false;
             List<double> areaNeededDept = new List<double>();
-            for (int i = 0; i < deptData.Count; i++) areaNeededDept.Add(deptData[i].DeptAreaProportionNeeded * totalAreaInPoly);
+            //for (int i = 0; i < deptData.Count; i++) areaNeededDept.Add(deptData[i].DeptAreaProportionNeeded * totalAreaInPoly); // this maintains dept area proportion and fills the whole poly 
+            for (int i = 0; i < deptData.Count; i++) areaNeededDept.Add(deptData[i].DeptAreaNeeded); // this maintains amount of area needed based on prog doc
+
 
             /*
             if (stackOptions)
@@ -820,8 +822,8 @@ namespace SpacePlanning
                         prepareReg = true;
                     }
                     double areaFactor = deptItem.DeptAreaProportionNeeded / totalDeptProp;
-                    double areaNeeded = areaFactor * areaAvailable;
-
+                    //double areaNeeded = areaFactor * areaAvailable;
+                    double areaNeeded = deptItem.DeptAreaNeeded;
                     //areaFactor = BasicUtility.RandomBetweenNumbers(new Random(iteration), 0.8, 0.5); // adding random area factor, need fix later
                     //if(noKpuMode) areaFactor = BasicUtility.RandomBetweenNumbers(new Random(iteration), 0.6, 0.3); // when there is no kpu at all
 

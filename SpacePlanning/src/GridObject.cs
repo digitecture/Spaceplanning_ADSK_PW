@@ -23,7 +23,7 @@ namespace SpacePlanning
         private List<Point2d> _siteBoundingBox = new List<Point2d>();
         private double _dimX;
         private double _dimY;
-        internal static int FORMCOUNT = 1;
+        internal static int FORMCOUNT = 3;
 
 
         private static int MINCELL = 250, MAXCELL = 550;
@@ -503,7 +503,7 @@ namespace SpacePlanning
                 {
                     siteCoverAchieved = (double)formBuildingOutlineObj["SiteCoverageAchieved"];
                     scDifference = Math.Abs(siteCoverAchieved - siteCoverage);
-                    if (scDifference < 0.05) worked = true;
+                    if (scDifference < 0.03) worked = true;
                     else
                     {
                         if (dummy < 1) dummy = (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed), 20, 7);
@@ -773,8 +773,8 @@ namespace SpacePlanning
                 { "BuildingOutline", (borders) },//borders //
                 { "SiteArea", (areaSite) },
                 { "LeftOverArea", (areaLeft) },
-                { "BuildingOutlineArea", (areaPlaced) },
-                { "SiteCoverageAchieved", (areaPlaced/areaSite) },//areaPlaced/areaSite
+                { "BuildingOutlineArea", (areaBorder) }, //areaPlaced
+                { "SiteCoverageAchieved", (groundCovAchieved) },//areaPlaced/areaSite
                 { "CellList", (preSelectedCellsCopy)},
                 { "CellNeighborMatrix", (cellNeighborMatrixPre) }
             };

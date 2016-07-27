@@ -39,7 +39,7 @@ namespace SpacePlanning
         /// <search>
         /// make data stack, dept data object, program data object
         /// </search>
-        public static List<DeptData> MakeDataStack(double circulationFactor = 1, string programDocumentPath = "", bool stackingOptionsDept = false, bool stackingOptionsProg =false, int designSeed = 0)
+        public static List<DeptData> MakeDataStack(string programDocumentPath, double circulationFactor = 1.2, bool stackingOptionsDept = false, bool stackingOptionsProg =false, int designSeed = 0)
         {
             double dim = 5;
             StreamReader reader;
@@ -141,7 +141,7 @@ namespace SpacePlanning
             int readCount = 0;
 
              string[] csvText = programDocumentString.Split('\n');
-        Trace.WriteLine(csvText);
+             //Trace.WriteLine(csvText);
               foreach (string s in csvText)
               {
                  if (s.Length == 0) continue;              

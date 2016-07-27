@@ -484,7 +484,8 @@ namespace SpacePlanning
         //blocks are assigne based on offset distance, used for inpatient blocks
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock", "FalseLines", "LineOptions", "PointAdded" })]
         internal static Dictionary<string, object> AssignBlocksBasedOnDistance(List<Polygon2d> polyList, List<double> distanceList, 
-            double area,List<double> areaEachKPUList, double thresDistance = 10, int iteration = 5,  bool noExternalWall = false, double parameter =0.5, bool stackOptions = false)
+            double area,List<double> areaEachKPUList, double thresDistance = 10, int iteration = 5,  bool noExternalWall = false, 
+            double parameter =0.5, bool stackOptions = false)
         {
 
             if (!ValidateObject.CheckPolyList(polyList)) return null;
@@ -550,8 +551,7 @@ namespace SpacePlanning
                         index += 1;
                         if (index > areaEachKPUList.Count - 1) index = 0;
                         distance = distanceList[index];
-                        areaCurrentKPU = areaEachKPUList[index];
-                      
+                        areaCurrentKPU = areaEachKPUList[index];                      
                     }
 
 

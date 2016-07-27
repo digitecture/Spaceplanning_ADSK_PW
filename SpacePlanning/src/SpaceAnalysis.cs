@@ -318,11 +318,14 @@ namespace SpacePlanning
 
             if (deptDataInp == null) return null;
             List<List<Polygon2d>> polyProgsList = new List<List<Polygon2d>>();
-            List<Polygon2d> polyFlattened = new List<Polygon2d>();
+            List<List<Polygon2d>> polyFlattened = new List<List<Polygon2d>>();
             for (int i = 0; i < deptDataInp.Count; i++)
             {
-                polyProgsList.Add(deptDataInp[i].PolyAssignedToDept);
-                polyFlattened.AddRange(deptDataInp[i].PolyAssignedToDept);
+                if (deptDataInp[i].PolyAssignedToDept != null)
+                {
+                    polyProgsList.Add(deptDataInp[i].PolyAssignedToDept);
+                    polyFlattened.Add(deptDataInp[i].PolyAssignedToDept);
+                }
             }
 
             Color kpuColor = colorListSelected[0];
@@ -363,10 +366,15 @@ namespace SpacePlanning
                 displayListAll.Add(displayList);
             }
 
-            List<Polygon> polyList = new List<Polygon>();
+            List<List<Polygon>> polyList = new List<List<Polygon>>();
             for(int i = 0; i < polyFlattened.Count; i++)
             {
-                polyList.Add(DynamoGeometry.PolygonByPolygon2d(polyFlattened[i], height));
+                List<Polygon> polyFound = new List<Polygon>();
+                for(int j = 0; j < polyFlattened[i].Count; j++)
+                {
+                    polyFound.Add(DynamoGeometry.PolygonByPolygon2d(polyFlattened[i][j], height));
+                }
+                polyList.Add(polyFound);
             }
 
             return new Dictionary<string, object>

@@ -483,7 +483,7 @@ namespace SpacePlanning
 
         //blocks are assigne based on offset distance, used for inpatient blocks
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock", "FalseLines", "LineOptions", "PointAdded" })]
-        internal static Dictionary<string, object> AssignBlocksBasedOnDistance(List<Polygon2d> polyList, List<double> distanceList, 
+        internal static Dictionary<string, object> AssignBlocksBasedOnDistance(List<Polygon2d> polyList,double kpuDepth, 
             double area,List<double> areaEachKPUList, double thresDistance = 10, int iteration = 5,  bool noExternalWall = false, 
             double parameter =0.5, bool stackOptions = false)
         {
@@ -521,9 +521,10 @@ namespace SpacePlanning
                 Random ran = new Random(iteration);
                 double a = 60, b = 20;
                 //thresDistance = BasicUtility.RandomBetweenNumbers(ran, a, b);
-                double areaCurrentKPU = areaEachKPUList[index];
-                double distance = distanceList[index];
-                double maxValue = distance * 2, minValue = distance * 0.3;
+                
+                //double areaCurrentKPU = areaEachKPUList[index];
+                //double distance = distanceList[index];
+                double maxValue = kpuDepth * 2, minValue = kpuDepth * 0.3;
                 while (polyLeftList.Count > 0 && areaAdded < area) //count<recompute count < maxTry
                 {    
                     //distance = BasicUtility.RandomBetweenNumbers(ran, maxValue, minValue);
@@ -531,13 +532,13 @@ namespace SpacePlanning
                     error = false;
                     Polygon2d currentPoly = polyLeftList.Pop();
                     Polygon2d tempPoly = new Polygon2d(currentPoly.Points, 0);
-                    Dictionary<string, object> splitObject = CreateBlocksByLines(currentPoly, poly, distance,areaLeftToAdd, thresDistance, noExternalWall,parameter);
+                    Dictionary<string, object> splitObject = CreateBlocksByLines(currentPoly, poly, kpuDepth, areaLeftToAdd, thresDistance, noExternalWall,parameter);
                     if (splitObject == null) { count += 1; Trace.WriteLine("Split errored"); continue; }
                     Polygon2d blockPoly = (Polygon2d)splitObject["PolyAfterSplit"];
                     Polygon2d leftPoly = (Polygon2d)splitObject["LeftOverPoly"];
                     lineOptions = (List<Line2d>)splitObject["LineOptions"];
                     if(stackOptions) lineOptions = RandomizeLineList(lineOptions, iteration);
-                    Dictionary<string, object> addPtObj = LayoutUtility.AddPointToFitPoly(leftPoly, poly, distance, thresDistance, iteration);
+                    Dictionary<string, object> addPtObj = LayoutUtility.AddPointToFitPoly(leftPoly, poly, kpuDepth, thresDistance, iteration);
                     leftPoly = (Polygon2d)addPtObj["PolyAddedPts"];
                     falseLines = (List<Line2d>)addPtObj["FalseLineList"];
                     pointAdd = (Point2d)addPtObj["PointAdded"];
@@ -545,14 +546,7 @@ namespace SpacePlanning
                     polyLeftList.Push(leftPoly);
                     blockPolyList.Add(blockPoly);
 
-                    areaCurrentKPU -= areaAdded;
-                    if (areaCurrentKPU < 50)
-                    {
-                        index += 1;
-                        if (index > areaEachKPUList.Count - 1) index = 0;
-                        distance = distanceList[index];
-                        areaCurrentKPU = areaEachKPUList[index];                      
-                    }
+                    //areaCurrentKPU -= areaAdded;                 
 
 
                     count += 1;
@@ -745,15 +739,16 @@ namespace SpacePlanning
             Polygon2d currentPoly = polyList[0];
             List<double> areaEachKPUList = new List<double>();            
             double areaKpu = 0;
-            for(int j = 0; j < kpuDepthList.Count; j++) areaEachKPUList.Add(kpuWidthList[j] * kpuDepthList[j]);
-            
+            for(int j = 0; j < kpuDepthList.Count; j++) areaEachKPUList.Add(1000);  //areaEachKPUList.Add(kpuWidthList[j] * kpuDepthList[j]);
+           
             for (int i = 0; i < deptData.Count; i++)
             {
+                int index = i;
                 double thresDistance = 20;
                 double areaAssigned = 0;
                 DeptData deptItem = deptData[i];     
                 if ((deptItem.DepartmentType.IndexOf(KPU.ToLower()) != -1 ||
-                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1) && !kpuPlaced)// key planning unit - disabled multiple kpu same lvl
+                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1))// key planning unit - disabled multiple kpu same lvl // && !kpuPlaced
                 {
                     double areaAvailablePoly = 0;
                     for (int j = 0; j < polyList.Count; j++) areaAvailablePoly += PolygonUtility.AreaPolygon(polyList[j]);              
@@ -763,8 +758,9 @@ namespace SpacePlanning
                     if (unlimitedKPU) areaNeeded = 0.9 * areaLeftOverBlocks;
                     //else areaNeeded = 6000;
                     //if(!stackOptionsDept && areaNeeded> 0.75 * areaLeftOverBlocks) areaNeeded = 0.75 * areaLeftOverBlocks;
-                    
-                    Dictionary<string, object> inpatientObject = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepthList, areaNeeded, areaEachKPUList,
+                    if (index > kpuDepthList.Count-1) index = 0;
+                    double kpuDepth = kpuDepthList[index];
+                    Dictionary<string, object> inpatientObject = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, areaNeeded, areaEachKPUList,
                         thresDistance, designSeed, noExternalWall,parameter, stackOptionsDept);
                     if (inpatientObject == null) return null;
                     List<Polygon2d> inpatienBlocks = (List<Polygon2d>)inpatientObject["PolyAfterSplit"];

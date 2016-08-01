@@ -82,7 +82,7 @@ namespace SpacePlanning
 
             List<string> deptNames = GetDeptNames(deptNameList);
             List<DeptData> deptDataStack = new List<DeptData>();
-            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, programDocumentPath,stackingOptionsProg);
+            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList,progAdjList, circulationFactor = 1, programDocumentPath,stackingOptionsProg);
             List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
             for (int i = 0; i < deptNames.Count; i++)
             {
@@ -163,7 +163,7 @@ namespace SpacePlanning
 
             List<string> deptNames = GetDeptNames(deptNameList);
             List<DeptData> deptDataStack = new List<DeptData>();
-            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(circulationFactor = 1, programDocumentString, stackingOptionsProg,false);
+            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList, progAdjList, circulationFactor = 1, programDocumentString, stackingOptionsProg,false);
             List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
              for (int i = 0; i<deptNames.Count; i++)
              {
@@ -359,24 +359,23 @@ namespace SpacePlanning
  
         [MultiReturn(new[] { "ProgIdList", "ProgramList","DeptNameList", "ProgQuantList","AreaEachProgList",
             "ProgPrefValList","ProgAdjList", "ProgAdjWeightList"})]
-        internal static Dictionary<string, object> FindPreferredProgs(double circulationFactor = 1,  string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
-        {
-            
+        internal static Dictionary<string, object> FindPreferredProgs(List<string> progIdList, List<string> progAdjList,double circulationFactor = 1,  string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
+        {            
             //int caseStudy = 0;
             double dim = 5;
-            List<string> progIdList = new List<string>();
+            //List<string> progIdList = new List<string>();
             List<string> programList = new List<string>();
             List<string> deptNameList = new List<string>();
             List<string> progQuantList = new List<string>();
             List<string> areaEachProgList = new List<string>();
             List<string> prefValProgList = new List<string>();
-            List<string> progAdjList = new List<string>();
+            //List<string> progAdjList = new List<string>();
             List<string> progTypeList = new List<string>();
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
       
 
-
+            /*
             string docInfo = "";
             if (path == true)
             {
@@ -412,7 +411,7 @@ namespace SpacePlanning
                     Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim, values[7], stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
                 programDataStack.Add(progData);
             }// end of for each statement
-
+            */
             List<string> progAdjId = new List<string>();
             for (int i = 0; i < progIdList.Count; i++)
             {

@@ -56,10 +56,9 @@ namespace SpacePlanning
             List<ProgramData> programDataStack = new List<ProgramData>();
             reader = new StreamReader(File.OpenRead(@programDocumentPath));
             int readCount = 0;
-            
-       
-            //StreamReader reader = new StreamReader(res);
             string docInfo = reader.ReadToEnd();
+            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg, designSeed);
+            //StreamReader reader = new StreamReader(res);
             string[] csvText = docInfo.Split('\n');
             Trace.WriteLine(csvText);
             foreach (string s in csvText)

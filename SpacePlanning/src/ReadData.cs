@@ -57,59 +57,7 @@ namespace SpacePlanning
             reader = new StreamReader(File.OpenRead(@programDocumentPath));
             int readCount = 0;
             string docInfo = reader.ReadToEnd();
-            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg, designSeed);
-            //StreamReader reader = new StreamReader(res);
-            string[] csvText = docInfo.Split('\n');
-            Trace.WriteLine(csvText);
-            foreach (string s in csvText)
-            {
-                if (s.Length == 0) continue;              
-                var values = s.Split(',');
-                if (readCount == 0) { readCount += 1; continue; }
-                progIdList.Add(values[0]);
-                programList.Add(values[1]);
-                deptNameList.Add(values[2]);
-                progQuantList.Add(values[3]);
-                prefValProgList.Add(values[5]);
-                progTypeList.Add(values[7]);
-                progAdjList.Add(values[8]);
-                List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0,0, true) };
-                //List<string> adjList = new List<string>();
-                //adjList.Add(values[8]);
-                ProgramData progData = new ProgramData(Convert.ToInt32(values[0]), values[1], values[2], Convert.ToInt32(Convert.ToDouble(values[3])),
-                    Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim,  Convert.ToString(values[7]), stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
-                programDataStack.Add(progData);
-            }// end of for each statement
-
-            List<string> deptNames = GetDeptNames(deptNameList);
-            List<DeptData> deptDataStack = new List<DeptData>();
-            Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList,progAdjList, circulationFactor = 1, programDocumentPath,stackingOptionsProg);
-            List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];
-            for (int i = 0; i < deptNames.Count; i++)
-            {
-                List<ProgramData> progInDept = new List<ProgramData>();
-                for (int j = 0; j < programDataStack.Count; j++)
-                    if (deptNames[i] == programDataStack[j].DeptName)
-                    {
-                        try { programDataStack[j].AdjacencyWeight = adjWeightList[j]; }
-                        catch { programDataStack[j].AdjacencyWeight = 0; }
-                        progInDept.Add(programDataStack[j]);
-                    }
-                List<ProgramData> programBasedOnQuanity = MakeProgramListBasedOnQuantity(progInDept);
-                DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
-                deptDataStack.Add(dept);
-            }// end of for loop statement
-            Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList, progTypeList,progAdjList, circulationFactor, programDocumentPath,stackingOptionsDept);
-            List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
-            //sort the depts by high area
-            deptDataStack = SortDeptData(deptDataStack, preferredDept);
-
-            //added to compute area percentage for each dept
-            double totalDeptArea = 0;
-            for(int i = 0; i < deptDataStack.Count; i++) totalDeptArea += deptDataStack[i].DeptAreaNeeded;
-            for (int i = 0; i < deptDataStack.Count; i++) deptDataStack[i].DeptAreaProportionNeeded = Math.Round((deptDataStack[i].DeptAreaNeeded / totalDeptArea), 3);
-
-            return SortProgramsByPrefInDept(deptDataStack, stackingOptionsProg, designSeed);    
+            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg, designSeed);         
 
         }
 
@@ -135,10 +83,12 @@ namespace SpacePlanning
             List<string> prefValProgList = new List<string>();
             List<string> progAdjList = new List<string>();
             List<string> progTypeList = new List<string>();
+            List<string> deptIdList = new List<string>();
+            List<string> deptAdjList = new List<string>();
 
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
-           Stream res;
+            Stream res;
               
             int readCount = 0;
 
@@ -149,14 +99,15 @@ namespace SpacePlanning
                  if (s.Length == 0) continue;              
                  var values = s.Split(',');
                  if (readCount == 0) { readCount += 1; continue; }
-                 progIdList.Add(values[0]);
-                 programList.Add(values[1]);
-                 deptNameList.Add(values[2]);
-                 progQuantList.Add(values[3]);
-                 prefValProgList.Add(values[5]);
-                 progTypeList.Add(values[7]);
-
+                progIdList.Add(values[0]);
+                programList.Add(values[1]);
+                deptNameList.Add(values[2]);
+                progQuantList.Add(values[3]);
+                prefValProgList.Add(values[5]);
+                progTypeList.Add(values[7]);
                 progAdjList.Add(values[8]);
+                deptIdList.Add(values[9]);
+                deptAdjList.Add(values[10]);
                  List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0, 0, true) };
                 //List<string> adjList = new List<string>();
                 //adjList.Add(values[8]);
@@ -165,7 +116,21 @@ namespace SpacePlanning
                 programDataStack.Add(progData);
              }// end of for each statement
 
+            List<string> deptIdSequenced = new List<string>();
+            List<string> deptAdjSequenced = new List<string>();
             List<string> deptNames = GetDeptNames(deptNameList);
+            for(int i = 0; i < deptNames.Count; i++)
+            {
+                for(int j = 0; j < deptNameList.Count; j++)
+                {
+                    if(deptNames[i].ToLower().IndexOf(deptNameList[j].ToLower()) != -1)
+                    {
+                        deptIdSequenced.Add(deptIdList[j]);
+                        deptAdjSequenced.Add(deptAdjList[j]);
+                        break;
+                    }
+                }
+            }
             List<DeptData> deptDataStack = new List<DeptData>();
             Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList, progAdjList, circulationFactor = 1, programDocumentString, stackingOptionsProg,false);
             List<double> adjWeightList = (List<double>)progAdjWeightObj["ProgAdjWeightList"];

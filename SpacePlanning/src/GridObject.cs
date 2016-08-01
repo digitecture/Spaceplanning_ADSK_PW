@@ -468,11 +468,12 @@ namespace SpacePlanning
         /// <search>
         /// form maker, buildingoutline, orthogonal forms
         /// </search>
-        [MultiReturn(new[] { "BuildingOutline",  "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
+        [MultiReturn(new[] { "BuildingOutline",  "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         public static Dictionary<string, object> FormBuildingOutline(Polygon2d orthoSiteOutline, 
-            List<Cell> cellList, [DefaultArgument("null")]List<Point2d> attractorPoints, [DefaultArgument("null")]List<double> weightList,
-     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10, bool highIteration = false)
+            List<Cell> cellList, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints, [DefaultArgument("null")]List<double> weightList,
+     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10)
         {
+            bool highIteration = false;
             if (highIteration == true) FORMCOUNT = 5;
             Trace.WriteLine("FORM BUILD OUTLINE STARTS+++++++++++++++++++++++++");
             if (designSeed < 1) designSeed = 1;
@@ -491,7 +492,7 @@ namespace SpacePlanning
                 //if (attractorPoints.Count == 0 || weightList.Count == 0) { attractorPoints = null; weightList = null; }
                 count += 1;
                 Trace.WriteLine("||||||||||||||||||||||||||||||trying to get the form we want : " + count);
-                formBuildingOutlineObj = BuildOutline(orthoSiteOutline, cellList, attractorPoints, weightList, siteCoverage, designSeed, removeNotch, minNotchDistance, dummy, cellRefine);
+                formBuildingOutlineObj = BuildOutline(orthoSiteOutline, cellList, deptData, attractorPoints, weightList, siteCoverage, designSeed, removeNotch, minNotchDistance, dummy, cellRefine);
 
                 if (formBuildingOutlineObj == null)
                 {
@@ -522,11 +523,12 @@ namespace SpacePlanning
 
 
 
-        [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
-        internal static Dictionary<string, object> BuildOutline(Polygon2d orthoSiteOutline, List<Cell> cellListInp, [DefaultArgument("null")]List<Point2d> attractorPoints,
-             [DefaultArgument("null")]List<double>weightList, double groundCoverage = 0.5, int iteration = 100, 
+        [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired","SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
+        internal static Dictionary<string, object> BuildOutline(Polygon2d orthoSiteOutline, List<Cell> cellListInp, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints,
+             [DefaultArgument("null")]List<double>weightList, double siteCoverage = 0.5, int iteration = 100, 
             bool removeNotch = false, double minNotchDistance  = 10,int dummy=100, bool cellRefine = false)
         {
+           
             if (iteration < 1) iteration = 0;
             bool randomAllow = true, notchRefine = true; 
             if (cellListInp == null) return null;
@@ -536,12 +538,20 @@ namespace SpacePlanning
             double eps = 0.05, fac = 0.95, whole = 1, prop = 0;
             int number = (int)BasicUtility.RandomBetweenNumbers(new Random(iteration), 2, 6);
             number = dummy;
+            double areaRequired = 0;
             int count = 0, dir = 0, prevDir = 0, countInner =0, countCircleMode = 0, countExtremeMode = 0, extremePointIndex = 0;
-
-            if (groundCoverage < eps) groundCoverage = 2 * eps;
-            if (groundCoverage > 0.8) groundCoverage = 0.8;
             double areaSite = PolygonUtility.AreaPolygon(orthoSiteOutline), areaPlaced = 0;
-            double areaBuilding = groundCoverage * areaSite, areaLeft = 10000;
+            if (deptData == null)
+            {
+                if (siteCoverage < eps) siteCoverage = 2 * eps;
+                if (siteCoverage > 0.8) siteCoverage = 0.8;
+            }
+            else
+            {
+                for(int i = 0; i < deptData.Count; i++) areaRequired += deptData[i].DeptAreaNeeded;
+                siteCoverage = areaRequired / areaSite;
+            }
+            double areaBuilding = siteCoverage * areaSite, areaLeft = 10000;
             List<double> areaPartsList = new List<double>();
             for (int i = 0; i < number; i++)
             {
@@ -766,7 +776,7 @@ namespace SpacePlanning
              //            { "SubdividedPolys", (polySquares) },
             double areaBorder = 0;
             for (int i = 0; i < borders.Count; i++) areaBorder += PolygonUtility.AreaPolygon(borders[i]);
-            double groundCovAchieved = areaBorder / areaSite;
+            double siteCoverageAchieved = areaBorder / areaSite;
             return new Dictionary<string, object>
             {
                
@@ -774,7 +784,8 @@ namespace SpacePlanning
                 { "SiteArea", (areaSite) },
                 { "LeftOverArea", (areaLeft) },
                 { "BuildingOutlineArea", (areaBorder) }, //areaPlaced
-                { "SiteCoverageAchieved", (groundCovAchieved) },//areaPlaced/areaSite
+                { "SiteCoverageRequired", (siteCoverage) },//areaPlaced/areaSite
+                { "SiteCoverageAchieved", (siteCoverageAchieved) },//areaPlaced/areaSite
                 { "CellList", (preSelectedCellsCopy)},
                 { "CellNeighborMatrix", (cellNeighborMatrixPre) }
             };

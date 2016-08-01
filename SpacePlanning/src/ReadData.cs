@@ -50,6 +50,7 @@ namespace SpacePlanning
             List<string> areaEachProgList = new List<string>();
             List<string> prefValProgList = new List<string>();
             List<string> progAdjList = new List<string>();
+            List<string> progTypeList = new List<string>();
 
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
@@ -71,6 +72,7 @@ namespace SpacePlanning
                 deptNameList.Add(values[2]);
                 progQuantList.Add(values[3]);
                 prefValProgList.Add(values[5]);
+                progTypeList.Add(values[7]);
                 progAdjList.Add(values[8]);
                 List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0,0, true) };
                 //List<string> adjList = new List<string>();
@@ -98,7 +100,7 @@ namespace SpacePlanning
                 DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
                 deptDataStack.Add(dept);
             }// end of for loop statement
-            Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, programDocumentPath,stackingOptionsDept);
+            Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList, progTypeList,progAdjList, circulationFactor, programDocumentPath,stackingOptionsDept);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
             //sort the depts by high area
             deptDataStack = SortDeptData(deptDataStack, preferredDept);
@@ -131,8 +133,9 @@ namespace SpacePlanning
             List<string> deptNameList = new List<string>();
             List<string> progQuantList = new List<string>();
             List<string> areaEachProgList = new List<string>();
-           List<string> prefValProgList = new List<string>();
+            List<string> prefValProgList = new List<string>();
             List<string> progAdjList = new List<string>();
+            List<string> progTypeList = new List<string>();
 
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
@@ -152,7 +155,9 @@ namespace SpacePlanning
                  deptNameList.Add(values[2]);
                  progQuantList.Add(values[3]);
                  prefValProgList.Add(values[5]);
-                 progAdjList.Add(values[8]);
+                 progTypeList.Add(values[7]);
+
+                progAdjList.Add(values[8]);
                  List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0, 0, true) };
                 //List<string> adjList = new List<string>();
                 //adjList.Add(values[8]);
@@ -178,7 +183,7 @@ namespace SpacePlanning
             DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept);
             deptDataStack.Add(dept);
              }// end of for loop statement
-             Dictionary<string, object> programDocObj = FindPreferredDepts(circulationFactor, programDocumentString, stackingOptionsDept,false);
+             Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList,progTypeList, progAdjList,circulationFactor, programDocumentString, stackingOptionsDept,false);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
             //sort the depts by high area
             deptDataStack = SortDeptData(deptDataStack, preferredDept);
@@ -210,60 +215,12 @@ namespace SpacePlanning
         /// <search>
         /// make data stack, dept data object, program data object
         /// </search>
-        [MultiReturn(new[] { "ProgIdList", "ProgramList","DeptNameList", "ProgQuantList","AreaEachProgList",
-            "ProgPrefValList","ProgAdjList", "DeptTopoList", "DeptTopoAdjacency" , "EachDeptAdjDeptList",
+        [MultiReturn(new[] { "DeptTopoAdjacency" , "EachDeptAdjDeptList",
             "DeptTopListTotal", "DeptNamesUnique", "MostFrequentDept", "MostFrequentDeptSorted"})]
-        internal static Dictionary<string, object> FindPreferredDepts(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
+        internal static Dictionary<string, object> FindPreferredDepts(List<string> deptNameList,List<string> progTypeList,List<string> progAdjList,double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsProg = false, bool path = true)
         {
             double dim = 5;
-            List<string> progIdList = new List<string>();
-            List<string> programList = new List<string>();
-            List<string> deptNameList = new List<string>();
-            List<string> progQuantList = new List<string>();
-            List<string> areaEachProgList = new List<string>();
-            List<string> prefValProgList = new List<string>();
-            List<string> progAdjList = new List<string>();
-            List<string> progTypeList = new List<string>();
-            List<List<string>> dataStack = new List<List<string>>();
-            List<ProgramData> programDataStack = new List<ProgramData>();
-            
-            string docInfo = "";
-            if(path == true)
-            {
-                StreamReader reader;
-                reader = new StreamReader(File.OpenRead(programDocumentString));
-                docInfo = reader.ReadToEnd();
-            }
-            else
-            {
-                docInfo = programDocumentString;
-            }
-            
-            
-            
-            int readCount = 0;
-            
-            
-            string[] csvText = docInfo.Split('\n');
-            //Trace.WriteLine(csvText);
-            foreach (string s in csvText)
-            {
-                if (s.Length == 0) continue;
-                var values = s.Split(',');
-                if (readCount == 0) { readCount += 1; continue; }
-                progIdList.Add(values[0]);
-                programList.Add(values[1]);
-                deptNameList.Add(values[2]);
-                progQuantList.Add(values[3]);
-                prefValProgList.Add(values[5]);
-                progTypeList.Add(values[7]);
-                progAdjList.Add(values[8]);
-                List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0, 0, true) };
-              
-                ProgramData progData = new ProgramData(Convert.ToInt32(values[0]), values[1], values[2], Convert.ToInt32(Convert.ToDouble(values[3])),
-                    Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim, values[7], stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
-                programDataStack.Add(progData);
-            }// end of for each statement
+          
             List<List<string>> deptTopList = MakeDeptTopology(progAdjList);
             List<List<string>> deptNameAdjacencyList = new List<List<string>>();
             string kpuDeptName = "";
@@ -336,13 +293,7 @@ namespace SpacePlanning
             for (int i = 0; i < depImpList.Count(); i++) depImpList.Remove("");
             return new Dictionary<string, object>
             {
-                 { "ProgIdList", (progIdList) },
-                 { "ProgramList", (programList) },
-                 { "DeptNameList", (deptNameList) },
-                 { "ProgQuantList", (progQuantList) },
-                 { "AreaEachProgList", (areaEachProgList) },
-                 { "ProgPrefValList", (prefValProgList) },
-                 { "ProgAdjList", (progAdjList) },
+ 
                  { "DeptTopoList", (deptTopList) },
                  { "DeptTopoAdjacency", (deptNameAdjacencyList) },
                  { "EachDeptAdjDeptList", (NumberOfDeptNames) },
@@ -363,17 +314,7 @@ namespace SpacePlanning
         {            
             //int caseStudy = 0;
             double dim = 5;
-            //List<string> progIdList = new List<string>();
-            List<string> programList = new List<string>();
-            List<string> deptNameList = new List<string>();
-            List<string> progQuantList = new List<string>();
-            List<string> areaEachProgList = new List<string>();
-            List<string> prefValProgList = new List<string>();
-            //List<string> progAdjList = new List<string>();
-            List<string> progTypeList = new List<string>();
-            List<List<string>> dataStack = new List<List<string>>();
-            List<ProgramData> programDataStack = new List<ProgramData>();
-      
+   
 
             /*
             string docInfo = "";
@@ -443,11 +384,6 @@ namespace SpacePlanning
             return new Dictionary<string, object>
             {
                  { "ProgIdList", (progIdList) },
-                 { "ProgramList", (programList) },
-                 { "DeptNameList", (deptNameList) },
-                 { "ProgQuantList", (progQuantList) },
-                 { "AreaEachProgList", (areaEachProgList) },
-                 { "ProgPrefValList", (prefValProgList) },
                  { "ProgAdjList", (progAdjList) },
                  { "ProgAdjWeightList" ,(adjWeightList) }
             };

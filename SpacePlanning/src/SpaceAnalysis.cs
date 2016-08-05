@@ -327,7 +327,7 @@ namespace SpacePlanning
                     polyFlattened.Add(deptDataInp[i].PolyAssignedToDept);
                 }
             }
-
+            bool kpuPlaced = false;
             Color kpuColor = colorListSelected[0];
             List<List<Surface>> srfListAll = new List<List<Surface>>();
             List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
@@ -344,7 +344,7 @@ namespace SpacePlanning
                 DeptData deptItem = deptData[i];
                 //if (i == 0)
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
-                deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)) col = kpuColor;
+                deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) && !kpuPlaced) { col = kpuColor; kpuPlaced = true; }
                 List<Surface> srfList = new List<Surface>();
                 List<Display.Display> displayList = new List<Display.Display>();
                 for (int j = 0; j < polyProgs.Count; j++)

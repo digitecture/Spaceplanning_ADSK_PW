@@ -302,7 +302,6 @@ namespace SpacePlanning
             }
 
             adjWeightList = BasicUtility.NormalizeList(adjWeightList, 0, 10);
-            string x  = "";
             return new Dictionary<string, object>
             {
                  { "ProgIdList", (progIdList) },

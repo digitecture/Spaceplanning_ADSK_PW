@@ -13,16 +13,15 @@ namespace SpacePlanning
 
         #region - Public Methods
         //subdivide a given poly into smaller parts till acceptable width is met, returns list of polydept grids and list of polys to compute circulation
-        public static List<List<Polygon2d>> SplitRecursivelyToSubdividePoly(List<Polygon2d> polyList, double acceptableWidth = 10, double circulationFreq = 10, double ratio = 0.5, bool tag = false)
+        public static List<List<Polygon2d>> SplitRecursivelyToSubdividePoly(List<Polygon2d> polyList, double acceptableWidth = 10,  double ratio = 0.5, bool tag = false)
         {
             if (!ValidateObject.CheckPolyList(polyList)) return null;
-
             int count = 0;
             Queue<Polygon2d> polyQueue = new Queue<Polygon2d>();
             List<List<Polygon2d>> polyAllReturn = new List<List<Polygon2d>>();
             List<Polygon2d> polyBrokenList = new List<Polygon2d>(), polyCirculationList = new List<Polygon2d>();
             double totalArea = 0; // cirFac = Math.Ceiling(acceptableWidth/ circulationFreq);
-            double cirFac = circulationFreq;
+            double cirFac = 10;
             for (int i = 0; i < polyList.Count; i++)
             {
                 totalArea += PolygonUtility.AreaPolygon(polyList[i]);

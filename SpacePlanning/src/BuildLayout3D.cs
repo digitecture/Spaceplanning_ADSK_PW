@@ -35,7 +35,7 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false,
+             int designSeed = 50, bool noExternalWall = false,
             bool unlimitedKPU = true, int numDeptPerFloor = 2)
         {
             Trace.WriteLine("Dept 3d mode");
@@ -73,8 +73,7 @@ namespace SpacePlanning
             for (int i = 0; i < floorHeightList.Count; i++)
             {
                 // replaced deptData with deptRegPerFloorList[i]
-                deptObj = PlaceDepartments2D(deptRegPerFloorList[i], buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth,
-                                        polyDivision, designSeed, noExternalWall);
+                deptObj = PlaceDepartments2D(deptRegPerFloorList[i], buildingOutline, kpuDepthList, kpuWidthList,designSeed, noExternalWall);
                 List<DeptData> deptDataList = (List<DeptData>)deptObj["DeptData"];
                 //for (int j = 0; j < deptDataList.Count; j++) { deptDataList[j].DeptFloorLevel = i; }
                 List<DeptData> depInObj = deptDataList.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -112,12 +111,10 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false,
+             int designSeed = 50, bool noExternalWall = false,
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15)
         {
-
-
-            if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
+            //if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
             double circulationFreq = 8;
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -134,7 +131,7 @@ namespace SpacePlanning
                 if (!stackOptionsDept) parameter = 0;
                 //parameter = 0;
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
-                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth, circulationFreq, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg, parameter);
+                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, kpuDepthList, kpuWidthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];

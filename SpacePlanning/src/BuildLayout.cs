@@ -78,10 +78,12 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false, 
+             int designSeed = 50, bool noExternalWall = false, 
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2, bool highIteration = false)
         {
             if (highIteration == true) DEPTCOUNT = 5;
+            //double acceptableWidth;
+            double polyDivision = 8;
             List<DeptData> deptDataInp = deptData;
             Dictionary<string, object> obj = new Dictionary<string, object>();
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -100,12 +102,12 @@ namespace SpacePlanning
             }
             if (deptData[0].Mode3D)
             {
-                return BuildLayout3D.PlaceDepartments3D(deptData, buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth,
-                                        polyDivision, designSeed, noExternalWall,unlimitedKPU, numDeptPerFloor);
+                return BuildLayout3D.PlaceDepartments3D(deptData, buildingOutline, kpuDepthList, kpuWidthList,
+                                        designSeed, noExternalWall,unlimitedKPU, numDeptPerFloor);
             }
             else {
-                return BuildLayout3D.PlaceDepartments2D(deptData, buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth,
-                                        polyDivision, designSeed, noExternalWall,unlimitedKPU);
+                return BuildLayout3D.PlaceDepartments2D(deptData, buildingOutline, kpuDepthList, kpuWidthList,
+                                        designSeed, noExternalWall,unlimitedKPU);
             }  
         }
 
@@ -485,9 +487,9 @@ namespace SpacePlanning
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock", "FalseLines", "LineOptions", "PointAdded" })]
         internal static Dictionary<string, object> AssignBlocksBasedOnDistance(List<Polygon2d> polyList,double kpuDepth, 
             double area,List<double> areaEachKPUList, double thresDistance = 10, int iteration = 5,  bool noExternalWall = false, 
-            double parameter =0.5, bool stackOptions = false)
+            bool stackOptions = false)
         {
-
+            double parameter = 0.5;
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             //if (distance < 1) return null;
             if (parameter <= 0 && parameter >= 1) parameter = 0.5;
@@ -669,9 +671,10 @@ namespace SpacePlanning
         //dept assignment new way
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth = 20, double circulationFreq = 10, int designSeed = 5, bool noExternalWall = false, 
-            bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false, double parameter = 0.5)
+            int designSeed = 5, bool noExternalWall = false, 
+            bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false)
         {
+            double acceptableWidth = 0;
             if (deptData == null) { return null; }
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");
@@ -761,7 +764,7 @@ namespace SpacePlanning
                     if (index > kpuDepthList.Count-1) index = 0;
                     double kpuDepth = kpuDepthList[index];
                     Dictionary<string, object> inpatientObject = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, areaNeeded, areaEachKPUList,
-                        thresDistance, designSeed, noExternalWall,parameter, stackOptionsDept);
+                        thresDistance, designSeed, noExternalWall, stackOptionsDept);
                     if (inpatientObject == null) return null;
                     List<Polygon2d> inpatienBlocks = (List<Polygon2d>)inpatientObject["PolyAfterSplit"];
                     leftOverBlocks = (List<Polygon2d>)inpatientObject["LeftOverPoly"];
@@ -779,22 +782,22 @@ namespace SpacePlanning
                     kpuPlaced = true;
                 }else // regular depts
                 {
-                    //Trace.WriteLine("Dept playing : " + i);
                     //when there is no kpu in the requirement
                     if (!kpuPlaced) { leftOverPoly = leftOverBlocks; kpuPlaced = true; noKpuMode = true; }
                     if (!prepareReg) // only need to do once, places a grid of rectangles before other depts get alloted
                     {
                         List<List<Polygon2d>> polySubDivs = new List<List<Polygon2d>>();
                         Point2d center = PolygonUtility.CentroidOfPolyList(leftOverPoly);
-                        if(stackOptionsProg)
-                        {
-                            double arealeft = 0;
-                            for (int j = 0; j < leftOverPoly.Count; j++) { arealeft += PolygonUtility.AreaPolygon(leftOverPoly[j]); }
+                        double arealeft = 0;
+                        for (int j = 0; j < leftOverPoly.Count; j++) { arealeft += PolygonUtility.AreaPolygon(leftOverPoly[j]); }
+                        if (stackOptionsProg)
+                        {                            
                             double upper = arealeft / 6, lower = arealeft / 12;
-                            //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);
-                           
+                            //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);  
                         }
-                        polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, circulationFreq, ratio);
+
+                        acceptableWidth = Math.Sqrt(arealeft)/10;
+                        polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
                         bool checkPoly2 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[1], 0.5);
                         while (polySubDivs == null || polySubDivs.Count == 0 || !checkPoly1 || !checkPoly2 && count < maxTry)
@@ -802,7 +805,7 @@ namespace SpacePlanning
                             ratio -= 0.01;
                             if (ratio < 0) ratio = 0.6; break;
                             ///Trace.WriteLine("Ratio problem faced , ratio reduced to : " + ratio);
-                            polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, circulationFreq, ratio);
+                            polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
                             count += 1;
                         }
                         //SORT THE POLYSUBDIVS
@@ -812,7 +815,7 @@ namespace SpacePlanning
                         for(int k = 0; k < sortedPolyIndices.Count; k++) { sortedPolySubDivs.Add(polySubDivs[0][sortedPolyIndices[k]]); }
                         leftOverPoly = sortedPolySubDivs; // polySubDivs[0]
                         //leftOverPoly = polySubDivs[0];
-                        polyCirculation = polySubDivs[1];
+                        //polyCirculation = polySubDivs[1];
                         for (int j = 0; j < leftOverPoly.Count; j++) areaAvailable += PolygonUtility.AreaPolygon(leftOverPoly[j]);
                         if (leftOverPoly == null) break;
                         prepareReg = true;

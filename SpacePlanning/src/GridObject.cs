@@ -23,7 +23,7 @@ namespace SpacePlanning
         private List<Point2d> _siteBoundingBox = new List<Point2d>();
         private double _dimX;
         private double _dimY;
-        internal static int FORMCOUNT = 3;
+        internal static int FORMCOUNT = 5;
 
 
         private static int MINCELL = 250, MAXCELL = 550;
@@ -503,6 +503,7 @@ namespace SpacePlanning
                 else
                 {
                     siteCoverAchieved = (double)formBuildingOutlineObj["SiteCoverageAchieved"];
+                    siteCoverage = (double)formBuildingOutlineObj["SiteCoverageRequired"];
                     scDifference = Math.Abs(siteCoverAchieved - siteCoverage);
                     if (scDifference < 0.03) worked = true;
                     else
@@ -550,7 +551,10 @@ namespace SpacePlanning
             {
                 for(int i = 0; i < deptData.Count; i++) areaRequired += deptData[i].DeptAreaNeeded;
                 siteCoverage = areaRequired / areaSite;
+                if (siteCoverage > 0.99) { siteCoverage = 0.9; }
             }
+
+            
             double areaBuilding = siteCoverage * areaSite, areaLeft = 10000;
             List<double> areaPartsList = new List<double>();
             for (int i = 0; i < number; i++)

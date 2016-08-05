@@ -112,7 +112,7 @@ namespace SpacePlanning
 
 
 
-        //arranges program elements inside primary dept unit and updates program data object
+        //arranges program elements inside primary dept unit and updates program data 
         /// <summary>
         /// Assigns program elements inside the primary department polygon2d.
         /// </summary>

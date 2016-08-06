@@ -622,7 +622,7 @@ namespace SpacePlanning
 
         //blocks are assigne based on offset distance, used for inpatient blocks
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly"})]
-        public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
+        public static Dictionary<string, object> FitKPUDeptOrig(Polygon2d poly, double kpuDepth,
             double area,  double thresDistance = 10, int iteration = 5,bool stackOptions = false)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
@@ -650,7 +650,57 @@ namespace SpacePlanning
                 { "LeftOverPoly", (currentPoly) }
             };
         }
+        //blocks are assigne based on offset distance, used for inpatient blocks
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced" })]
+        public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
+            double area, double thresDistance = 10, int iteration = 5, bool stackOptions = false)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            Polygon2d currentPoly = new Polygon2d(poly.Points);
+            //List<int> lineIdList = new List<int> { 1, 2, 3 };
+            List<Polygon2d> polyBlockList = new List<Polygon2d>();
+            List<int> lineIdList = new List<int>();
+            int lineId = 0, count = 0, maxTry = 40;
+            double areaAdded = 0;
+            double areaLeftToBeAdded = area - areaAdded;
+            
 
+            for (int i = 0; i < poly.Points.Count; i++)
+            {
+                bool error = false;
+                Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, i, kpuDepth, thresDistance);
+                Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
+                Polygon2d leftOver = (Polygon2d)splitObj["LeftOverPoly"];
+                if (ValidateObject.CheckPolygonSelfIntersection(leftOver)) error = true;
+                else if(polyBlockList.Count>0)
+                {
+                    for(int j = 0; j < polyBlockList.Count; j++)
+                    {
+                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j])) error = true;
+                    }
+                }
+
+                if (!error)
+                {
+                    currentPoly = leftOver;
+                    polyBlockList.Add(polySplit);
+                    areaAdded += poly.Lines[i].Length * kpuDepth;
+                    lineIdList.Add(i);
+                    if (areaAdded > area) break;
+                    
+                }
+
+            }
+         
+
+
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polyBlockList) },
+                { "LeftOverPoly", (currentPoly) },
+                { "AreaPlaced", (areaAdded) }
+            };
+        }
 
         //makes a space data tree from dept data
         [MultiReturn(new[] { "SpaceTree", "NodeList" })]

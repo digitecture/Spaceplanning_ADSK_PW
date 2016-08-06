@@ -33,6 +33,18 @@ namespace SpacePlanning
             return result;
         }
 
+
+        //checks if two polys overlap, true if overlap, false if no overlap
+        public static bool CheckPolyPolyOverlap(Polygon2d polyA, Polygon2d polyB)
+        {
+            List<Point2d> ptList = polyA.Points;
+            for(int i = 0; i < ptList.Count; i++)
+            {
+               if( GraphicsUtility.PointInsidePolygonTest(polyB, ptList[i])) return true;
+            }
+            return false;
+        }
+
         //checks a polygon2d if its orthogonal or non orthogonal
         public static bool CheckPolygon2dOrtho(Polygon2d nonOrthoPoly, double eps = 0)
         {

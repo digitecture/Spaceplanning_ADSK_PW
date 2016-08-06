@@ -645,15 +645,18 @@ namespace SpacePlanning
                 bool error = false;
                 Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);
                 Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
+                Point2d center = PolygonUtility.CentroidOfPoly(polySplit);
                 Polygon2d leftOver = (Polygon2d)splitObj["LeftOverPoly"];
                 if (ValidateObject.CheckPolygonSelfIntersection(leftOver)) error = true;
-                else if(polyBlockList.Count>0)
+                if (polyBlockList.Count > 0)
                 {
-                    for(int j = 0; j < polyBlockList.Count; j++)
+                    for (int j = 0; j < polyBlockList.Count; j++)
                     {
-                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j])) error = true;
+                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j])) { error = true; break; }
                     }
                 }
+                if (!GraphicsUtility.PointInsidePolygonTest(poly, center)) error = true;
+                //if (!ValidateObject.CheckPolyInsideOuterPoly(polySplit, poly)) error = true; NEEDS FURTHER TEST
                 if (!error)
                 {
                     currentPoly = leftOver;

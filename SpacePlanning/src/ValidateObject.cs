@@ -45,6 +45,28 @@ namespace SpacePlanning
             return false;
         }
 
+        //checks if one poly is inside another, true if it is inside, false, if not inside - NEEDS TESTING MORE
+        public static bool CheckPolyInsideOuterPoly(Polygon2d insidePoly, Polygon2d outerPoly)
+        {
+            Polygon2d polyIns = new Polygon2d(insidePoly.Points);
+            Polygon2d polyOut = new Polygon2d(outerPoly.Points);
+            Point2d centerOut = PolygonUtility.CentroidOfPoly(polyOut);
+            List<Point2d> ptInsidePoly = new List<Point2d>();
+            for(int i = 0; i < polyIns.Points.Count; i++)
+            {
+                Vector2d vec = new Vector2d(polyIns.Points[i], centerOut);
+                Point2d shiftedPt = VectorUtility.VectorAddToPoint(polyIns.Points[i], vec, 0.2);
+                //ptInsidePoly.Add(polyIns.Points[i]);
+                ptInsidePoly.Add(shiftedPt);
+            }
+
+            for(int i = 0; i < ptInsidePoly.Count; i++)
+            {
+                if(!GraphicsUtility.PointInsidePolygonTest(polyOut, ptInsidePoly[i])) return false;
+            }
+            return true;
+        }
+
         //checks a polygon2d if its orthogonal or non orthogonal
         public static bool CheckPolygon2dOrtho(Polygon2d nonOrthoPoly, double eps = 0)
         {

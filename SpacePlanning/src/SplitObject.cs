@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SpacePlanning
 {
-    internal static class SplitObject
+    public static class SplitObject
     {
 
         #region - Public Methods
@@ -337,6 +337,30 @@ namespace SpacePlanning
             {
                 { "PolyAfterSplit", (polySplit) },
                 { "LeftOverPoly", (leftPoly) },
+            };
+
+        }
+
+
+        //splits a polygon based on offset direction from a given line id
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly" })]
+        public static Dictionary<string, object> SplitByOffsetFromLineList(Polygon2d polyOutline, List<int> lineIdList, double distance = 10, double minDist = 0)
+        {
+            if (!ValidateObject.CheckPoly(polyOutline)) return null;
+            Polygon2d poly = new Polygon2d(polyOutline.Points);
+            Polygon2d currentPoly = poly;
+            List<Polygon2d> polySplits = new List<Polygon2d>();
+            for(int i = 0; i < lineIdList.Count; i++)
+            {
+                Dictionary<string, object> offsetPolyObj = SplitByOffsetFromLine(currentPoly, lineIdList[i], distance, minDist);
+                polySplits.Add((Polygon2d)offsetPolyObj["PolyAfterSplit"]);
+                currentPoly = (Polygon2d)offsetPolyObj["LeftOverPoly"];
+            }       
+
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polySplits) },
+                { "LeftOverPoly", (currentPoly) }
             };
 
         }

@@ -20,6 +20,7 @@ namespace SpacePlanning
         internal static double RECURSE = 0;
         internal static Point2d REFERENCEPOINT = new Point2d(0,0);
         internal static int DEPTCOUNT = 1;
+        internal static double DIVISION = 2;
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";
@@ -438,7 +439,8 @@ namespace SpacePlanning
             {
                 //Trace.WriteLine("Poly given is null"); 
                 return null;
-            }           
+            }
+            int count = 0, maxTry = 10;
             //for (int i = 0; i < polyList.Count; i++) areaAvailable += PolygonUtility.AreaPolygon(polyList[i]);
             Queue<Polygon2d> polyAvailable = new Queue<Polygon2d>();
             List<Polygon2d> polysToDept = new List<Polygon2d>(), leftOverPoly = new List<Polygon2d>();
@@ -446,11 +448,36 @@ namespace SpacePlanning
             //double deptAreaTarget = areaFactor * areaAvailable, areaAssigned = 0;
             //deptAreaTarget = areaFactor;
             //double deptAreaTarget = deptItem.DeptAreaNeeded,
-            double areaAssigned = 0;
+            double areaAssigned = 0, ratio = 0.3;
+            int dir = 0;
+            double areaLeftTobeAssigned = deptAreaTarget - areaAssigned;
             while (areaAssigned < deptAreaTarget && polyAvailable.Count > 0)
             {
                 Polygon2d currentPoly = polyAvailable.Dequeue();
+                if(PolygonUtility.AreaPolygon(currentPoly) > areaLeftTobeAssigned)
+                {
+                    Dictionary<string,object> splitObj = SplitObject.SplitByRatio(currentPoly, ratio, dir);
+                    List<Polygon2d> polySplit = new List<Polygon2d>();
+
+                    while(splitObj == null && count < maxTry)
+                    {
+                        count += 1;
+                        ratio += 0.02;
+                        dir = BasicUtility.ToggleInputInt(dir);
+                        splitObj = SplitObject.SplitByRatio(currentPoly, ratio, dir);
+                    }
+                    if (splitObj != null)
+                    {
+                        polySplit = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                        polySplit = PolygonUtility.SortPolygonList(polySplit);
+                        currentPoly = polySplit[0];
+                        polyAvailable.Enqueue(polySplit[1]);
+                    }
+                    dir = BasicUtility.ToggleInputInt(dir);
+                }
+
                 areaAssigned += PolygonUtility.AreaPolygon(currentPoly);
+                areaLeftTobeAssigned = deptAreaTarget - areaAssigned;
                 polysToDept.Add(currentPoly);
             }
 
@@ -823,7 +850,7 @@ namespace SpacePlanning
                             double upper = arealeft / 6, lower = arealeft / 12;
                             //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);  
                         }
-                        acceptableWidth = Math.Sqrt(arealeft)/10;
+                        acceptableWidth = Math.Sqrt(arealeft)/DIVISION;
                         polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
                         bool checkPoly2 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[1], 0.5);

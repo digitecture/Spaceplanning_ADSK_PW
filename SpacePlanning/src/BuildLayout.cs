@@ -622,7 +622,7 @@ namespace SpacePlanning
 
        
         //blocks are assigne based on offset distance, used for KPU Dept 
-        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced" })]
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
         public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
             double area, double thresDistance = 10, int iteration = 5, bool stackOptions = false)
         {
@@ -652,7 +652,15 @@ namespace SpacePlanning
                 {
                     for (int j = 0; j < polyBlockList.Count; j++)
                     {
-                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j])) { error = true; break; }
+                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j]))
+                        {
+                            error = true;
+                            //poly = AddPointToPoly(poly, i, 0.75);
+                            //indices.Clear();
+                            //for (int k = 0; k < poly.Points.Count; k++) indices.Add(k);
+                            //if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(iteration));
+                            break; 
+                        }
                     }
                 }
                 if (!GraphicsUtility.PointInsidePolygonTest(poly, center)) error = true;
@@ -665,12 +673,18 @@ namespace SpacePlanning
                     lineIdList.Add(i);
                     if (areaAdded > area) break;                    
                 }
-            }      
+            }
+
+
+            Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, 5, 0);
+            List<Polygon2d> polyCorridors = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
+                  
             return new Dictionary<string, object>
             {
                 { "PolyAfterSplit", (polyBlockList) },
                 { "LeftOverPoly", (currentPoly) },
-                { "AreaPlaced", (areaAdded) }
+                { "AreaPlaced", (areaAdded) },
+                { "CirculationPoly", (polyCorridors) }
             };
         }
 

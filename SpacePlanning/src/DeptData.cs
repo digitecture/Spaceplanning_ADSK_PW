@@ -36,10 +36,12 @@ namespace SpacePlanning
         private bool _mode3D;
         private int _floorLevel;
         private int _numDeptPerFloor = 0;
+        private string _deptId;
+        private string _deptAdj = "";
 
 
         #region - internal constructor
-        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions)
+        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions, string deptId, string deptAdjacency)
         {
             _deptName = deptName;
             _progDataList = programDataList;
@@ -65,6 +67,8 @@ namespace SpacePlanning
             _flrHeightList.Add(0);
             _floorLevel = 0;
 
+            _deptId = deptId;
+            _deptAdj = deptAdjacency;
         }
 
         internal DeptData(DeptData other)
@@ -94,6 +98,9 @@ namespace SpacePlanning
             _floorLevel = other.DeptFloorLevel;
             _numDeptPerFloor = other.NumDeptPerFloor;
 
+            _deptId = other.DeptId;
+            _deptAdj = other.DeptAdjacencyProvided;
+
             if (other.PolyAssignedToDept != null && other.PolyAssignedToDept.Count > 0) _polyDepts = other.PolyAssignedToDept;
             else _polyDepts = null;
         }
@@ -109,6 +116,22 @@ namespace SpacePlanning
         {
             get { return _deptAreaProportion; }
             set { _deptAreaProportion = value; }
+        }
+
+        /// <summary>
+        /// Department Id.
+        /// </summary>
+        public string DeptId
+        {
+            get { return _deptId; }
+        }
+
+        /// <summary>
+        /// Department Adjacency as provided.
+        /// </summary>
+        public string DeptAdjacencyProvided
+        {
+            get { return _deptAdj; }
         }
 
         /// <summary>

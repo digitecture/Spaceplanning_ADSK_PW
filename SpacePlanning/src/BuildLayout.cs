@@ -537,7 +537,7 @@ namespace SpacePlanning
                     Dictionary<string, object> splitObject = CreateBlocksByLines(currentPoly, poly, kpuDepth, areaLeftToAdd, thresDistance, noExternalWall,parameter, stackOptions, iteration);
                     if (splitObject == null) { count += 1; Trace.WriteLine("Split errored"); continue; }
 
-                    Trace.WriteLine("Create Block Done");
+                    //Trace.WriteLine("Create Block Done");
                     Polygon2d blockPoly = (Polygon2d)splitObject["PolyAfterSplit"];
                     Polygon2d leftPoly = (Polygon2d)splitObject["LeftOverPoly"];
                     lineOptions = (List<Line2d>)splitObject["LineOptions"];
@@ -547,7 +547,7 @@ namespace SpacePlanning
                     falseLines = (List<Line2d>)addPtObj["FalseLineList"];
                     pointAdd = (Point2d)addPtObj["PointAdded"];
                     areaAdded += PolygonUtility.AreaPolygon(blockPoly);
-                    Trace.WriteLine("Area added now is : " + areaAdded);
+                    //Trace.WriteLine("Area added now is : " + areaAdded);
                     polyLeftList.Push(leftPoly);
                     blockPolyList.Add(blockPoly);
 
@@ -653,19 +653,20 @@ namespace SpacePlanning
             {
                 if (offsetAble[i] == true)
                 {
-                    //lineLength.Add(poly.Lines[i].Length);
-                    lineOptions.Add(poly.Lines[i]);
+                    lineLength.Add(poly.Lines[i].Length);
+                    //lineOptions.Add(poly.Lines[i]);
                 }
-               // else lineLength.Add(0);
+                else lineLength.Add(0);
             }      
             
-            for(int i = 0; i < lineOptions.Count; i++) lineLength.Add(lineOptions[i].Length);
+           //for(int i = 0; i < lineOptions.Count; i++) lineLength.Add(lineOptions[i].Length);
 
             List<int> sortedIndices = BasicUtility.Quicksort(lineLength);          
             Trace.WriteLine("Whats going on 1");
-            if (sortedIndices != null) sortedIndices.Reverse();
+            if (sortedIndices == null) return null;
+            if (sortedIndices != null && sortedIndices.Count>1) sortedIndices.Reverse();
             // randomize the line indices to pick any line as found
-            if (stackOptions)
+            if (stackOptions && sortedIndices != null)
             {
                 List<int> dupSortedIndices = sortedIndices.Select(x => x).ToList();
                 Random nRan = new Random(designSeed);
@@ -673,7 +674,7 @@ namespace SpacePlanning
                 //index = (int)BasicUtility.RandomBetweenNumbers(nRan, sortedIndices.Count - 1, 0);
                 //index = 1;
             }
-            //for (int i = 0; i < poly.Points.Count; i++) if (lineLength[i] > 0 && i != sortedIndices[index]) { lineOptions.Add(poly.Lines[i]); }
+            for (int i = 0; i < poly.Points.Count; i++) if (lineLength[i] > 0 && i != sortedIndices[index]) { lineOptions.Add(poly.Lines[i]); }
             
             // add a funct, which takes a lineid, poly, areatarget
             // it checks what parameter it should split to have it meet area requirement correctly

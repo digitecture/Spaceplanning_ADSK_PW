@@ -162,15 +162,15 @@ namespace SpacePlanning
                 }
             }
             //int hIndLow = GraphicsUtility.ReturnLowestPointFromListNew(hMidPt);
-            //int hIndHigh = GraphicsUtility.ReturnHighestPointFromListNew(hMidPt);
+            //int hIndHigh = CodeToBeTested.ReturnHighestPointFromList(hMidPt);
             int hIndLow = CodeToBeTested.ReturnLowestPointFromList(hMidPt);
             int hIndHigh = PointUtility.HighestPointFromList(hMidPt);
             int vIndLow = PointUtility.LowestPointFromList(vMidPt);
             int vIndHigh = PointUtility.HighestPointFromList(vMidPt);
             hLines.RemoveAt(hIndLow);
-            hLines.RemoveAt(hIndHigh);
+            hLines.RemoveAt(hIndHigh-1);
             vLines.RemoveAt(vIndLow);
-            vLines.RemoveAt(vIndHigh);
+            vLines.RemoveAt(vIndHigh-1);
             List<Line2d> allSplitLines = new List<Line2d>();
             allSplitLines.AddRange(hLines);
             allSplitLines.AddRange(vLines);
@@ -195,7 +195,7 @@ namespace SpacePlanning
 
         //get a poly and find rectangular polys inside. then merge them together to form a big poly 
         [MultiReturn(new[] { "WholesomePolys", "PolysAfterSplit", "AllSplitLines"})]
-        internal static Dictionary<string, object> MakeWholesomeBlockInPoly(Polygon2d poly, double dim = 10,double recompute = 5)
+        public static Dictionary<string, object> MakeWholesomeBlockInPoly(Polygon2d poly, double dim = 10,double recompute = 5)
         {
             if (poly == null || poly.Points == null || poly.Points.Count == 0) return null;
             List<Polygon2d> wholesomePolyList = new List<Polygon2d>();

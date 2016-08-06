@@ -77,7 +77,7 @@ namespace SpacePlanning
         /// <search>
         /// DeptData object, department arrangement on site
         /// </search>
-        [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
+        [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
              int designSeed = 50, bool noExternalWall = false, 
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2, bool highIteration = false)
@@ -725,7 +725,7 @@ namespace SpacePlanning
 
 
         //dept assignment new way
-        [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
+        [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
         internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, List<double> kpuDepthList, List<double> kpuWidthList,
             int designSeed = 5, bool noExternalWall = false, 
             bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false)
@@ -842,7 +842,13 @@ namespace SpacePlanning
                     if (!prepareReg) // only need to do once, places a grid of rectangles before other depts get alloted
                     {
                         List<List<Polygon2d>> polySubDivs = new List<List<Polygon2d>>();
+                        List<Polygon2d> polysWhole = new List<Polygon2d>();
                         Point2d center = PolygonUtility.CentroidOfPolyList(leftOverPoly);
+                        List<Point2d> ptLists = new List<Point2d>();
+                        for (int j = 0; j< leftOverPoly.Count; j++) ptLists.AddRange(leftOverPoly[j].Points);
+
+                        Point2d lowestPt = ptLists[PointUtility.LowestPointFromList(ptLists)];
+                        Point2d ptToSort = lowestPt;
                         double arealeft = 0;
                         for (int j = 0; j < leftOverPoly.Count; j++) { arealeft += PolygonUtility.AreaPolygon(leftOverPoly[j]); }
                         if (stackOptionsProg)
@@ -851,7 +857,14 @@ namespace SpacePlanning
                             //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);  
                         }
                         acceptableWidth = Math.Sqrt(arealeft)/DIVISION;
-                        polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
+                        //polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
+                        for (int j = 0; j < leftOverPoly.Count; j++)
+                        {
+                            Dictionary<string, object> wholsesomeObj = PolygonUtility.MakeWholesomeBlockInPoly(leftOverPoly[j]);
+                            polysWhole = (List<Polygon2d>)wholsesomeObj["PolysAfterSplit"];
+                            polySubDivs.Add(polysWhole);
+                        }
+                        /*
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
                         bool checkPoly2 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[1], 0.5);
                         while (polySubDivs == null || polySubDivs.Count == 0 || !checkPoly1 || !checkPoly2 && count < maxTry)
@@ -859,12 +872,13 @@ namespace SpacePlanning
                             ratio -= 0.01;
                             if (ratio < 0) ratio = 0.6; break;
                             //Trace.WriteLine("Ratio problem faced , ratio reduced to : " + ratio);
-                            polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
+                            //polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
                             count += 1;
                         }
+                        */
                         //SORT THE POLYSUBDIVS
                         //Point2d center = PolygonUtility.CentroidOfPolyList(leftOverPoly);
-                        List<int> sortedPolyIndices = PolygonUtility.SortPolygonsFromAPoint(polySubDivs[0], center);
+                        List<int> sortedPolyIndices = PolygonUtility.SortPolygonsFromAPoint(polySubDivs[0], ptToSort);
                         List<Polygon2d> sortedPolySubDivs = new List<Polygon2d>();
                         for(int k = 0; k < sortedPolyIndices.Count; k++) { sortedPolySubDivs.Add(polySubDivs[0][sortedPolyIndices[k]]); }
                         leftOverPoly = sortedPolySubDivs; // polySubDivs[0]
@@ -941,7 +955,8 @@ namespace SpacePlanning
             return new Dictionary<string, object>
             {
                 { "DeptData", (UpdatedDeptData) },
-                { "LeftOverPolys", (leftOverPoly) }
+                { "LeftOverPolys", (leftOverPoly) },
+                { "OtherDeptPoly", (otherDeptPoly)}
             };
         }
 

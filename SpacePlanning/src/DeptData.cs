@@ -37,11 +37,11 @@ namespace SpacePlanning
         private int _floorLevel;
         private int _numDeptPerFloor = 0;
         private string _deptId;
-        private string _deptAdj = "";
+        private List<string> _deptAdj = new List<string>();
 
 
         #region - internal constructor
-        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions, string deptId, string deptAdjacency)
+        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions, string deptId, List<string> deptAdjacency)
         {
             _deptName = deptName;
             _progDataList = programDataList;
@@ -129,7 +129,7 @@ namespace SpacePlanning
         /// <summary>
         /// Department Adjacency as provided.
         /// </summary>
-        public string DeptAdjacencyProvided
+        public List<string> DeptAdjacencyProvided
         {
             get { return _deptAdj; }
         }

@@ -132,7 +132,16 @@ namespace SpacePlanning
                 }
             }
 
-            Dictionary<string,object> deptAssemblies = FindPreferredProgs(deptIdSequenced, deptAdjSequenced);
+
+            List<List<string>> deptAdjProvList = new List<List<string>>();
+            for (int i = 0; i < deptAdjSequenced.Count; i++)
+            {
+                string adjacency = deptAdjSequenced[i];
+                List<string> adjList = adjacency.Split('.').ToList();
+                deptAdjProvList.Add(adjList);
+            }
+
+           // Dictionary<string,object> deptAssemblies = FindPreferredProgs(deptIdSequenced, deptAdjProvList);
 
             List<DeptData> deptDataStack = new List<DeptData>();
             Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList, progAdjList);
@@ -147,7 +156,7 @@ namespace SpacePlanning
                          progInDept.Add(programDataStack[j]);
                      }
                  List<ProgramData> programBasedOnQuanity = MakeProgramListBasedOnQuantity(progInDept);
-            DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept, deptIdSequenced[i],deptAdjSequenced[i]);
+            DeptData dept = new DeptData(deptNames[i], programBasedOnQuanity, circulationFactor, dim, dim, stackingOptionsDept, deptIdSequenced[i], deptAdjProvList[i]);
             deptDataStack.Add(dept);
              }// end of for loop statement
              Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList,progTypeList, progAdjList);

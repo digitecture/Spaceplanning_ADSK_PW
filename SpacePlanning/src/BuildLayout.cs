@@ -624,7 +624,7 @@ namespace SpacePlanning
         //blocks are assigne based on offset distance, used for KPU Dept 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
         public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
-            double area, double thresDistance = 10, int iteration = 5, bool stackOptions = false)
+            double area, double thresDistance = 10, int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
             Polygon2d currentPoly = new Polygon2d(poly.Points);
@@ -638,7 +638,7 @@ namespace SpacePlanning
 
             List<int> indices = new List<int>();
             for (int i = 0; i < poly.Points.Count; i++) indices.Add(i);
-            if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(iteration));
+            if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
 
 
             for (int i = 0; i < poly.Points.Count; i++)
@@ -669,8 +669,7 @@ namespace SpacePlanning
                 if (!GraphicsUtility.PointInsidePolygonTest(poly, center)) error = true;
                 //if (!ValidateObject.CheckPolyInsideOuterPoly(polySplit, poly)) error = true; NEEDS FURTHER TEST
                 if (!error)
-                {
-             
+                {             
                     polyBlockList.Add(polySplit);
                     areaAdded += poly.Lines[i].Length * kpuDepth;
                     lineIdList.Add(i);
@@ -684,10 +683,13 @@ namespace SpacePlanning
                 }
             }
 
-
-            Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, 5, 0);
-            polyCorridorsList = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
-            currentPoly = (Polygon2d)corridorObj["LeftOverPoly"];
+            if (circulation)
+            {
+                Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, circulationWidth, 0);
+                polyCorridorsList = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
+                currentPoly = (Polygon2d)corridorObj["LeftOverPoly"];
+            }
+         
                   
             return new Dictionary<string, object>
             {
@@ -701,12 +703,39 @@ namespace SpacePlanning
 
 
 
-        
+        //blocks are assigne based on offset distance, used for KPU Dept 
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
+        public static Dictionary<string, object> FitOtherDept(Polygon2d poly, List<Polygon2d> polyDepts, List<string> adjacencyList, 
+           List<int> deptIdPlacedList, double area,  int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
+        {
+
+            /*
+            store the polys of kpudepts in a list
+            get the leftoverpoly
+            get the adjacency assembly list
+            place the first dept based on Area req and adjacency by checking the kpu dept polys
+            find the lineId where the dept should be placed till area satisfied
+            after placing it place it back to the polylist
+            get the left over poly , ans start again
+            */
+
+
+
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            if (!ValidateObject.CheckPolyList(polyDepts)) return null;
+            Polygon2d currentPoly = new Polygon2d(poly.Points);
 
 
 
 
+            
 
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (null) },
+                { "LeftOverPoly", (null) }
+            };
+        }
 
 
 

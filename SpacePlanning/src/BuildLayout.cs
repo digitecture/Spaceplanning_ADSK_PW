@@ -701,55 +701,7 @@ namespace SpacePlanning
 
 
 
-        //blocks are assigne based on offset distance, used for KPU Dept 
-        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced" })]
-        public static Dictionary<string, object> FitKPUDeptOld(Polygon2d poly, double kpuDepth,
-            double area, double thresDistance = 10, int iteration = 5, bool stackOptions = false)
-        {
-            if (!ValidateObject.CheckPoly(poly)) return null;
-            Polygon2d currentPoly = new Polygon2d(poly.Points);
-            List<Polygon2d> polyBlockList = new List<Polygon2d>();
-            List<int> lineIdList = new List<int>();
-            int lineId = 0, count = 0, maxTry = 40;
-            double areaAdded = 0;
-            double areaLeftToBeAdded = area - areaAdded;
-
-            List<int> indices = new List<int>();
-            for (int i = 0; i < poly.Points.Count; i++) indices.Add(i);
-            if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(iteration));
-
-
-            for (int i = 0; i < poly.Points.Count; i++)
-            {
-                lineId = indices[i];
-                bool error = false;
-                Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);
-                Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
-                Polygon2d leftOver = (Polygon2d)splitObj["LeftOverPoly"];
-                if (ValidateObject.CheckPolygonSelfIntersection(leftOver)) error = true;
-                else if (polyBlockList.Count > 0)
-                {
-                    for (int j = 0; j < polyBlockList.Count; j++)
-                    {
-                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j])) error = true;
-                    }
-                }
-                if (!error)
-                {
-                    currentPoly = leftOver;
-                    polyBlockList.Add(polySplit);
-                    areaAdded += poly.Lines[i].Length * kpuDepth;
-                    lineIdList.Add(i);
-                    if (areaAdded > area) break;
-                }
-            }
-            return new Dictionary<string, object>
-            {
-                { "PolyAfterSplit", (polyBlockList) },
-                { "LeftOverPoly", (currentPoly) },
-                { "AreaPlaced", (areaAdded) }
-            };
-        }
+        
 
 
 

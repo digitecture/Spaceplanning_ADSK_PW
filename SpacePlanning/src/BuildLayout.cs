@@ -642,6 +642,7 @@ namespace SpacePlanning
 
 
             for (int i = 0; i < poly.Points.Count; i++)
+            //while(areaAdded<area)
             {
                 lineId = indices[i];
                 bool error = false;
@@ -656,12 +657,12 @@ namespace SpacePlanning
                     {
                         if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j]))
                         {
-                            error = true;
+                           // error = true;
                             //poly = AddPointToPoly(poly, i, 0.75);
                             //indices.Clear();
                             //for (int k = 0; k < poly.Points.Count; k++) indices.Add(k);
                             //if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(iteration));
-                            break; 
+                            //break; 
                         }
                     }
                 }
@@ -674,25 +675,26 @@ namespace SpacePlanning
                     areaAdded += poly.Lines[i].Length * kpuDepth;
                     lineIdList.Add(i);
 
-                    Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, 5, 0);
-                    polyCorridors = (Polygon2d)splitObj["PolyAfterSplit"];
-                    polyCorridorsList.Add(polyCorridors);
-                    leftOver = (Polygon2d)splitObj["LeftOverPoly"];
+                    //Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, 5, 0);
+                    //polyCorridors = (Polygon2d)splitObj["PolyAfterSplit"];
+                    //polyCorridorsList.Add(polyCorridors);
+                    //leftOver = (Polygon2d)splitObj["LeftOverPoly"];
                     currentPoly = leftOver;
                     if (areaAdded > area) break;                    
                 }
             }
 
 
-            //Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, 5, 0);
-            //List<Polygon2d> polyCorridors = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
+            Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, 5, 0);
+            polyCorridorsList = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
+            currentPoly = (Polygon2d)corridorObj["LeftOverPoly"];
                   
             return new Dictionary<string, object>
             {
                 { "PolyAfterSplit", (polyBlockList) },
                 { "LeftOverPoly", (currentPoly) },
                 { "AreaPlaced", (areaAdded) },
-                { "CirculationPoly", (polyCorridors) }
+                { "CirculationPoly", (polyCorridorsList) }
             };
         }
 

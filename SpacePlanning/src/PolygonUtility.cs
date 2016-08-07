@@ -351,7 +351,7 @@ namespace SpacePlanning
         }
 
         //offsets a poly 
-        internal static Polygon2d OffsetPoly(Polygon2d polyOutline, double distance = 0.5)
+        public static Polygon2d OffsetPoly(Polygon2d polyOutline, double distance = 0.5)
         {
             if (!ValidateObject.CheckPoly(polyOutline)) return null;
             List<bool> offsetAble = new List<bool>();

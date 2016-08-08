@@ -764,9 +764,13 @@ namespace SpacePlanning
 
             List<Polygon2d> polySplitList = new List<Polygon2d>();
             Polygon2d splitPoly = new Polygon2d(null), leftPoly = new Polygon2d(null);
-            while(areaLeftTobeAdded > 0 && count < maxTry)
+            while(areaAdded < area && count < maxTry)
             {
-                double minWidth = areaLeftTobeAdded / 4, maxLength = areaLeftTobeAdded / minWidth, fac = 0.75;
+                //double minWidth = areaLeftTobeAdded / 4, maxLength = areaLeftTobeAdded / minWidth, fac = 0.75;
+                double aspRatio = 0.8; // l/w
+                double maxWidth = Math.Sqrt(areaLeftTobeAdded * aspRatio);
+                double maxLength = areaLeftTobeAdded / maxWidth;
+                double fac = 0.75;
                 count += 1;
                 int lineId = PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint);
                 if (currentPoly.Lines[lineId].Length > maxLength)
@@ -775,12 +779,12 @@ namespace SpacePlanning
                     currentPoly = AddPointToPoly(currentPoly, lineId, param);                    
                 }
 
-                double length = currentPoly.Lines[lineId].Length;
-                double width = areaLeftTobeAdded / length;
-                double maxWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineId);
-                if (width > maxWidth * fac) width = maxWidth * fac;
+                maxLength = currentPoly.Lines[lineId].Length;
+                maxWidth = areaLeftTobeAdded / maxLength;
+                double allowedWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineId);
+                if (allowedWidth < maxWidth * fac) maxWidth = allowedWidth * fac;
 
-                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, width, 0);
+                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, maxWidth, 0);
                 splitPoly = (Polygon2d)splitObj["PolyAfterSplit"];
                 leftPoly = (Polygon2d)splitObj["LeftOverPoly"];
 

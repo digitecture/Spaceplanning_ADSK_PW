@@ -10,7 +10,7 @@ using Autodesk.DesignScript.Geometry;
 
 namespace SpacePlanning
 {
-    internal static class LineUtility
+    public static class LineUtility
     {
         #region - Public Methods
         //offsets an input line by a given distance 
@@ -38,12 +38,15 @@ namespace SpacePlanning
         public static double FindMaxOffsetInPoly(Polygon2d poly, int lineId)
         {
             if (!ValidateObject.CheckPoly(poly)) return -1;
+
+            poly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5),0);
             Point2d midPt = LineMidPoint(poly.Lines[lineId]);
             int dir = ValidateObject.CheckLineOrient(poly.Lines[lineId]);
             double maxDistance = 0;
-            if(dir == 0 ) dir = 1; // horizontal line 
-            else  dir = 0; // vertical line
-            Line2d bisectorLine = new Line2d(midPt, 300, dir);
+            int newDir = -1;
+            if (dir == 0) newDir = 1; // horizontal line 
+            if (dir == 1) newDir = 0; // vertical line
+            Line2d bisectorLine = new Line2d(midPt, 20, newDir);
             Point2d farPt = new Point2d(0,0);
             List<Point2d> intersectedPt = GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
             if (intersectedPt.Count > 1) farPt = intersectedPt[PointUtility.FindFarPointIndex(intersectedPt, midPt)];
@@ -51,6 +54,41 @@ namespace SpacePlanning
             else return -1;
             return PointUtility.DistanceBetweenPoints(midPt, farPt);
         }
+
+
+
+
+
+        //given a poly, and a lineId, gives the max offset distance it can go inside a poly
+        public static Line2d FindBisectorLine(Polygon2d poly, int lineId)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5), 0);
+            Point2d midPt = LineMidPoint(poly.Lines[lineId]);
+            int dir = ValidateObject.CheckLineOrient(poly.Lines[lineId]);
+            double maxDistance = 0;
+            int newDir = -1;
+            if (dir == 0) newDir = 1; // horizontal line 
+            if (dir == 1) newDir = 0; // vertical line
+            return new Line2d(midPt, 20, newDir);   
+        }
+
+        //given a poly, and a lineId, gives the max offset distance it can go inside a poly
+        public static List<Point2d> FindBisectorIntersections(Polygon2d poly, int lineId)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5), 0);
+            Point2d midPt = LineMidPoint(poly.Lines[lineId]);
+            int dir = ValidateObject.CheckLineOrient(poly.Lines[lineId]);
+            double maxDistance = 0;
+            int newDir = -1;
+            if (dir == 0) newDir = 1; // horizontal line 
+            if (dir == 1) newDir = 0; // vertical line
+            Line2d bisectorLine = new Line2d(midPt, 20, newDir);
+            return GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
+
+        }
+
 
         //returns the midPt of a line
         public static Point2d LineMidPoint(Line2d line)

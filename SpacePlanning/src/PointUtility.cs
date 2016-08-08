@@ -189,6 +189,25 @@ namespace SpacePlanning
             return index;
         }
 
+
+        // find the furthest point to a point from a point list
+        public static int FindFarPointIndex(List<Point2d> ptList, Point2d pt)
+        {
+            int index = 0;
+            double maxDist = 0;
+            for (int i = 0; i < ptList.Count; i++)
+            {
+                Point2d centerPt = ptList[i];
+                double calcDist = DistanceBetweenPoints(centerPt, pt);
+                if (calcDist > maxDist)
+                {
+                    maxDist = calcDist;
+                    index = i;
+                }
+            }
+            return index;
+        }
+
         // find the closest point to a point from a group of cells
         internal static int FindClosestPointIndex(List<Cell> cellList, Point2d pt)
         {

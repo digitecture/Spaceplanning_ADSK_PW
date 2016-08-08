@@ -39,28 +39,17 @@ namespace SpacePlanning
         {
             if (!ValidateObject.CheckPoly(poly)) return -1;
             Point2d midPt = LineMidPoint(poly.Lines[lineId]);
-            Line2d bisectorLine = new Line2d(null);
             int dir = ValidateObject.CheckLineOrient(poly.Lines[lineId]);
-            if(dir == 0 )// horizontal line
-            {
-                dir = 1;
-                bisectorLine = new Line2d(midPt, 300, dir);
-                List<Point2d> intersectedPt = GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
-                if (intersectedPt.Count > 1)
-                {
-
-                }
-                else if (intersectedPt.Count == 1)
-                {
-
-                }
-                else return -1;
-            }
-            else // vertical line
-            {
-
-            }
-            return -1;
+            double maxDistance = 0;
+            if(dir == 0 ) dir = 1; // horizontal line 
+            else  dir = 0; // vertical line
+            Line2d bisectorLine = new Line2d(midPt, 300, dir);
+            Point2d farPt = new Point2d(0,0);
+            List<Point2d> intersectedPt = GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
+            if (intersectedPt.Count > 1) farPt = intersectedPt[PointUtility.FindFarPointIndex(intersectedPt, midPt)];
+            else if (intersectedPt.Count == 1) farPt = intersectedPt[0];
+            else return -1;
+            return PointUtility.DistanceBetweenPoints(midPt, farPt);
         }
 
         //returns the midPt of a line

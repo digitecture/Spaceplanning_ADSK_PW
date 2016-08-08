@@ -759,20 +759,42 @@ namespace SpacePlanning
             if (!ValidateObject.CheckPoly(poly)) return null;
             Polygon2d currentPoly = new Polygon2d(poly.Points);
 
-            double areaAdded = 0, areaLeftTobeAdded = 0;
-            int count = 0, maxTry = 0;
+            double areaAdded = 0, areaLeftTobeAdded = area- areaAdded;
+            int count = 0, maxTry = 100;
 
-            List<Polygon2d> polyAdjacent = new List<Polygon2d>();
+            List<Polygon2d> polySplitList = new List<Polygon2d>();
+            Polygon2d splitPoly = new Polygon2d(null), leftPoly = new Polygon2d(null);
+            while(areaLeftTobeAdded > 0 && count < maxTry)
+            {
+                double minWidth = areaLeftTobeAdded / 4, maxLength = areaLeftTobeAdded / minWidth, fac = 0.75;
+                count += 1;
+                int lineId = PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint);
+                if (currentPoly.Lines[lineId].Length > maxLength)
+                {
+                    double param = maxLength / currentPoly.Lines[lineId].Length;
+                    currentPoly = AddPointToPoly(currentPoly, lineId, param);                    
+                }
 
-      
+                double length = currentPoly.Lines[lineId].Length;
+                double width = areaLeftTobeAdded / length;
+                double maxWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineId);
+                if (width > maxWidth * fac) width = maxWidth * fac;
 
+                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, width, 0);
+                splitPoly = (Polygon2d)splitObj["PolyAfterSplit"];
+                leftPoly = (Polygon2d)splitObj["LeftOverPoly"];
 
-
-
+                areaAdded += PolygonUtility.AreaPolygon(splitPoly);
+                areaLeftTobeAdded = area - areaAdded;
+                currentPoly = leftPoly;
+                polySplitList.Add(splitPoly);
+            }
+            
             return new Dictionary<string, object>
             {
-                { "PolyAfterSplit", (null) },
-                { "LeftOverPoly", (null) }
+                { "PolyAfterSplit", (polySplitList) },
+                { "LeftOverPoly", (leftPoly) },
+                { "AreaPlaced", (areaAdded) }
             };
         }
 

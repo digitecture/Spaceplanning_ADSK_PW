@@ -51,6 +51,24 @@ namespace SpacePlanning
         }
 
 
+        // adds a point2d to a provided polygon with a given line id
+        internal static Polygon2d AddPointToPoly(Polygon2d poly, Point2d givenPoint, int lineId = 0)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(poly.Points, 0);
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < poly.Points.Count; i++)
+            {
+                int a = i, b = i + 1;
+                if (i == poly.Points.Count - 1) b = 0;
+                ptList.Add(poly.Points[i]);
+                if (a == lineId)
+                {
+                    ptList.Add(givenPoint);
+                }
+            }
+            return new Polygon2d(ptList, 0);
+        }
 
 
         //arranges depts on site and updates dept data object
@@ -758,6 +776,7 @@ namespace SpacePlanning
 
             if (!ValidateObject.CheckPoly(poly)) return null;
             Polygon2d currentPoly = new Polygon2d(poly.Points);
+            Polygon2d smoothPoly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5),0);
 
             double areaAdded = 0, areaLeftTobeAdded = area- areaAdded;
             int count = 0, maxTry = 100;
@@ -772,19 +791,41 @@ namespace SpacePlanning
                 double maxLength = areaLeftTobeAdded / maxWidth;
                 double fac = 0.75;
                 count += 1;
-                int lineId = PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint);
-                if (currentPoly.Lines[lineId].Length > maxLength)
+                //Point2d ptSmooth = smoothPoly.Points[PointUtility.FindClosestPointIndex(smoothPoly.Points, attractorPoint)];
+                //Point2d ptCurrent = currentPoly.Points[PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint)];
+
+                //int lineIdSmooth = PointUtility.FindClosestPointIndex(smoothPoly.Points, attractorPoint);
+                int lineIdCurrent = PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint);
+                int lineIdPrev = lineIdCurrent - 1;
+                if (lineIdPrev < 0) lineIdPrev = currentPoly.Points.Count - 1;
+                Point2d midPtCurrent = LineUtility.LineMidPoint(currentPoly.Lines[lineIdCurrent]);
+                Point2d midPtPrev = LineUtility.LineMidPoint(currentPoly.Lines[lineIdPrev]);
+                double distCurr = PointUtility.DistanceBetweenPoints(attractorPoint, currentPoly.Points[lineIdCurrent]);
+                double distPrev = PointUtility.DistanceBetweenPoints(attractorPoint, currentPoly.Points[lineIdPrev]);
+
+
+                if (stackOptions)
                 {
-                    double param = maxLength / currentPoly.Lines[lineId].Length;
-                    currentPoly = AddPointToPoly(currentPoly, lineId, param);                    
+                    if (distPrev < distCurr) lineIdCurrent = lineIdPrev;
+                    Point2d projectAttrPt = GraphicsUtility.ProjectedPointOnLine(currentPoly.Lines[lineIdCurrent], attractorPoint);
+                    //currentPoly = AddPointToPoly(currentPoly, projectAttrPt, lineIdCurrent);
+                }
+               
+
+
+
+                if (currentPoly.Lines[lineIdCurrent].Length > maxLength)
+                {
+                    double param = maxLength / currentPoly.Lines[lineIdCurrent].Length;
+                    currentPoly = AddPointToPoly(currentPoly, lineIdCurrent, param);                    
                 }
 
-                maxLength = currentPoly.Lines[lineId].Length;
+                maxLength = currentPoly.Lines[lineIdCurrent].Length;
                 maxWidth = areaLeftTobeAdded / maxLength;
-                double allowedWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineId);
+                double allowedWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineIdCurrent);
                 if (allowedWidth < maxWidth * fac) maxWidth = allowedWidth * fac;
 
-                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, maxWidth, 0);
+                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineIdCurrent, maxWidth, 0);
                 splitPoly = (Polygon2d)splitObj["PolyAfterSplit"];
                 leftPoly = (Polygon2d)splitObj["LeftOverPoly"];
 

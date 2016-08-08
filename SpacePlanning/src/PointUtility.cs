@@ -170,6 +170,37 @@ namespace SpacePlanning
             };
         }
 
+
+        // find the closest point to a point from a point list
+        public static int FindClosestPointIndex(List<Point2d> ptList, Point2d pt)
+        {
+            int index = 0;
+            double minDist = 100000000;
+            for (int i = 0; i < ptList.Count; i++)
+            {
+                Point2d centerPt = ptList[i];
+                double calcDist = PointUtility.DistanceBetweenPoints(centerPt, pt);
+                if (calcDist < minDist)
+                {
+                    minDist = calcDist;
+                    index = i;
+                }
+            }
+            return index;
+        }
+
+        // find the closest point to a point from a group of cells
+        internal static int FindClosestPointIndex(List<Cell> cellList, Point2d pt)
+        {
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < cellList.Count; i++)
+            {
+                if (cellList[i].CellAvailable) ptList.Add(cellList[i].CenterPoint);
+            }
+            return FindClosestPointIndex(ptList, pt);
+        }
+
+
         //returns the point having highest x,y value from a list - using now
         internal static int HighestPointFromList(List<Point2d> ptList)
         {

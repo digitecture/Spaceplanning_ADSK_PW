@@ -457,7 +457,7 @@ namespace SpacePlanning
             }
 
             for (int i = 0; i < poly.Points.Count; i++)
-                if (!GraphicsUtility.PointInsidePolygonTest(siteOutline, poly.Points[i])) poly.Points[i] = sitePts[FindClosestPointIndex(sitePts, poly.Points[i])];
+                if (!GraphicsUtility.PointInsidePolygonTest(siteOutline, poly.Points[i])) poly.Points[i] = sitePts[PointUtility.FindClosestPointIndex(sitePts, poly.Points[i])];
   
           
           Polygon2d cleanPoly = new Polygon2d(poly.Points, 0);
@@ -580,25 +580,6 @@ namespace SpacePlanning
             return ran2D;
         }        
 
-
-        // find the closest point to a point from a point list
-        public static int FindClosestPointIndex(List<Point2d> ptList, Point2d pt)
-        {
-            int index = 0;
-            double minDist = 100000000;
-            for (int i = 0; i < ptList.Count; i++)
-            {
-                Point2d centerPt = ptList[i];
-                double calcDist = PointUtility.DistanceBetweenPoints(centerPt, pt);
-                if (calcDist < minDist)
-                {
-                    minDist = calcDist;
-                    index = i;
-                }
-            }
-            return index;
-        }
-        
 
         //checks all lines of a polyline, if orthogonal or not, if not makes the polyline orthogonal - NEW IMPLEMENTED
         public static Polygon2d CreateOrthoPoly(Polygon2d nonOrthoPoly)

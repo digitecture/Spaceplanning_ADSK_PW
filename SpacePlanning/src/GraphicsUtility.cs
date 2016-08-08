@@ -191,16 +191,7 @@ namespace SpacePlanning
             return cleanLineList;
         }
 
-        // find the closest point to a point from a group of cells
-        internal static int FindClosestPointIndex(List<Cell> cellList, Point2d pt)
-        {
-            List<Point2d> ptList = new List<Point2d>();
-            for (int i = 0; i < cellList.Count; i++)
-            {
-                if (cellList[i].CellAvailable) ptList.Add(cellList[i].CenterPoint);
-            }
-            return PolygonUtility.FindClosestPointIndex(ptList, pt);
-        }
+  
 
 
         // find the centroid of a group of  cells

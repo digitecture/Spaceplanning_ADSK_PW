@@ -33,6 +33,36 @@ namespace SpacePlanning
             return new Line2d(ptStart, ptEnd);
         }
 
+
+        //given a poly, and a lineId, gives the max offset distance it can go inside a poly
+        public static double FindMaxOffsetInPoly(Polygon2d poly, int lineId)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return -1;
+            Point2d midPt = LineMidPoint(poly.Lines[lineId]);
+            Line2d bisectorLine = new Line2d(null);
+            int dir = ValidateObject.CheckLineOrient(poly.Lines[lineId]);
+            if(dir == 0 )// horizontal line
+            {
+                dir = 1;
+                bisectorLine = new Line2d(midPt, 300, dir);
+                List<Point2d> intersectedPt = GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
+                if (intersectedPt.Count > 1)
+                {
+
+                }
+                else if (intersectedPt.Count == 1)
+                {
+
+                }
+                else return -1;
+            }
+            else // vertical line
+            {
+
+            }
+            return -1;
+        }
+
         //returns the midPt of a line
         public static Point2d LineMidPoint(Line2d line)
         {
@@ -125,7 +155,7 @@ namespace SpacePlanning
             return OffsetLinePoint(lineInp, testPoint, dir * distance);
         }
 
-        //offsets an input line by a given distance 
+        //finds the direction of offset for a point to be inside the poly, 1 = positive offset, -1 = negative offsets
         internal static int DirectionForPointInPoly(Line2d lineInp, Polygon2d poly, double distance)
         {
             if (lineInp == null || !ValidateObject.CheckPoly(poly)) return 0;

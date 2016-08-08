@@ -705,7 +705,7 @@ namespace SpacePlanning
 
         //blocks are assigne based on offset distance, used for KPU Dept 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
-        public static Dictionary<string, object> FitOtherDept(Polygon2d poly, List<Polygon2d> polyDepts, List<string> adjacencyList, 
+        public static Dictionary<string, object> FitRegDept(Polygon2d poly, List<Polygon2d> polyDepts, List<string> adjacencyList, 
            List<int> deptIdPlacedList, double area,  int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
         {
 
@@ -725,6 +725,18 @@ namespace SpacePlanning
             if (!ValidateObject.CheckPolyList(polyDepts)) return null;
             Polygon2d currentPoly = new Polygon2d(poly.Points);
 
+            double areaAdded = 0,areaLeftTobeAdded = 0;
+            int count = 0, maxTry = 0;
+
+            List<int> adjIntList = adjacencyList.Select(x => Int32.Parse(x)).ToList();
+            List<Polygon2d> polyAdjacent = new List<Polygon2d>();
+
+            for(int i = 0; i < adjIntList.Count; i++)
+            {
+                for(int j = 0; j < deptIdPlacedList.Count; j++)
+                {
+                }
+            }
 
 
 
@@ -738,7 +750,31 @@ namespace SpacePlanning
         }
 
 
+        //blocks are assigne based on offset distance, used for KPU Dept 
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
+        public static Dictionary<string, object> FitPublicDept(Polygon2d poly, Point2d attractorPoint,
+           double area, int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
+        {
 
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            Polygon2d currentPoly = new Polygon2d(poly.Points);
+
+            double areaAdded = 0, areaLeftTobeAdded = 0;
+            int count = 0, maxTry = 0;
+
+            List<Polygon2d> polyAdjacent = new List<Polygon2d>();
+
+      
+
+
+
+
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (null) },
+                { "LeftOverPoly", (null) }
+            };
+        }
 
 
 

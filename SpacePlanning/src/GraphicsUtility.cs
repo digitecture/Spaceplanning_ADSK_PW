@@ -21,7 +21,7 @@ namespace SpacePlanning
     internal class GraphicsUtility
     {
         #region - Public Methods
-        //checks if a point is inside a polygon or not
+        //checks if a point is inside a polygon or not , returns true if inside, false if outside
         public static bool PointInsidePolygonTest(Polygon2d poly, Point2d testPoint)
         {
             if (!ValidateObject.CheckPoly(poly) || testPoint == null) return false;

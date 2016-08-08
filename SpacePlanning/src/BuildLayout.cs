@@ -784,7 +784,7 @@ namespace SpacePlanning
 
             List<Polygon2d> polySplitList = new List<Polygon2d>();
             Polygon2d splitPoly = new Polygon2d(null), leftPoly = new Polygon2d(null);
-            while(areaAdded < area && count < maxTry)
+            while(areaAdded < area && count < circulationWidth)
             {
                 //double minWidth = areaLeftTobeAdded / 4, maxLength = areaLeftTobeAdded / minWidth, fac = 0.75;
                 double aspRatio = 0.8; // l/w
@@ -796,7 +796,9 @@ namespace SpacePlanning
                 //Point2d ptCurrent = currentPoly.Points[PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint)];
 
                 //int lineIdSmooth = PointUtility.FindClosestPointIndex(smoothPoly.Points, attractorPoint);
+                
                 int lineIdCurrent = PointUtility.FindClosestPointIndex(currentPoly.Points, attractorPoint);
+                ////////
                 int lineIdPrev = lineIdCurrent - 1;
                 if (lineIdPrev < 0) lineIdPrev = currentPoly.Points.Count - 1;
                 Point2d midPtCurrent = LineUtility.LineMidPoint(currentPoly.Lines[lineIdCurrent]);
@@ -811,8 +813,8 @@ namespace SpacePlanning
                     Point2d projectAttrPt = GraphicsUtility.ProjectedPointOnLine(currentPoly.Lines[lineIdCurrent], attractorPoint);
                     //currentPoly = AddPointToPoly(currentPoly, projectAttrPt, lineIdCurrent);
                 }
-               
 
+                ////////
 
 
                 if (currentPoly.Lines[lineIdCurrent].Length > maxLength)
@@ -826,6 +828,10 @@ namespace SpacePlanning
                 double allowedWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineIdCurrent);
                 if (allowedWidth < maxWidth * fac) maxWidth = allowedWidth * fac;
 
+
+                //if (!LineUtility.TestLineInPolyOffset(currentPoly, lineIdCurrent, maxWidth)) maxWidth = maxWidth * 0.75;
+
+                ////////
                 //check lineid previous and next length and calibrate maxWidth based on that
                 int lineIdLast = lineIdCurrent - 1, lineIdNext = lineIdCurrent + 1;
                 if (lineIdLast < 0) lineIdLast = currentPoly.Points.Count - 1;
@@ -836,9 +842,12 @@ namespace SpacePlanning
                 double smaller = 0;
                 if (lenLast < lenNext) smaller = lenLast;
                 else smaller = lenNext;
+                if(lenNext !=0 && lenLast != 0)
+                {
+                    if (maxWidth > smaller) maxWidth = smaller;
 
-                if (maxWidth > smaller) maxWidth = smaller;
-
+                }
+                ////////
 
 
                 Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineIdCurrent, maxWidth, 0);
@@ -862,6 +871,44 @@ namespace SpacePlanning
 
 
 
+        //blocks are assigne based on offset distance, used for KPU Dept 
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
+        public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList, Polygon2d containerPoly
+           , int designSeed = 5, int circulationWidth = 3)
+        {
+
+            if (!ValidateObject.CheckPolyList(polyList)) return null;
+            List<Polygon2d> polysToVerify = new List<Polygon2d>();
+
+            polysToVerify.Add(containerPoly);
+            List<Polygon2d> polyListNew = new List<Polygon2d>();
+            List<List<Polygon2d>> polyCorridors = new List<List<Polygon2d>>();
+            for(int i=0;i<polyList.Count;i++)
+            {
+                List<int> lineIdList = new List<int>();
+                for ( int j = 0; j < polysToVerify.Count; j++)
+                {
+                    lineIdList.AddRange(PolygonUtility.FindNotAdjacentPolyToPolyEdges(polyList[i], polysToVerify[j], 0));
+                }
+
+                Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLineList(polyList[i], lineIdList, circulationWidth, 0);
+                //"PolyAfterSplit", "LeftOverPoly"
+                List<Polygon2d> polySplits = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                Polygon2d leftOverPoly = (Polygon2d)splitObj["LeftOverPoly"];
+                polysToVerify.AddRange(polySplits);
+                polyCorridors.Add(polySplits);
+                polyListNew.Add(leftOverPoly);
+            }
+
+           
+
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polyCorridors) },
+                { "LeftOverPoly", (polyListNew) },
+                { "AreaPlaced", (null) }
+            };
+        }
 
 
 

@@ -182,6 +182,20 @@ namespace SpacePlanning
             return OffsetLinePoint(lineInp, testPoint, dir * distance);
         }
 
+        //check if a line of a poly if offsetted by a distance, falls inside the poly or not
+        public static bool TestLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return false;
+            Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], poly.Lines[lineId].StartPoint, poly, offsetDistance);
+            Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], poly.Lines[lineId].EndPoint, poly, offsetDistance);
+
+            bool checkStartPt = GraphicsUtility.PointInsidePolygonTest(poly, startOffsetPt);
+            bool checkEndPt = GraphicsUtility.PointInsidePolygonTest(poly, endOffsetPt);
+
+            if (checkStartPt && checkEndPt) return true;
+            else return false;
+        }
+
         //finds the direction of offset for a point to be inside the poly, 1 = positive offset, -1 = negative offsets
         internal static int DirectionForPointInPoly(Line2d lineInp, Polygon2d poly, double distance)
         {

@@ -776,7 +776,8 @@ namespace SpacePlanning
 
             if (!ValidateObject.CheckPoly(poly)) return null;
             Polygon2d currentPoly = new Polygon2d(poly.Points);
-            Polygon2d smoothPoly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5),0);
+            Polygon2d smoothPoly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 20),0);
+            //currentPoly = smoothPoly;
 
             double areaAdded = 0, areaLeftTobeAdded = area- areaAdded;
             int count = 0, maxTry = 100;
@@ -824,6 +825,21 @@ namespace SpacePlanning
                 maxWidth = areaLeftTobeAdded / maxLength;
                 double allowedWidth = LineUtility.FindMaxOffsetInPoly(currentPoly, lineIdCurrent);
                 if (allowedWidth < maxWidth * fac) maxWidth = allowedWidth * fac;
+
+                //check lineid previous and next length and calibrate maxWidth based on that
+                int lineIdLast = lineIdCurrent - 1, lineIdNext = lineIdCurrent + 1;
+                if (lineIdLast < 0) lineIdLast = currentPoly.Points.Count - 1;
+                if (lineIdNext > currentPoly.Points.Count - 1) lineIdNext = 0;
+                double lenLast = currentPoly.Lines[lineIdLast].Length;
+                double lenNext = currentPoly.Lines[lineIdNext].Length;
+
+                double smaller = 0;
+                if (lenLast < lenNext) smaller = lenLast;
+                else smaller = lenNext;
+
+                if (maxWidth > smaller) maxWidth = smaller;
+
+
 
                 Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineIdCurrent, maxWidth, 0);
                 splitPoly = (Polygon2d)splitObj["PolyAfterSplit"];

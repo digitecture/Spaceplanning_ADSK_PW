@@ -351,7 +351,7 @@ namespace SpacePlanning
 
         //adds a point to a line of a poly, such that offsetting places offset line inside the poly
         [MultiReturn(new[] { "PolyAddedPts", "ProblemPoint", "IsAdded", "PointAdded", "Trials", "FinalRatio", "ProblemLine", "ProblemPtsList", "FalseLineList" })]
-        internal static Dictionary<string, object> AddPointToFitPoly(Polygon2d poly, Polygon2d containerPoly, double distance = 16, double area = 0, double thresDistance = 10, double recompute = 5)
+        public static Dictionary<string, object> AddPointToFitPoly(Polygon2d poly, Polygon2d containerPoly, double distance = 16, double area = 0, double thresDistance = 10, double recompute = 5)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
             if (distance < 1) return null;
@@ -376,7 +376,7 @@ namespace SpacePlanning
                 polyNewPoints.Add(poly.Points[a]);
                 if (indicesFalse[i] > -1) falseLines.Add(poly.Lines[i]);
                 if (poly.Lines[i].Length > thresDistance &&
-                    indicesFalse[i] > -1 && pointsFalse[i] != null && pointsFalse[i].Count == 1 && !added && LayoutUtility.CheckLineGetsExternalWall(poly.Lines[i], containerPoly))
+                    indicesFalse[i] > -1 && pointsFalse[i] != null && pointsFalse[i].Count == 1 && !added && CheckLineGetsExternalWall(poly.Lines[i], containerPoly))
                 {
                     probPointList.AddRange(pointsFalse[i]);
                     probPt = pointsFalse[i][0];

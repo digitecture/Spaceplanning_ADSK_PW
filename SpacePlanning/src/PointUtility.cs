@@ -179,7 +179,7 @@ namespace SpacePlanning
             for (int i = 0; i < ptList.Count; i++)
             {
                 Point2d centerPt = ptList[i];
-                double calcDist = PointUtility.DistanceBetweenPoints(centerPt, pt);
+                double calcDist = DistanceBetweenPoints(centerPt, pt);
                 if (calcDist < minDist)
                 {
                     minDist = calcDist;
@@ -189,6 +189,15 @@ namespace SpacePlanning
             return index;
         }
 
+
+
+        // find the closest point to a point from a point list
+        public static int FindClosestLineFromPoint(List<Line2d> lineList, Point2d pt)
+        {
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < lineList.Count; i++) ptList.Add(LineUtility.LineMidPoint(lineList[i]));
+            return FindClosestPointIndex(ptList, pt);
+        }
 
         // find the furthest point to a point from a point list
         public static int FindFarPointIndex(List<Point2d> ptList, Point2d pt)

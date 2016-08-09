@@ -34,6 +34,16 @@ namespace SpacePlanning
         }
 
 
+        //compare if twow lines are same or not
+        public static bool CheckIfTwoLinesSame(Line2d lineA, Line2d lineB)
+        {
+            if (lineA == null && lineB == null) return false;
+            Point2d startA = lineA.StartPoint, endA = lineA.EndPoint;
+            Point2d startB = lineB.StartPoint, endB = lineB.EndPoint;
+            if (lineA.Length == lineB.Length && startA.Compare(startB) && endA.Compare(endB)) return true; 
+            else return false;
+      
+        }
         //checks if two polys overlap, true if overlap, false if no overlap
         public static bool CheckPolyPolyOverlap(Polygon2d polyA, Polygon2d polyB)
         {

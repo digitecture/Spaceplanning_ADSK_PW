@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using stuffer;
 using Autodesk.DesignScript.Runtime;
-using System.Diagnostics;
+
 
 namespace SpacePlanning
 {
@@ -12,10 +12,10 @@ namespace SpacePlanning
         #region - Private Methods
         // Given three colinear points p, q, r, the function checks if
         // point q lies on line segment 'pr'
-        internal static bool CheckOnSegment(Point2d p, Point2d q, Point2d r)
+        internal static bool CheckOnSegment(Point2d p, Point2d q, Point2d r, double eps = 0.02)
         {
-            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) &&
-                q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y)) return true;
+            if (q.X <= Math.Max(p.X, r.X) + eps && q.X >= Math.Min(p.X, r.X) - eps &&
+                q.Y <= Math.Max(p.Y, r.Y) + eps && q.Y >= Math.Min(p.Y, r.Y) - eps)  return true;
             return false;
         }
 

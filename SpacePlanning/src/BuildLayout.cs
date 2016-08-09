@@ -838,7 +838,7 @@ namespace SpacePlanning
         //adds circulation polygons to a list of polygons and a container polygon
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced"})]
         public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList, Polygon2d containerPoly
-           , int designSeed = 5, int circulationWidth = 3)
+           , int designSeed = 2, int circulationWidth = 3)
         {
 
             if (!ValidateObject.CheckPolyList(polyList)) return null;
@@ -849,6 +849,7 @@ namespace SpacePlanning
             List<List<Polygon2d>> polyCorridors = new List<List<Polygon2d>>();
             for(int i=0;i<polyList.Count;i++)
             {
+                if (i > designSeed) break;
                 List<int> lineIdList = new List<int>();
                 for ( int j = 0; j < polysToVerify.Count; j++)
                 {

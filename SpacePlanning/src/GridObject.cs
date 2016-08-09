@@ -471,7 +471,7 @@ namespace SpacePlanning
         [MultiReturn(new[] { "BuildingOutline",  "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         public static Dictionary<string, object> FormBuildingOutline(Polygon2d orthoSiteOutline, 
             List<Cell> cellList, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints, [DefaultArgument("null")]List<double> weightList,
-     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10)
+     double siteCoverage = 100, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10)
         {
             bool highIteration = false;
             if (highIteration == true) FORMCOUNT = 5;
@@ -526,7 +526,7 @@ namespace SpacePlanning
 
         [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired","SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         internal static Dictionary<string, object> BuildOutline(Polygon2d orthoSiteOutline, List<Cell> cellListInp, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints,
-             [DefaultArgument("null")]List<double>weightList, double siteCoverage = 0.5, int iteration = 100, 
+             [DefaultArgument("null")]List<double>weightList, double siteCoverage = 100, int iteration = 100, 
             bool removeNotch = false, double minNotchDistance  = 10,int dummy=100, bool cellRefine = false)
         {
            
@@ -542,7 +542,7 @@ namespace SpacePlanning
             double areaRequired = 0;
             int count = 0, dir = 0, prevDir = 0, countInner =0, countCircleMode = 0, countExtremeMode = 0, extremePointIndex = 0;
             double areaSite = PolygonUtility.AreaPolygon(orthoSiteOutline), areaPlaced = 0;
-            if (deptData == null)
+            if (deptData == null || siteCoverage != 100 )
             {
                 if (siteCoverage < eps) siteCoverage = 2 * eps;
                 if (siteCoverage > 0.8) siteCoverage = 0.8;

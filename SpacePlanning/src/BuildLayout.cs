@@ -453,25 +453,20 @@ namespace SpacePlanning
         [MultiReturn(new[] { "DeptPoly", "LeftOverPoly", "AllPolys", "AreaAdded", "AllNodes" })]
         internal static Dictionary<string, object> AssignBlocksBasedOnRatio(double deptAreaTarget, List<Polygon2d> polyList)
         {
-            if (!ValidateObject.CheckPolyList(polyList))
-            {
-                //Trace.WriteLine("Poly given is null"); 
-                return null;
-            }
+            if (!ValidateObject.CheckPolyList(polyList)) return null;
+
             int count = 0, maxTry = 10;
-            //for (int i = 0; i < polyList.Count; i++) areaAvailable += PolygonUtility.AreaPolygon(polyList[i]);
             Queue<Polygon2d> polyAvailable = new Queue<Polygon2d>();
             List<Polygon2d> polysToDept = new List<Polygon2d>(), leftOverPoly = new List<Polygon2d>();
             for (int i = 0; i < polyList.Count; i++) polyAvailable.Enqueue(polyList[i]);
-            //double deptAreaTarget = areaFactor * areaAvailable, areaAssigned = 0;
-            //deptAreaTarget = areaFactor;
-            //double deptAreaTarget = deptItem.DeptAreaNeeded,
+         
             double areaAssigned = 0, ratio = 0.3;
             int dir = 0;
             double areaLeftTobeAssigned = deptAreaTarget - areaAssigned;
             while (areaAssigned < deptAreaTarget && polyAvailable.Count > 0)
             {
                 Polygon2d currentPoly = polyAvailable.Dequeue();
+                //split the poly if area is more than requirement
                 if(PolygonUtility.AreaPolygon(currentPoly) > areaLeftTobeAssigned)
                 {
                     Dictionary<string,object> splitObj = SplitObject.SplitByRatio(currentPoly, ratio, dir);
@@ -855,15 +850,7 @@ namespace SpacePlanning
                 for (int j = 0; j < polysToVerify.Count; j++) lineList.AddRange(polysToVerify[j].Lines);
                 lineIdList = PolygonUtility.FindNotAdjacentPolyToLinesEdges(polyList[i], lineList, 0, circulationWidth);
 
-                    /*
-                    for ( int j = 0; j < polysToVerify.Count; j++)
-                    {
-                        lineIdList.AddRange(PolygonUtility.FindNotAdjacentPolyToPolyEdges(polyList[i], polysToVerify[j], 0,circulationWidth+1));
-                    }
-                    */
-
                 Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLineList(polyList[i], lineIdList, circulationWidth, 0);
-                //"PolyAfterSplit", "LeftOverPoly"
                 List<Polygon2d> polySplits = (List<Polygon2d>)splitObj["PolyAfterSplit"];
                 Polygon2d leftOverPoly = (Polygon2d)splitObj["LeftOverPoly"];
                 polysToVerify.AddRange(polySplits);
@@ -1115,6 +1102,7 @@ namespace SpacePlanning
 
                         Point2d lowestPt = ptLists[PointUtility.LowestPointFromList(ptLists)];
                         Point2d ptToSort = lowestPt;
+                        //Point2d ptToSort = center;
                         double arealeft = 0;
                         for (int j = 0; j < leftOverPoly.Count; j++) { arealeft += PolygonUtility.AreaPolygon(leftOverPoly[j]); }
                         if (stackOptionsProg)
@@ -1124,27 +1112,18 @@ namespace SpacePlanning
                         }
                         acceptableWidth = Math.Sqrt(arealeft)/DIVISION;
                         polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
-                        /*
-                        for (int j = 0; j < leftOverPoly.Count; j++)
-                        {
-                            Dictionary<string, object> wholsesomeObj = PolygonUtility.MakeWholesomeBlockInPoly(leftOverPoly[j]);
-                            List<Polygon2d> polysWhole = (List<Polygon2d>)wholsesomeObj["PolysAfterSplit"];
-                            polySubDivs.Add(polysWhole);
-                        }
-                        */
+                  
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
                         bool checkPoly2 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[1], 0.5);
                         while (polySubDivs == null || polySubDivs.Count == 0 || !checkPoly1 || !checkPoly2 && count < maxTry)
                         {
                             ratio -= 0.01;
                             if (ratio < 0) ratio = 0.6; break;
-                            //Trace.WriteLine("Ratio problem faced , ratio reduced to : " + ratio);
                             polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
                             count += 1;
                         }
                         
                         //SORT THE POLYSUBDIVS
-                        //Point2d center = PolygonUtility.CentroidOfPolyList(leftOverPoly);
                         List<int> sortedPolyIndices = PolygonUtility.SortPolygonsFromAPoint(polySubDivs[0], ptToSort);
                         List<Polygon2d> sortedPolySubDivs = new List<Polygon2d>();
                         for(int k = 0; k < sortedPolyIndices.Count; k++) { sortedPolySubDivs.Add(polySubDivs[0][sortedPolyIndices[k]]); }
@@ -1162,11 +1141,7 @@ namespace SpacePlanning
                     //if(noKpuMode) areaFactor = BasicUtility.RandomBetweenNumbers(new Random(iteration), 0.6, 0.3); // when there is no kpu at all
 
                     Dictionary<string, object> assignedByRatioObj = AssignBlocksBasedOnRatio(areaNeeded, leftOverPoly);
-                    if (assignedByRatioObj == null)
-                    {
-                        //Trace.WriteLine("Null it is " + i);
-                        continue;
-                    }
+                    if (assignedByRatioObj == null) continue;
                     Trace.WriteLine("Assignment worked " + i);
                     List<Polygon2d> everyDeptPoly = (List<Polygon2d>)assignedByRatioObj["DeptPoly"];
                     leftOverPoly = (List<Polygon2d>)assignedByRatioObj["LeftOverPoly"];

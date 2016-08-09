@@ -755,7 +755,7 @@ namespace SpacePlanning
 
 
         //find if two polys are adjacent, and if yes, then returns the common edge between them
-        public static List<int>FindNotAdjacentPolyToPolyEdges(Polygon2d polyA, Polygon2d polyB, double eps = 0)
+        public static List<int>FindNotAdjacentPolyToPolyEdges(Polygon2d polyA, Polygon2d polyB, double eps = 0, double minDim =0)
         {
             if (!ValidateObject.CheckPoly(polyA) || !ValidateObject.CheckPoly(polyB)) return null;
             List<int> lineIdList = new List<int>();
@@ -767,6 +767,7 @@ namespace SpacePlanning
                 for (int j = 0; j < polyB.Points.Count; j++)
                 {
                     Line2d lineB = polyB.Lines[j];
+                    if (lineB.Length < minDim) continue;
                     bool check = GraphicsUtility.LineAdjacencyCheck(lineA, lineB, eps);
                     if (check) { isAdjacent = true; break; }      
 
@@ -776,7 +777,29 @@ namespace SpacePlanning
             return lineIdList;
         }
 
+        //find if two polys are adjacent, and if yes, then returns the common edge between them
+        public static List<int> FindNotAdjacentPolyToLinesEdges(Polygon2d polyA, List<Line2d> lineList, double eps = 0, double minDim = 0)
+        {
+            if (!ValidateObject.CheckPoly(polyA)) return null;
+            if (lineList == null) return null;
+            List<int> lineIdList = new List<int>();
+            bool isAdjacent = false;
+            for (int i = 0; i < polyA.Points.Count; i++)
+            {
+                Line2d lineA = polyA.Lines[i];
+                isAdjacent = false;
+                for (int j = 0; j < lineList.Count; j++)
+                {
+                    Line2d lineB = lineList[j];
+                    if (lineB.Length < minDim) continue;
+                    bool check = GraphicsUtility.LineAdjacencyCheck(lineA, lineB, eps);
+                    if (check) { isAdjacent = true; break; }
 
+                }
+                if (!isAdjacent) lineIdList.Add(i);
+            }
+            return lineIdList;
+        }
 
 
         //find if two polys are adjacent, and if yes, then returns the common edge between them

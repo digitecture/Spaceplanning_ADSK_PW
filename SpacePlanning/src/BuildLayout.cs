@@ -847,22 +847,29 @@ namespace SpacePlanning
             polysToVerify.Add(containerPoly);
             List<Polygon2d> polyListNew = new List<Polygon2d>();
             List<List<Polygon2d>> polyCorridors = new List<List<Polygon2d>>();
-            for(int i=0;i<polyList.Count;i++)
+            List<int> lineIdList = new List<int>();
+            for (int i=0;i<polyList.Count;i++)
             {
                 if (i > designSeed) break;
-                List<int> lineIdList = new List<int>();
-                for ( int j = 0; j < polysToVerify.Count; j++)
-                {
-                    lineIdList.AddRange(PolygonUtility.FindNotAdjacentPolyToPolyEdges(polyList[i], polysToVerify[j], 0));
-                }
+                List<Line2d> lineList = new List<Line2d>();
+                for (int j = 0; j < polysToVerify.Count; j++) lineList.AddRange(polysToVerify[j].Lines);
+                lineIdList = PolygonUtility.FindNotAdjacentPolyToLinesEdges(polyList[i], lineList, 0, circulationWidth);
+
+                    /*
+                    for ( int j = 0; j < polysToVerify.Count; j++)
+                    {
+                        lineIdList.AddRange(PolygonUtility.FindNotAdjacentPolyToPolyEdges(polyList[i], polysToVerify[j], 0,circulationWidth+1));
+                    }
+                    */
 
                 Dictionary<string,object> splitObj = SplitObject.SplitByOffsetFromLineList(polyList[i], lineIdList, circulationWidth, 0);
                 //"PolyAfterSplit", "LeftOverPoly"
                 List<Polygon2d> polySplits = (List<Polygon2d>)splitObj["PolyAfterSplit"];
                 Polygon2d leftOverPoly = (Polygon2d)splitObj["LeftOverPoly"];
-                //polysToVerify.AddRange(polySplits);
+                polysToVerify.AddRange(polySplits);
                 polyCorridors.Add(polySplits);
                 polyListNew.Add(leftOverPoly);
+                lineIdList.Clear();
             }
 
            

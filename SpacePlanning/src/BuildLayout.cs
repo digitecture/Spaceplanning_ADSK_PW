@@ -835,6 +835,14 @@ namespace SpacePlanning
         public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList, Polygon2d containerPoly
            , int designSeed = 2, int circulationWidth = 3)
         {
+            containerPoly = new Polygon2d(containerPoly.Points);
+            List<Polygon2d> polyCleanList = new List<Polygon2d>();
+            for(int i = 0; i < polyList.Count; i++)
+            {
+                Polygon2d polyC = new Polygon2d(polyList[i].Points);
+                polyCleanList.Add(polyC);
+            }
+            polyList = polyCleanList;
 
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             List<Polygon2d> polysToVerify = new List<Polygon2d>();

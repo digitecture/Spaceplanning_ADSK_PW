@@ -18,7 +18,7 @@ using System.Diagnostics;
 
 namespace SpacePlanning
 {
-    internal class GraphicsUtility
+    public class GraphicsUtility
     {
         #region - Public Methods
         //checks if a point is inside a polygon or not , returns true if inside, false if outside
@@ -53,7 +53,7 @@ namespace SpacePlanning
             return lineJoined;
         }
 
-        //checks if two lines are collinear or not 
+        //checks if two lines are collinear or not returns true if collinear, else false 
         public static bool LineAdjacencyCheck(Line2d lineA, Line2d lineB, double eps = 0)
         {
             Point2d pA = lineA.StartPoint, qA = lineA.EndPoint;

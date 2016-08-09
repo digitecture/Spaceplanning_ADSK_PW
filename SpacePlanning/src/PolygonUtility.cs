@@ -758,24 +758,28 @@ namespace SpacePlanning
         public static List<int>FindNotAdjacentPolyToPolyEdges(Polygon2d polyA, Polygon2d polyB, double eps = 0)
         {
             if (!ValidateObject.CheckPoly(polyA) || !ValidateObject.CheckPoly(polyB)) return null;
-            Polygon2d polyAReg = new Polygon2d(polyA.Points, 0);
-            Polygon2d polyBReg = new Polygon2d(polyB.Points, 0);
+            Polygon2d polyAReg = new Polygon2d(polyA.Points);
+            Polygon2d polyBReg = new Polygon2d(polyB.Points);
             List<int> lineIdList = new List<int>();
             bool isAdjacent = false;
             for (int i = 0; i < polyAReg.Points.Count; i++)
             {
-                int a = i + 1;
-                if (i == polyAReg.Points.Count - 1) a = 0;
-                Line2d lineA = new Line2d(polyAReg.Points[i], polyAReg.Points[a]);
+                //int a = i + 1;
+                //if (i == polyAReg.Points.Count - 1) a = 0;
+                //Line2d lineA = new Line2d(polyAReg.Points[i], polyAReg.Points[a]);
+                Line2d lineA = polyAReg.Lines[i];
+                isAdjacent = false;
                 for (int j = 0; j < polyBReg.Points.Count; j++)
                 {
-                    int b = j + 1;
-                    if (j == polyBReg.Points.Count - 1) b = 0;
-                    Line2d lineB = new Line2d(polyBReg.Points[j], polyBReg.Points[b]);
-                    if (GraphicsUtility.LineAdjacencyCheck(lineA, lineB, eps)) { isAdjacent = true; break; }         
+                    //int b = j + 1;
+                    //if (j == polyBReg.Points.Count - 1) b = 0;
+                    //Line2d lineB = new Line2d(polyBReg.Points[j], polyBReg.Points[b]);
+                    Line2d lineB = polyBReg.Lines[j];
+                    bool check = GraphicsUtility.LineAdjacencyCheck(lineA, lineB, eps);
+                    if (check) { isAdjacent = true; break; }      
 
                 }
-                if (isAdjacent) lineIdList.Add(i);
+                if (!isAdjacent) lineIdList.Add(i);
             }
             return lineIdList;
         }

@@ -737,10 +737,14 @@ namespace SpacePlanning
             if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
 
             Stack<int> lineIdStack = new Stack<int>();
+            Queue<int> lineIdQueue = new Queue<int>();
             for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
-            while (areaAdded < area && lineIdStack.Count > 0 && countMain < designSeed)
+            for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
+
+            while (areaAdded < area && lineIdQueue.Count > 0 && countMain < designSeed)
             {
-                lineId = lineIdStack.Pop();
+                //lineId = lineIdStack.Pop();
+                lineId = lineIdQueue.Dequeue();
                 countMain += 1;
                 bool error = false;
                 double maxLength = areaLeftToBeAdded / kpuDepth;
@@ -752,7 +756,10 @@ namespace SpacePlanning
                     currentPoly = AddPointToPoly(currentPoly, lineId, param);
                     lineIdStack = new Stack<int>();
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
-                    lineId = lineIdStack.Pop();
+                    for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
+
+                   // lineId = lineIdStack.Pop();
+                    lineId = lineIdQueue.Dequeue();
                 }
 
                 bool checkOffset = LineUtility.TestLineInPolyOffset(currentPoly, lineId, kpuDepth);
@@ -768,11 +775,13 @@ namespace SpacePlanning
                         lineIdStack = new Stack<int>();
                         currentPoly = tempPoly;
                         for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
-                        lineId = lineIdStack.Pop();
+                        for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
+                        lineId = lineIdQueue.Dequeue();
+                        //lineId = lineIdStack.Pop();
                     }
                   
                 }
-                if (!checkOffset) continue;
+                if (!checkOffset || currentPoly.Lines[lineId].Length<= kpuDepth) continue;
 
 
                 Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);

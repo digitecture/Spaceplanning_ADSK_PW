@@ -39,6 +39,8 @@ namespace SpacePlanning
         private string _deptId;
         private List<string> _deptAdj = new List<string>();
 
+        private List<Polygon2d> _deptCirculatonPoly;
+
 
         #region - internal constructor
         internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions, string deptId, List<string> deptAdjacency)
@@ -69,6 +71,8 @@ namespace SpacePlanning
 
             _deptId = deptId;
             _deptAdj = deptAdjacency;
+
+            _deptCirculatonPoly = new List<Polygon2d>();
         }
 
         internal DeptData(DeptData other)
@@ -100,6 +104,7 @@ namespace SpacePlanning
 
             _deptId = other.DeptId;
             _deptAdj = other.DeptAdjacencyProvided;
+            _deptCirculatonPoly = other.DeptCirculationPoly;
 
             if (other.PolyAssignedToDept != null && other.PolyAssignedToDept.Count > 0) _polyDepts = other.PolyAssignedToDept;
             else _polyDepts = null;
@@ -118,6 +123,15 @@ namespace SpacePlanning
             set { _deptAreaProportion = value; }
         }
 
+
+        /// <summary>
+        /// Required area proportion for each department on site.
+        /// </summary>
+        public List<Polygon2d> DeptCirculationPoly
+        {
+            get { return _deptCirculatonPoly; }
+            set { _deptCirculatonPoly = value; }
+        }
         /// <summary>
         /// Department Id.
         /// </summary>

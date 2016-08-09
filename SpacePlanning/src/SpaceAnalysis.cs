@@ -280,6 +280,96 @@ namespace SpacePlanning
             return colorChanged;
         }
 
+
+        //Provides information related to program data
+        /// <summary>
+        /// Visualizes departments and programs on site as colored poly surfaces.
+        /// </summary>
+        /// <param name="deptDataInp"> List of Department data object.</param>
+        /// <param name="height">Height of the surfaces.</param>
+        /// <param name="colorScheme">Integer value to toggle color scheme of the visualization.</param>
+        /// <param name="colorProgramSeparate">Color each program separetly.</param>
+        /// <param name="opacity">Opacity of the colored surfaces.</param>
+        /// <returns name="DisplayGeomList">Colored surfaces representing programs and departments.</returns>
+        /// <search>
+        /// visualize department and programs,color surfaces
+        /// </search>        
+        [MultiReturn(new[] { "DisplayGeomList", "DisplayPolyList" })]
+        public static Dictionary<string, object> VisualizeDepartmentCirculation(List<DeptData> deptDataInp, double height = 0,
+            int colorScheme = 0, int opacity = 10)
+        {
+            int transparency = 255;
+            double heightPlan = 0 + height;
+            List<DeptData> deptData = deptDataInp;
+            deptDataInp = deptData.Select(x => new DeptData(x)).ToList(); // example of deep copy
+
+            if (transparency < 0 || transparency > 255) transparency = 255;
+
+            if (deptDataInp == null) return null;
+            List<List<Polygon2d>> polyProgsList = new List<List<Polygon2d>>();
+            List<List<Polygon2d>> polyFlattened = new List<List<Polygon2d>>();
+            for (int i = 0; i < deptDataInp.Count; i++)
+            {
+                if (deptDataInp[i].DeptCirculationPoly != null)
+                {
+                    polyProgsList.Add(deptDataInp[i].DeptCirculationPoly);
+                    polyFlattened.Add(deptDataInp[i].DeptCirculationPoly);
+                }
+            }
+            bool kpuPlaced = false;
+            List<List<Surface>> srfListAll = new List<List<Surface>>();
+            List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
+            for (int i = 0; i < polyProgsList.Count; i++)
+            {
+                int numDeptFloor = deptDataInp[i].NumDeptPerFloor;
+                List<Polygon2d> polyProgs = polyProgsList[i];
+                int indexHeight = deptDataInp[i].DeptFloorLevel;
+                heightPlan = deptDataInp[i].FloorHeightList[indexHeight] + height;
+                //heightPlan = 100;
+                int index = i + 1;
+                Color col = Color.ByARGB(transparency, 119, 179, 0); // light green
+                DeptData deptItem = deptData[i];
+        
+                List<Surface> srfList = new List<Surface>();
+                List<Display.Display> displayList = new List<Display.Display>();
+                for (int j = 0; j < polyProgs.Count; j++)
+                {
+                    Polygon2d polyReduced = new Polygon2d(polyProgs[j].Points);
+                    List<Point2d> ptList = polyReduced.Points;
+                    List<Point> ptNewList = new List<Point>();
+                    for (int k = 0; k < ptList.Count; k++) ptNewList.Add(Point.ByCoordinates(ptList[k].X, ptList[k].Y));
+                    Surface srf;
+                    try { srf = Surface.ByPerimeterPoints(ptNewList); }
+                    catch { continue; }
+
+                    Geometry gm = srf.Translate(0, 0, heightPlan);
+                    Display.Display dis = Display.Display.ByGeometryColor(gm, col);
+                    displayList.Add(dis);
+                    srf.Dispose();
+                    ptNewList.Clear();
+                }
+                displayListAll.Add(displayList);
+            }
+
+            List<List<Polygon>> polyList = new List<List<Polygon>>();
+            for (int i = 0; i < polyFlattened.Count; i++)
+            {
+                List<Polygon> polyFound = new List<Polygon>();
+                for (int j = 0; j < polyFlattened[i].Count; j++)
+                {
+                    polyFound.Add(DynamoGeometry.PolygonByPolygon2d(polyFlattened[i][j], height));
+                }
+                polyList.Add(polyFound);
+            }
+
+            return new Dictionary<string, object>
+            {
+                { "DisplayGeomList", (displayListAll) },
+                { "DisplayPolyList", (polyList) }
+            };
+
+        }
+
         //Provides information related to program data
         /// <summary>
         /// Visualizes departments and programs on site as colored poly surfaces.

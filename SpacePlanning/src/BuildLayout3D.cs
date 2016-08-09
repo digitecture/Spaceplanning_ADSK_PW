@@ -109,7 +109,7 @@ namespace SpacePlanning
         /// DeptData object, department arrangement on site
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 5, bool noExternalWall = false,
+        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3, bool noExternalWall = false,
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15)
         {
             //if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
@@ -123,14 +123,15 @@ namespace SpacePlanning
             Random ran = new Random(designSeed);
             bool stackOptionsDept = deptData[0].StackingOptions;
             bool stackOptionsProg = deptData[0].ProgramsInDept[0].StackingOptions;
+            List<double> kpuWidthList = new List<double>() { 10 };
             while (deptPlaced == false && count < BuildLayout.DEPTCOUNT)//MAXCOUNT
             {
                 double parameter = BasicUtility.RandomBetweenNumbers(ran, 0.9, 0.5);
                 if (!stackOptionsDept) parameter = 0;
                 //parameter = 0;
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
-                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
-                // deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, kpuDepthList, kpuWidthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
+                deptArrangement = BuildLayout.DeptPlacerNew(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
+                //deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, kpuDepthList, kpuWidthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];

@@ -56,6 +56,7 @@ namespace SpacePlanning
         //checks if two lines are collinear or not returns true if collinear, else false 
         public static bool LineAdjacencyCheck(Line2d lineA, Line2d lineB, double eps = 0)
         {
+            if (lineA == null || lineB == null) return false;
             Point2d pA = lineA.StartPoint, qA = lineA.EndPoint;
             Point2d pB = lineB.StartPoint, qB = lineB.EndPoint;
 

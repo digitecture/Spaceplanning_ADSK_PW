@@ -353,8 +353,14 @@ namespace SpacePlanning
             for(int i = 0; i < lineIdList.Count; i++)
             {
                 Dictionary<string, object> offsetPolyObj = SplitByOffsetFromLine(currentPoly, lineIdList[i], distance, minDist);
-                polySplits.Add((Polygon2d)offsetPolyObj["PolyAfterSplit"]);
-                currentPoly = (Polygon2d)offsetPolyObj["LeftOverPoly"];
+                Polygon2d polyFound = (Polygon2d)offsetPolyObj["PolyAfterSplit"];
+                double area = PolygonUtility.AreaPolygon(polyFound);
+                if(area > 3)
+                {
+                    polySplits.Add(polyFound);
+                    currentPoly = (Polygon2d)offsetPolyObj["LeftOverPoly"];
+                }
+            
             }       
 
             return new Dictionary<string, object>

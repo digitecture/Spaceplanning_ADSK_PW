@@ -802,6 +802,22 @@ namespace SpacePlanning
         }
 
 
+        //finds if a line is adjacent to any of the lines in the given poly, returns true ifadjacent, else false
+        public static bool FindAdjacentPolyToALines(Polygon2d polyA, Line2d line, double eps = 0, double minDim = 0)
+        {
+            if (!ValidateObject.CheckPoly(polyA)) return false;
+            if (line == null) return false;
+            List<int> lineIdList = new List<int>();
+            for (int i = 0; i < polyA.Points.Count; i++)
+            {
+                Line2d lineA = polyA.Lines[i];          
+                bool isAdjacent = GraphicsUtility.LineAdjacencyCheck(lineA, line, eps);
+                if (isAdjacent) return true;
+            }
+            return false;
+        }
+
+
         //find if two polys are adjacent, and if yes, then returns the common edge between them
         [MultiReturn(new[] { "Neighbour", "SharedEdge" })]
         internal static Dictionary<string, object> FindPolyAdjacentEdgeEdit(Polygon2d polyA, Polygon2d polyB, double eps = 0)

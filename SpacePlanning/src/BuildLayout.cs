@@ -782,6 +782,7 @@ namespace SpacePlanning
                   
                 }
                 if (!checkOffset || currentPoly.Lines[lineId].Length<= kpuDepth) continue;
+                if (!PolygonUtility.FindAdjacentPolyToALines(poly, currentPoly.Lines[lineId])) continue;
 
 
                 Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);

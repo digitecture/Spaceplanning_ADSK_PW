@@ -54,7 +54,7 @@ namespace SpacePlanning
             _CellsAssigned = new List<Cell>();
             _gridX = dimX;
             _gridY = dimY;
-            _deptType = CalcDepartmentType();
+            _deptType = CalcDepartmentTypePublic();
             _polyDepts = null;
             _deptAreaProportion = 0;
             _deptAreaProportionAchieved = 0;
@@ -367,6 +367,15 @@ namespace SpacePlanning
                 if (_progDataList[i].ProgramType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || _progDataList[i].ProgramType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) count += 1;
             int perc = count / _progDataList.Count;
             if (perc > 0.50) return BuildLayout.KPU.ToUpper();
+            else return BuildLayout.REG.ToUpper();
+        }
+
+
+        internal string CalcDepartmentTypePublic()
+        {
+            if (_progDataList == null) return "";
+            if (_progDataList[0].ProgramType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || _progDataList[0].ProgramType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) return BuildLayout.KPU.ToUpper();
+            else if (_progDataList[0].ProgramType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 || _progDataList[0].ProgramType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1) return BuildLayout.PUBLIC.ToUpper();
             else return BuildLayout.REG.ToUpper();
         }
 

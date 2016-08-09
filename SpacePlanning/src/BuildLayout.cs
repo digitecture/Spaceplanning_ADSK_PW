@@ -24,6 +24,7 @@ namespace SpacePlanning
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";
+        internal const string PUBLIC = "public";
 
         #region - Public Methods
 

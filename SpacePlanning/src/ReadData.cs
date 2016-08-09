@@ -197,12 +197,18 @@ namespace SpacePlanning
         {
           
             List<List<string>> deptTopList = MakeDeptTopology(progAdjList);
-            string kpuDeptName = "";
+            string kpuDeptName = "", pubDeptName = "";
             int kpuIndex = 0;
             for (int i = 0; i < deptTopList.Count; i++)
             {
                 if (progTypeList[i].IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                    progTypeList[i].IndexOf(BuildLayout.KPU.ToUpper()) != -1) { kpuDeptName = deptNameList[i];  break; } // break is to make sure only one dept is kpuDeptName
+            }
+
+            for (int i = 0; i < deptTopList.Count; i++)
+            {
+                if (progTypeList[i].IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 ||
+                   progTypeList[i].IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1) { pubDeptName = deptNameList[i];  } 
             }
             List<List<string>> deptNameAdjacencyList = new List<List<string>>();
             for (int i = 0; i < deptTopList.Count; i++)
@@ -640,10 +646,12 @@ namespace SpacePlanning
             {   
                 double surpluss = 0;
                 double eps = i * BasicUtility.RandomBetweenNumbers(new Random(i),50,10);
-               
-                    if (deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)
+
+                if (deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1)
+                    surpluss = 2000000000 + eps + areaList[i];
+                else if (deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)
                         surpluss = 1000000000 + eps + areaList[i];
-                    else
+                else
                         surpluss = areaList[i];
                
 

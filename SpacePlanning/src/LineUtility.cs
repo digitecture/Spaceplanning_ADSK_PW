@@ -183,17 +183,45 @@ namespace SpacePlanning
         }
 
         //check if a line of a poly if offsetted by a distance, falls inside the poly or not
-        public static bool TestLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10)
+        public static bool TestLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10, double param = 0.1)
         {
             if (!ValidateObject.CheckPoly(poly)) return false;
-            Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], poly.Lines[lineId].StartPoint, poly, offsetDistance);
-            Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], poly.Lines[lineId].EndPoint, poly, offsetDistance);
+            Point2d lineStartPt = poly.Lines[lineId].StartPoint;
+            Point2d lineEndPt = poly.Lines[lineId].EndPoint;
+            Vector2d vec = new Vector2d(lineStartPt, lineEndPt);
+            Vector2d vecRev = new Vector2d(lineEndPt, lineStartPt);
+            double a = 0 + param, b = 1 - param;
+            Point2d startPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, a);
+            Point2d endPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, b);
+            Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], startPushPt, poly, offsetDistance);
+            Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], endPushPt, poly, offsetDistance);
 
             bool checkStartPt = GraphicsUtility.PointInsidePolygonTest(poly, startOffsetPt);
             bool checkEndPt = GraphicsUtility.PointInsidePolygonTest(poly, endOffsetPt);
 
             if (checkStartPt && checkEndPt) return true;
             else return false;
+        }
+
+        //check if a line of a poly if offsetted by a distance, falls inside the poly or not
+        public static List<Point2d> PointsLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10, double param = 0.1)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            Point2d lineStartPt = poly.Lines[lineId].StartPoint;
+            Point2d lineEndPt = poly.Lines[lineId].EndPoint;
+            Vector2d vec = new Vector2d(lineStartPt, lineEndPt);
+            Vector2d vecRev = new Vector2d(lineEndPt, lineStartPt);
+            double a = 0 + param, b = 1 - param;
+            Point2d startPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, a);
+            Point2d endPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, b);
+            Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], startPushPt, poly, offsetDistance);
+            Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], endPushPt, poly, offsetDistance);
+
+            bool checkStartPt = GraphicsUtility.PointInsidePolygonTest(poly, startOffsetPt);
+            bool checkEndPt = GraphicsUtility.PointInsidePolygonTest(poly, endOffsetPt);
+            List<Point2d> ptList = new List<Point2d> { startOffsetPt, endOffsetPt };
+            return ptList;
+    
         }
 
         //finds the direction of offset for a point to be inside the poly, 1 = positive offset, -1 = negative offsets

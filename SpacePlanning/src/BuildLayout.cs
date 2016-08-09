@@ -829,7 +829,7 @@ namespace SpacePlanning
                 if (allowedWidth < maxWidth * fac) maxWidth = allowedWidth * fac;
 
 
-                //if (!LineUtility.TestLineInPolyOffset(currentPoly, lineIdCurrent, maxWidth)) maxWidth = maxWidth * 0.75;
+                if (!LineUtility.TestLineInPolyOffset(currentPoly, lineIdCurrent, maxWidth)) maxWidth = maxWidth * 0.75;
 
                 ////////
                 //check lineid previous and next length and calibrate maxWidth based on that

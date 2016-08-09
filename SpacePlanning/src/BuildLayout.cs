@@ -633,111 +633,9 @@ namespace SpacePlanning
 
 
 
-       
         //places KPU dept with window or external wall need
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
-        public static Dictionary<string, object> FitKPUDeptOrig(Polygon2d poly, double kpuDepth,
-            double area, double thresDistance = 10, int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
-        {
-            if (!ValidateObject.CheckPoly(poly)) return null;
-            poly = new Polygon2d(poly.Points);
-            Polygon2d currentPoly = new Polygon2d(poly.Points);
-            Polygon2d polyCorridors = currentPoly;
-            List<Polygon2d> polyBlockList = new List<Polygon2d>();
-            List<Polygon2d> polyCorridorsList = new List<Polygon2d>();
-            List<int> lineIdList = new List<int>();
-            int lineId = 0, count = 0, maxTry = 40;
-            double areaAdded = 0;
-            double areaLeftToBeAdded = area - areaAdded;
-
-            List<int> indices = new List<int>();
-            for (int i = 0; i < poly.Points.Count; i++) indices.Add(i);
-            if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
-
-
-            for (int i = 0; i < poly.Points.Count; i++)
-            //while(areaAdded<area)
-            {
-                lineId = indices[i];
-                bool error = false;
-                double maxLength = areaLeftToBeAdded/kpuDepth;
-
-              
-                if (currentPoly.Lines[lineId].Length > maxLength)
-                {
-                    double param = maxLength / currentPoly.Lines[lineId].Length;
-                    currentPoly = AddPointToPoly(currentPoly, lineId, param);
-                    indices.Clear();
-                    for (int j = 0; j < currentPoly.Points.Count; j++) indices.Add(i);
-                    if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
-                }
-              
-           
-                Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);
-                Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
-                Point2d center = PolygonUtility.CentroidOfPoly(polySplit);
-                Polygon2d leftOver = (Polygon2d)splitObj["LeftOverPoly"];
-                if (ValidateObject.CheckPolygonSelfIntersection(leftOver)) error = true;
-                if (polyBlockList.Count > 0)
-                {
-                    for (int j = 0; j < polyBlockList.Count; j++)
-                    {
-                        if (ValidateObject.CheckPolyPolyOverlap(polySplit, polyBlockList[j]))
-                        {
-                            //error = true;
-                            //poly = AddPointToPoly(poly, i, 0.75);
-                            //indices.Clear();
-                            //for (int k = 0; k < poly.Points.Count; k++) indices.Add(k);
-                            //if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(iteration));
-                            //break; 
-                        }
-                    }
-                }
-                if (!GraphicsUtility.PointInsidePolygonTest(poly, center)) error = true;
-                //if (!ValidateObject.CheckPolyInsideOuterPoly(polySplit, poly)) error = true; NEEDS FURTHER TEST
-                if (!error)
-                {             
-                    polyBlockList.Add(polySplit);
-                    areaAdded += poly.Lines[i].Length * kpuDepth;
-                    lineIdList.Add(i);
-                    areaLeftToBeAdded = area - areaAdded;
-
-                    //Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, 5, 0);
-                    //polyCorridors = (Polygon2d)splitObj["PolyAfterSplit"];
-                    //polyCorridorsList.Add(polyCorridors);
-                    //leftOver = (Polygon2d)splitObj["LeftOverPoly"];
-                    currentPoly = leftOver;
-                    if (areaAdded > area) break;                    
-                }
-            }
-
-           // List<List<Polygon2d>> polyInCorridorList = new List<List<Polygon2d>>();
-           // List<Polygon2d> polyKPUList = new List<Polygon2d>();
-            if (circulation)
-            {
-                Dictionary<string, object> corridorObj = SplitObject.SplitByOffsetFromLineList(currentPoly, lineIdList, circulationWidth, 0);
-                polyCorridorsList = (List<Polygon2d>)corridorObj["PolyAfterSplit"];
-                currentPoly = (Polygon2d)corridorObj["LeftOverPoly"];
-
-                //Dictionary<string,object> circulationObj=  AddCirculationPoly(polyBlockList, poly, designSeed, circulationWidth);
-                // { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced"})]
-                //polyInCorridorList = (List<List<Polygon2d>>)corridorObj["PolyAfterSplit"];
-                //polyKPUList = (List<Polygon2d>)corridorObj["LeftOverPoly"];
-            }
-
-
-            return new Dictionary<string, object>
-            {
-                { "PolyAfterSplit", (polyBlockList) },
-                { "LeftOverPoly", (currentPoly) },
-                { "AreaPlaced", (areaAdded) },
-                { "CirculationPoly", (polyCorridorsList) }
-            };
-        }
-
-        //places KPU dept with window or external wall need
-        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
-        public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
+        public static Dictionary<string, object> FitKPUDeptoLD(Polygon2d poly, double kpuDepth,
             double area, double thresDistance = 10, int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
@@ -818,7 +716,88 @@ namespace SpacePlanning
         }
 
 
+        //places KPU dept with window or external wall need
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]
+        public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
+            double area, double thresDistance = 10, int designSeed = 5, int circulationWidth = 3, bool stackOptions = false, bool circulation = false)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(poly.Points);
+            Polygon2d currentPoly = new Polygon2d(poly.Points);
+            Polygon2d polyCorridors = currentPoly;
+            List<Polygon2d> polyBlockList = new List<Polygon2d>();
+            List<Polygon2d> polyCorridorsList = new List<Polygon2d>();
+            List<int> lineIdList = new List<int>();
+            int lineId = 0, count = 0,countMain = 0, maxTry = 40;
+            double areaAdded = 0;
+            double areaLeftToBeAdded = area - areaAdded;
 
+            List<int> indices = new List<int>();
+            for (int i = 0; i < currentPoly.Points.Count; i++) indices.Add(i);
+            if (stackOptions) indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
+
+            Stack<int> lineIdStack = new Stack<int>();
+            for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
+            while (areaAdded < area && lineIdStack.Count > 0 && countMain < designSeed)
+            {
+                lineId = lineIdStack.Pop();
+                countMain += 1;
+                bool error = false;
+                double maxLength = areaLeftToBeAdded / kpuDepth;
+
+                double param = 0;
+                if (currentPoly.Lines[lineId].Length > maxLength)
+                {
+                    param = maxLength / currentPoly.Lines[lineId].Length;
+                    currentPoly = AddPointToPoly(currentPoly, lineId, param);
+                    lineIdStack = new Stack<int>();
+                    for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
+                    lineId = lineIdStack.Pop();
+                }
+
+                bool checkOffset = LineUtility.TestLineInPolyOffset(currentPoly, lineId, kpuDepth);
+                param = 0.8;
+                while (!checkOffset && count < maxTry)
+                {
+                    count += 1;
+                    param -= 0.02;
+                    Polygon2d tempPoly = AddPointToPoly(currentPoly, lineId, param);
+                    checkOffset = LineUtility.TestLineInPolyOffset(currentPoly, lineId, kpuDepth);
+                    if (checkOffset)
+                    {
+                        lineIdStack = new Stack<int>();
+                        currentPoly = tempPoly;
+                        for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
+                        lineId = lineIdStack.Pop();
+                    }
+                  
+                }
+                if (!checkOffset) continue;
+
+
+                Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);
+                Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
+                Point2d center = PolygonUtility.CentroidOfPoly(polySplit);
+                Polygon2d leftOver = (Polygon2d)splitObj["LeftOverPoly"];
+                if (ValidateObject.CheckPolygonSelfIntersection(leftOver)) error = true;
+                if (!GraphicsUtility.PointInsidePolygonTest(currentPoly, center)) error = true;
+                if (!error)
+                {
+                    polyBlockList.Add(polySplit);
+                    areaAdded += currentPoly.Lines[lineId].Length * kpuDepth;
+                    lineIdList.Add(lineId);
+                    areaLeftToBeAdded = area - areaAdded;
+                    currentPoly = leftOver;
+                }
+            }
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polyBlockList) },
+                { "LeftOverPoly", (currentPoly) },
+                { "AreaPlaced", (areaAdded) },
+                { "CirculationPoly", (polyCorridorsList) }
+            };
+        }
 
         //blocks are assigne based on offset distance, used for KPU Dept 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaPlaced", "CirculationPoly" })]

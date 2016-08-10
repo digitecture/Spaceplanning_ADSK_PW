@@ -19,7 +19,7 @@ namespace SpacePlanning
         internal static Random RANGENERATE = new Random();
         internal static double RECURSE = 0;
         internal static Point2d REFERENCEPOINT = new Point2d(0,0);
-        internal static int DEPTCOUNT = 1;
+        internal static int DEPTCOUNT = 5;
         internal static double DIVISION = 4;
 
         internal const string KPU = "kpu";
@@ -1522,16 +1522,32 @@ namespace SpacePlanning
 
                     Dictionary<string, object> kpuDeptObj = new Dictionary<string, object>();
                     List<Polygon2d> kpuBlock = new List<Polygon2d>();
-                    if (kpuNum > 0)
+                    if (kpuNum > 1000)
                     {
                         //kpuDeptObj = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, areaNeeded, thresDistance, designSeed, noExternalWall, stackOptionsDept);
                         //Line2d exitLine = new Line2d(new Point2d(0, 0), new Point2d(0, 1000)); // placeholder line
                         kpuDeptObj = FitKPUDept(leftOverBlocks[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept,exitLine); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
 
-                        if (kpuDeptObj == null) return null;
+                        if (kpuDeptObj == null)
+                        {
+                            kpuDeptObj = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, areaNeeded, thresDistance, designSeed, noExternalWall, stackOptionsDept);
+                            if (kpuDeptObj == null) return null;
+                            kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
+                            leftOverBlocks = (List<Polygon2d>)kpuDeptObj["LeftOverPoly"];
+                            if (!ValidateObject.CheckPolyList(kpuBlock) || !ValidateObject.CheckPolyList(leftOverBlocks)) return null;
+                            areaAssigned = (double)kpuDeptObj["AreaAssignedToBlock"];
+                        }
                         kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                         leftOverBlocks[0] = (Polygon2d)kpuDeptObj["LeftOverPoly"];
-                        if (!ValidateObject.CheckPolyList(kpuBlock) || !ValidateObject.CheckPolyList(leftOverBlocks)) return null;
+                        if (!ValidateObject.CheckPolyList(kpuBlock) || !ValidateObject.CheckPolyList(leftOverBlocks))
+                        {
+                            kpuDeptObj = AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, areaNeeded, thresDistance, designSeed, noExternalWall, stackOptionsDept);
+                            if (kpuDeptObj == null) return null;
+                            kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
+                            leftOverBlocks = (List<Polygon2d>)kpuDeptObj["LeftOverPoly"];
+                            if (!ValidateObject.CheckPolyList(kpuBlock) || !ValidateObject.CheckPolyList(leftOverBlocks)) return null;
+                            areaAssigned = (double)kpuDeptObj["AreaAssignedToBlock"];
+                        }
                         areaAssigned = (double)kpuDeptObj["AreaAssignedToBlock"];
                         
                     }

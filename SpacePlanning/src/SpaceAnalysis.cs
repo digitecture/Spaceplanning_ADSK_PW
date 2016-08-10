@@ -298,6 +298,8 @@ namespace SpacePlanning
         public static Dictionary<string, object> VisualizeDepartmentCirculation(List<DeptData> deptDataInp, double height = 0,
             int colorScheme = 0, int opacity = 10)
         {
+
+       
             int transparency = 255;
             double heightPlan = 0 + height;
             List<DeptData> deptData = deptDataInp;
@@ -316,6 +318,11 @@ namespace SpacePlanning
                     polyFlattened.Add(deptDataInp[i].DeptCirculationPoly);
                 }
             }
+
+            Color col1 = Color.ByARGB(transparency, 119, 179, 0); // light green
+            Color col2 = Color.ByARGB(transparency, 255, 55, 0); 
+            Color col3 = Color.ByARGB(transparency, 55, 155, 30);
+            Color col4 = Color.ByARGB(transparency, 12, 175, 225);
             bool kpuPlaced = false;
             List<List<Surface>> srfListAll = new List<List<Surface>>();
             List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
@@ -327,8 +334,11 @@ namespace SpacePlanning
                 heightPlan = deptDataInp[i].FloorHeightList[indexHeight] + height;
                 //heightPlan = 100;
                 int index = i + 1;
-                Color col = Color.ByARGB(transparency, 119, 179, 0); // light green
-                DeptData deptItem = deptData[i];
+                Color col = col1;
+                if (colorScheme == 1) col = col2;
+                else if (colorScheme == 2) col = col3;
+                else if (colorScheme == 3) col = col4; 
+                    DeptData deptItem = deptData[i];
         
                 List<Surface> srfList = new List<Surface>();
                 List<Display.Display> displayList = new List<Display.Display>();

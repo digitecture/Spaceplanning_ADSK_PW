@@ -221,7 +221,7 @@ namespace SpacePlanning
             // hard coded list of colors for 20 depts
             List<Color> colorList = new List<Color>();
             colorList.Add(Color.ByARGB(transparency, 119, 179, 0)); // light green
-            colorList.Add(Color.ByARGB(transparency, 255, 51, 204)); // bright pink
+            colorList.Add(Color.ByARGB(transparency, 255, 0, 0)); // bright pink
             colorList.Add(Color.ByARGB(transparency, 102, 102, 255)); // violetish blue
             colorList.Add(Color.ByARGB(transparency, 255, 195, 77)); // orangish yellow
             colorList.Add(Color.ByARGB(transparency, 204, 153, 255)); // violet blue
@@ -419,6 +419,7 @@ namespace SpacePlanning
             }
             bool kpuPlaced = false;
             Color kpuColor = colorListSelected[0];
+            Color pubColor = colorListSelected[1];
             List<List<Surface>> srfListAll = new List<List<Surface>>();
             List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
             for (int i = 0; i < polyProgsList.Count; i++)
@@ -435,6 +436,8 @@ namespace SpacePlanning
                 //if (i == 0)
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) && !kpuPlaced) { col = kpuColor; kpuPlaced = true; }
+                if ((deptItem.DepartmentType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 ||
+              deptItem.DepartmentType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1) && !kpuPlaced) { col = pubColor;  }
                 List<Surface> srfList = new List<Surface>();
                 List<Display.Display> displayList = new List<Display.Display>();
                 for (int j = 0; j < polyProgs.Count; j++)

@@ -791,6 +791,14 @@ namespace SpacePlanning
             List<List<Polygon2d>> AllDeptPolys = new List<List<Polygon2d>>();
             List<List<Polygon2d>> AllDeptCircPolys = new List<List<Polygon2d>>();
             List<double> areaAssignedList = new List<double>();
+
+            double accetableWidth = 30, ratio = 0.5;
+            List<List<Polygon2d>> polySplitAll = SplitObject.SplitRecursivelyToSubdividePoly(polyList, accetableWidth, ratio, true);
+            leftOverPoly = polySplitAll[0];
+
+
+
+
             for (int i = 0; i < areaList.Count; i++)
             {
                 double areaNeeded = areaList[i];
@@ -816,8 +824,7 @@ namespace SpacePlanning
                 List<Node> AllNodesList = (List<Node>)assignedByRatioObj["AllNodes"];
                 AllDeptAreaAdded.Add(areaAssigned);
                 AllDeptCircPolys.Add(null); //cirREGDeptPoly
-                AllDeptPolys.Add(everyDeptPoly);
-                
+                AllDeptPolys.Add(everyDeptPoly);                
             }
       
             return new Dictionary<string, object>

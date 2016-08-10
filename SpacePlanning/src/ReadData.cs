@@ -162,7 +162,10 @@ namespace SpacePlanning
              Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList,progTypeList, progAdjList);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
             //sort the depts by high area
-            deptDataStack = SortDeptData(deptDataStack, preferredDept);
+            bool tag = true;
+            if (!stackingOptionsProg) tag = true;
+            else tag = false;
+            deptDataStack = SortDeptData(deptDataStack, preferredDept, tag);
 
             //added to compute area percentage for each dept
             double totalDeptArea = 0;
@@ -613,7 +616,7 @@ namespace SpacePlanning
 
 
         //sorts a deptdata based on area 
-        internal static List<DeptData> SortDeptData(List<DeptData> deptDataInp, List<string> preferredDept)
+        internal static List<DeptData> SortDeptData(List<DeptData> deptDataInp, List<string> preferredDept, bool tag = true)
         {
 
             List<DeptData> deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -647,7 +650,7 @@ namespace SpacePlanning
                 double surpluss = 0;
                 double eps = i * BasicUtility.RandomBetweenNumbers(new Random(i),50,10);
 
-                if (deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1)
+                if ((deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1) && tag)
                     surpluss = 2000000000 + eps + areaList[i];
                 else if (deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)
                         surpluss = 1000000000 + eps + areaList[i];

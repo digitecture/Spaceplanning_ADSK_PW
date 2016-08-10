@@ -20,7 +20,7 @@ namespace SpacePlanning
         internal static double RECURSE = 0;
         internal static Point2d REFERENCEPOINT = new Point2d(0,0);
         internal static int DEPTCOUNT = 1;
-        internal static double DIVISION = 2;
+        internal static double DIVISION = 4;
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";

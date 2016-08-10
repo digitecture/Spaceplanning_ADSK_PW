@@ -71,7 +71,7 @@ namespace SpacePlanning
         /// <param name="stackingOptionsProg"></param>
         /// <param name="designSeed"></param>
         /// <returns name ="DeptData"> List of Dept Data Object"</returns>
-        public static List<DeptData> MakeDataStackFromString(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
+        public static List<DeptData> MakeDataStackFromString(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsDept = false, bool stackingOptionsProg = true, int designSeed = 0)
  {
            double dim = 5;
            StreamReader reader;

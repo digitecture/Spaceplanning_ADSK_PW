@@ -201,11 +201,13 @@ namespace SpacePlanning
           
             List<List<string>> deptTopList = MakeDeptTopology(progAdjList);
             string kpuDeptName = "", pubDeptName = "";
+            List<string> kpuDeptList = new List<string>();
             int kpuIndex = 0;
+            List<int> kpuIndices = new List<int>();
             for (int i = 0; i < deptTopList.Count; i++)
             {
                 if (progTypeList[i].IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
-                   progTypeList[i].IndexOf(BuildLayout.KPU.ToUpper()) != -1) { kpuDeptName = deptNameList[i];  break; } // break is to make sure only one dept is kpuDeptName
+                   progTypeList[i].IndexOf(BuildLayout.KPU.ToUpper()) != -1) { kpuDeptName = deptNameList[i]; kpuDeptList.Add(kpuDeptName); } // break is to make sure only one dept is kpuDeptName break;
             }
 
             for (int i = 0; i < deptTopList.Count; i++)
@@ -229,7 +231,14 @@ namespace SpacePlanning
 
 
             List<string> deptNames = GetDeptNames(deptNameList);
-            for (int i = 0; i < deptNames.Count; i++) if (deptNames[i] == kpuDeptName) { kpuIndex = i; break; }
+            for (int i = 0; i < deptNames.Count; i++)
+            {
+                for(int j = 0; j < kpuDeptList.Count; j++)
+                {
+                    if (deptNames[i] == kpuDeptList[j]) { kpuIndex = i; kpuIndices.Add(i); }
+                }
+             
+            }
   
 
             List<List<string>> NumberOfDeptNames = new List<List<string>>();
@@ -248,8 +257,12 @@ namespace SpacePlanning
             for (int i = 0; i < NumberOfDeptNames.Count; i++)
             {
                 NumberOfDeptNames[i].RemoveAll(x => x == deptNames[i]);
-                NumberOfDeptNames[i].RemoveAll(x => x == kpuDeptName);
-                if (i == kpuIndex) NumberOfDeptNames[i].Clear();
+                for(int j = 0; j < kpuDeptList.Count; j++)
+                {
+                    NumberOfDeptNames[i].RemoveAll(x => x == kpuDeptList[j]);
+                    if (i == kpuIndices[j]) NumberOfDeptNames[i].Clear();
+                }               
+                
             }
 
             List<string> mostFreq = new List<string>();

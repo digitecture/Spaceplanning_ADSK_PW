@@ -1462,7 +1462,7 @@ namespace SpacePlanning
                 double areaAssigned = 0;
                 DeptData deptItem = deptData[i];     
                 if ((deptItem.DepartmentType.IndexOf(KPU.ToLower()) != -1 ||
-                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1) && !kpuPlaced)// key planning unit - disabled multiple kpu same lvl // && !kpuPlaced
+                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1))// key planning unit - disabled multiple kpu same lvl // && !kpuPlaced
                 {
                     double areaAvailablePoly = 0;
                     for (int j = 0; j < polyList.Count; j++) areaAvailablePoly += PolygonUtility.AreaPolygon(polyList[j]);              
@@ -1488,7 +1488,7 @@ namespace SpacePlanning
                         otherDeptPoly.Add(new Polygon2d(leftOverBlocks[j].Points));// just for debugging
                         leftOverPoly.Add(leftOverBlocks[j]);
                     }
-                    kpuPlaced = true;
+                    //kpuPlaced = true;
                 }else // regular depts
                 {
                     //when there is no kpu in the requirement

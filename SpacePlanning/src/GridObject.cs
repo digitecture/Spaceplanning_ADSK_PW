@@ -319,7 +319,7 @@ namespace SpacePlanning
         /// Builds the Cell NeighborMatrix
         /// </summary>
         /// <param name="insetSiteOutline">Polygon2d as the border outline.</param>
-        /// <param name="cellDim">Dimension of the cell object in X and Y direction.</param>
+        /// <param name="dim">Dimension of the cell object in X and Y direction.</param>
         /// <param name="designSeed">Boolean item to activate two separate modes of calculation.</param>
         /// <returns name="OrthoSiteOutline">Polygon2d representing orthogonal poly outline.</returns>
         /// <returns name="BorderCells">Cell objects at the border of the outline.</returns>  
@@ -329,7 +329,7 @@ namespace SpacePlanning
         /// bordercells, cellneighbormatrix, 
         /// </search>
         [MultiReturn(new[] { "OrthoSiteOutline", "BorderCells", "CellNeighborMatrix", "CellList" })]
-        public static Dictionary<string, object> FindOrthoSiteOutline(Polygon2d insetSiteOutline, double cellDim, int designSeed = 100, bool highPrecision = false)
+        public static Dictionary<string, object> FindOrthoSiteOutline(Polygon2d insetSiteOutline, int dim=2, int designSeed = 100, bool highPrecision = false)
         {
             Polygon2d polyOutline = insetSiteOutline;
             double proportion = 0.75;
@@ -341,7 +341,7 @@ namespace SpacePlanning
             List<Polygon2d> cellsFound = new List<Polygon2d>();
             int minCells = MINCELL, maxCells = MAXCELL;
             if(highPrecision) { minCells = 1000; maxCells = 2500; }
-            double dimAdjusted = cellDim;
+            double dimAdjusted = dim;
             double areaPoly = PolygonUtility.AreaPolygon(polyOutline), eps = 0.01;
             int numCells = (int)(areaPoly / (dimAdjusted * dimAdjusted));
             if (numCells < minCells) dimAdjusted = Math.Sqrt(areaPoly / minCells);

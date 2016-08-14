@@ -781,7 +781,7 @@ namespace SpacePlanning
 
         //blocks are assigne based on offset distance, used for KPU Dept 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" })]
-        public static Dictionary<string, object> FitRegDept( List<Polygon2d> polyList, List<double> areaList,  int designSeed = 5, bool stackOptions = false)
+        public static Dictionary<string, object> FitRegDept( List<Polygon2d> polyList, List<double> areaList)
         {
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             List<Polygon2d> leftOverPoly = polyList;
@@ -790,11 +790,7 @@ namespace SpacePlanning
             List<List<Polygon2d>> AllDeptCircPolys = new List<List<Polygon2d>>();
             List<double> areaAssignedList = new List<double>();
 
-            double accetableWidth = 50, ratio = 0.5;
-            List<List<Polygon2d>> polySplitAll = SplitObject.SplitRecursivelyToSubdividePoly(polyList, accetableWidth, ratio, true);
-            leftOverPoly = polySplitAll[0];
-
-            leftOverPoly = polyList;
+         
 
             for (int i = 0; i < areaList.Count; i++)
             {
@@ -1575,14 +1571,14 @@ namespace SpacePlanning
                         if (leftOverPoly == null) break;
                         prepareReg = true;
 
-
+                        /*
                         //add the circulation
                         //place circulation on Public Dept Poly
                         Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(leftOverPoly, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                         List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                         leftOverPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
-
                         AllDeptCircPolys.Add(cirPublicDeptPoly);
+                        */
 
                     }// end of prepare reg dept
                     double areaNeeded = deptItem.DeptAreaNeeded;
@@ -1596,12 +1592,12 @@ namespace SpacePlanning
                     areaAssigned = (double)assignedByRatioObj["AreaAdded"];
 
 
-                    /*
+                    
                     //place circulation on Public Dept Poly
                     Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     everyDeptPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
-                    */
+                    AllDeptCircPolys.Add(cirPublicDeptPoly);
 
 
 
@@ -1612,9 +1608,10 @@ namespace SpacePlanning
                     List<Node> AllNodesList = (List<Node>)assignedByRatioObj["AllNodes"];
                     AllDeptAreaAdded.Add(areaAssigned);
                     AllDeptPolys.Add(everyDeptPoly);
-                    //AllDeptCircPolys.Add(cirPublicDeptPoly);
+                    //
                 }// end of regular dept placement
-            }
+            }// end of for loop
+            List<Polygon2d> polySubdived = new List<Polygon2d>();
             //clean dept polys based on their fitness
             for (int i = 0; i < AllDeptPolys.Count; i++) AllDeptPolys[i] = ValidateObject.CheckAndCleanPolygon2dList(AllDeptPolys[i]);
 

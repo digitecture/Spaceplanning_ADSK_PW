@@ -80,8 +80,10 @@ namespace SpacePlanning
         //checks a polygon2d if its orthogonal or non orthogonal
         public static bool CheckPolygon2dOrtho(Polygon2d nonOrthoPoly, double eps = 0)
         {
+            if (!CheckPoly(nonOrthoPoly)) return false;
             bool result = true;
             Polygon2d polyNew = new Polygon2d(nonOrthoPoly.Points);
+            if (CheckPoly(polyNew)) return false;
             List<Line2d> lineList = polyNew.Lines;
             for (int j = 0; j < lineList.Count; j++) if (!CheckLineOrthogonal(lineList[j])) { result = false; break; }
             return result;

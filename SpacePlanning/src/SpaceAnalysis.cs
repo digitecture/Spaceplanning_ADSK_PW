@@ -397,6 +397,7 @@ namespace SpacePlanning
         public static Dictionary<string, object> VisualizeDepartments(List<DeptData> deptDataInp, double height = 0,
             int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
         {
+            if (deptDataInp == null) return null;
             int transparency = 255;
             double heightPlan = 0 + height;
             List<DeptData> deptData = deptDataInp;
@@ -508,6 +509,7 @@ namespace SpacePlanning
         public static Dictionary<string, object> VisualizeDeptPrograms(List<DeptData> deptDataInp, double height = 0, 
             int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
         {
+            if (deptDataInp == null) return null;
             int transparency = 255;
             double heightPlan = 0 + height;
             List<DeptData> deptData = deptDataInp;

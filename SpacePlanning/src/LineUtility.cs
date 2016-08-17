@@ -17,7 +17,7 @@ namespace SpacePlanning
         public static Line2d Offset(Line2d lineInp,double distance)
         {
             if (lineInp == null) return null;
-            Point2d ptStart = OffsetLinePoint(lineInp, lineInp.StartPoint, distance);
+            Point2d ptStart = OffsetPointFromLine(lineInp, lineInp.StartPoint, distance);
             Vector2d vec = new Vector2d(lineInp.StartPoint, ptStart);
             Point2d ptEnd = VectorUtility.VectorAddToPoint(lineInp.EndPoint, vec);
             return new Line2d(ptStart, ptEnd);
@@ -53,8 +53,8 @@ namespace SpacePlanning
             else return -1;
             return PointUtility.DistanceBetweenPoints(midPt, farPt);
         }
-        
-        //given a poly, and a lineId, gives the max offset distance it can go inside a poly
+
+        //returns the bisector perpendicular line of a line in a Polygon2d
         public static Line2d FindBisectorLine(Polygon2d poly, int lineId)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
@@ -68,8 +68,8 @@ namespace SpacePlanning
             return new Line2d(midPt, 20, newDir);   
         }
 
-        //given a poly, and a lineId, gives the max offset distance it can go inside a poly
-        public static List<Point2d> FindBisectorIntersections(Polygon2d poly, int lineId)
+        //given a poly, and a lineId, gives the max offset point that can be inside or on the Polygon2d
+        public static List<Point2d> FindMaxPointFromALineInPoly(Polygon2d poly, int lineId)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
             poly = new Polygon2d(PolygonUtility.SmoothPolygon(poly.Points, 5), 0);
@@ -106,7 +106,7 @@ namespace SpacePlanning
 
         }
 
-        //moves a line by a distance in positive dir 
+        //moves a line by a distance in X and Y dir 
         public static Line2d Move(Line2d line, double distX, double distY)
         {
             Point2d start = new Point2d((line.StartPoint.X + distX), (line.StartPoint.Y + distY));
@@ -150,8 +150,8 @@ namespace SpacePlanning
             return new Point2d(midPt.X + vecScaled.X, midPt.Y + vecScaled.Y);
         }
 
-        //offsets an input point by a given distance 
-        internal static Point2d OffsetLinePoint(Line2d lineInp, Point2d testPoint, double distance)
+        //offsets an input point perpendicular to a line by a given distance 
+        internal static Point2d OffsetPointFromLine(Line2d lineInp, Point2d testPoint, double distance)
         {
             double newX1 = 0, newY1 = 0;
             if (ValidateObject.CheckLineOrient(lineInp) == 0) // horizontal line
@@ -173,11 +173,11 @@ namespace SpacePlanning
             if (lineInp == null || !ValidateObject.CheckPoly(poly)) return null;
             int dir = DirectionForPointInPoly(lineInp, poly, distance);
             if (dir == 0) return null;
-            return OffsetLinePoint(lineInp, testPoint, dir * distance);
+            return OffsetPointFromLine(lineInp, testPoint, dir * distance);
         }
 
         //check if a line of a poly if offsetted by a distance, falls inside the poly or not
-        public static bool TestLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10, double param = 0.1)
+        internal static bool TestLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10, double param = 0.1)
         {
             if (!ValidateObject.CheckPoly(poly)) return false;
             Point2d lineStartPt = poly.Lines[lineId].StartPoint;
@@ -189,42 +189,19 @@ namespace SpacePlanning
             Point2d endPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, b);
             Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], startPushPt, poly, offsetDistance);
             Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], endPushPt, poly, offsetDistance);
-
             bool checkStartPt = GraphicsUtility.PointInsidePolygonTest(poly, startOffsetPt);
             bool checkEndPt = GraphicsUtility.PointInsidePolygonTest(poly, endOffsetPt);
-
             if (checkStartPt && checkEndPt) return true;
             else return false;
-        }
-
-        //check if a line of a poly if offsetted by a distance, falls inside the poly or not
-        public static List<Point2d> PointsLineInPolyOffset(Polygon2d poly, int lineId = 0, double offsetDistance = 10, double param = 0.1)
-        {
-            if (!ValidateObject.CheckPoly(poly)) return null;
-            Point2d lineStartPt = poly.Lines[lineId].StartPoint;
-            Point2d lineEndPt = poly.Lines[lineId].EndPoint;
-            Vector2d vec = new Vector2d(lineStartPt, lineEndPt);
-            Vector2d vecRev = new Vector2d(lineEndPt, lineStartPt);
-            double a = 0 + param, b = 1 - param;
-            Point2d startPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, a);
-            Point2d endPushPt = VectorUtility.VectorAddToPoint(lineStartPt, vec, b);
-            Point2d startOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], startPushPt, poly, offsetDistance);
-            Point2d endOffsetPt = OffsetLinePointInsidePoly(poly.Lines[lineId], endPushPt, poly, offsetDistance);
-
-            bool checkStartPt = GraphicsUtility.PointInsidePolygonTest(poly, startOffsetPt);
-            bool checkEndPt = GraphicsUtility.PointInsidePolygonTest(poly, endOffsetPt);
-            List<Point2d> ptList = new List<Point2d> { startOffsetPt, endOffsetPt };
-            return ptList;
-    
-        }
+        }      
 
         //finds the direction of offset for a point to be inside the poly, 1 = positive offset, -1 = negative offsets
         internal static int DirectionForPointInPoly(Line2d lineInp, Polygon2d poly, double distance)
         {
             if (lineInp == null || !ValidateObject.CheckPoly(poly)) return 0;
             Point2d midPt = LineMidPoint(lineInp);
-            Point2d pt1 = OffsetLinePoint(lineInp, midPt, distance);
-            Point2d pt2 = OffsetLinePoint(lineInp, midPt, -1 * distance);
+            Point2d pt1 = OffsetPointFromLine(lineInp, midPt, distance);
+            Point2d pt2 = OffsetPointFromLine(lineInp, midPt, -1 * distance);
             if (GraphicsUtility.PointInsidePolygonTest(poly, pt1)) return 1;
             else return -1;
         }

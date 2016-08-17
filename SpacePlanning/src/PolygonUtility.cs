@@ -27,7 +27,6 @@ namespace SpacePlanning
             return orthoPoly;
         }
     
-
         //gives the highest and lowest point from poly points
         public static List<Point2d> GetLowestAndHighestPointFromPoly(Polygon2d poly)
         {
@@ -58,19 +57,7 @@ namespace SpacePlanning
             if (added) return polyNewList;
             else return null;
         }
-
-        // removes polygons which are null from the list
-        internal static List<Polygon2d> CleanPolygons(List<Polygon2d> polygonsList)
-        {
-            List<Polygon2d> cleanPolyList = new List<Polygon2d>();
-            for (int i = 0; i < polygonsList.Count; i++)
-            {
-                if (polygonsList[i] == null || polygonsList[i].Points == null || polygonsList[i].Points.Count == 0)
-                    continue;
-                cleanPolyList.Add(polygonsList[i]);
-            }
-            return cleanPolyList;
-        }
+        
         
         // sorts a list of polygons from a point and returns the indices 
         public static List<int> SortPolygonsFromAPoint(List<Polygon2d> polygonsList, Point2d centerPt)
@@ -161,8 +148,6 @@ namespace SpacePlanning
                     }
                 }
             }
-            //int hIndLow = GraphicsUtility.ReturnLowestPointFromListNew(hMidPt);
-            //int hIndHigh = CodeToBeTested.ReturnHighestPointFromList(hMidPt);
             int hIndLow = CodeToBeTested.ReturnLowestPointFromList(hMidPt);
             int hIndHigh = PointUtility.HighestPointFromList(hMidPt);
             int vIndLow = PointUtility.LowestPointFromList(vMidPt);
@@ -224,7 +209,7 @@ namespace SpacePlanning
             while (splittedPolys.Count > 0 && countBig < maxRounds && allSplitLines.Count > 0)
             {
                 int count = 0, maxTry = 100;
-                int numSides = NumberofSidesPoly(currentPoly);
+                int numSides = currentPoly.Lines.Count;
                 numSidesList.Add(numSides);
                 //CHECK sides
                 if (numSides < 5)
@@ -277,56 +262,7 @@ namespace SpacePlanning
             };
         }            
 
-        //finds number of sides in a polygon2d
-        internal static int NumberofSidesPoly(Polygon2d poly)
-        {
-            if (poly == null || poly.Points == null || poly.Points.Count == 0) return -1;
-            int sides = 0;
-            Polygon2d polyReg = new Polygon2d(poly.Points);
-            for(int i = 0; i < polyReg.Points.Count; i++)
-            {
-                int a = i, b = i + 1;
-                if (i == polyReg.Points.Count - 1) b = 0;
-                sides += 1;                
-            }
-            return sides;
-        }
   
-        //gets two point lists , adds or optimizes the number of points and merges the pointlist together
-        internal static List<Polygon2d> OptimizePolyPoints(List<Point2d> sortedA, List<Point2d> sortedB,
-        bool tag = false, double spacing = 0)
-        {
-            Polygon2d polyA, polyB;
-
-            if (tag)
-            {
-                //added to make sure poly has uniform points
-                polyA = new Polygon2d(sortedA);
-                polyB = new Polygon2d(sortedB);
-                double spacingProvided = 3;
-                if (spacing == 0) spacingProvided = BuildLayout.SPACING;
-                else spacingProvided = spacing;
-                List<Point2d> ptsPolyA = SmoothPolygon(polyA.Points, spacingProvided);
-                List<Point2d> ptsPolyB = SmoothPolygon(polyB.Points, spacingProvided);
-                polyA = new Polygon2d(ptsPolyA, 0);
-                polyB = new Polygon2d(ptsPolyB, 0);
-            }
-            else
-            {
-                //return the polys as obtained - no smoothing
-                polyA = new Polygon2d(sortedA, 0);
-                polyB = new Polygon2d(sortedB, 0);
-            }
-
-            //added check to see if poly is null
-            if (!ValidateObject.CheckPoly(polyA)) polyA = null;
-            if (!ValidateObject.CheckPoly(polyB)) polyB = null;
-
-            List<Polygon2d> splittedPoly = new List<Polygon2d>();
-            splittedPoly.Add(polyA);
-            splittedPoly.Add(polyB);
-            return splittedPoly;
-        }
         
         //returns the hprizontal and vertical span of a polygon2d , places longer span first
         public static List<double> GetPolySpan(Polygon2d poly)
@@ -350,7 +286,7 @@ namespace SpacePlanning
             return spanList;
         }
 
-        //offsets a poly 
+        //offsets a poly by a given dist
         public static Polygon2d OffsetPoly(Polygon2d polyOutline, double distance = 0.5)
         {
             if (!ValidateObject.CheckPoly(polyOutline)) return null;
@@ -503,7 +439,7 @@ namespace SpacePlanning
             return new Polygon2d(ptList);
         }
 
-        //calc centroid of a closed polygon2d
+        //calc centroid of a list of polygon2d
         internal static Point2d CentroidOfPolyList(List<Polygon2d> polyList)
         {
             if (!ValidateObject.CheckPolyList(polyList)) return null;
@@ -581,7 +517,7 @@ namespace SpacePlanning
         }        
 
 
-        //checks all lines of a polyline, if orthogonal or not, if not makes the polyline orthogonal - NEW IMPLEMENTED
+        //checks all lines of a polyline, if orthogonal or not, if not makes the polyline orthogonal
         public static Polygon2d CreateOrthoPoly(Polygon2d nonOrthoPoly)
         {
             if (!ValidateObject.CheckPoly(nonOrthoPoly)) return null;
@@ -755,7 +691,47 @@ namespace SpacePlanning
 
 
         //find if two polys are adjacent, and if yes, then returns the common edge between them
-        public static List<int>FindNotAdjacentPolyToPolyEdges(Polygon2d polyA, Polygon2d polyB, double eps = 0, double minDim =0)
+        [MultiReturn(new[] { "Neighbour", "SharedEdge" })]
+        internal static Dictionary<string, object> FindPolyAdjacentEdgeEdit(Polygon2d polyA, Polygon2d polyB, double eps = 0)
+        {
+            if (!ValidateObject.CheckPoly(polyA) || !ValidateObject.CheckPoly(polyB)) return null;
+            Line2d joinedLine = null;
+            bool isNeighbour = false;
+            Polygon2d polyAReg = new Polygon2d(polyA.Points);
+            Polygon2d polyBReg = new Polygon2d(polyB.Points);
+
+            for (int i = 0; i < polyAReg.Points.Count; i++)
+            {
+                int a = i + 1;
+                if (i == polyAReg.Points.Count - 1) a = 0;
+                Line2d lineA = new Line2d(polyAReg.Points[i], polyAReg.Points[a]);
+                for (int j = 0; j < polyBReg.Points.Count; j++)
+                {
+                    int b = j + 1;
+                    if (j == polyBReg.Points.Count - 1) b = 0;
+                    Line2d lineB = new Line2d(polyBReg.Points[j], polyBReg.Points[b]);
+                    if (lineA.StartPoint.Compare(lineB.StartPoint) && lineA.EndPoint.Compare(lineB.EndPoint))
+                    {
+                        joinedLine = lineA;
+                        isNeighbour = true;
+                    }
+                    else if (lineA.EndPoint.Compare(lineB.StartPoint) && lineA.StartPoint.Compare(lineB.EndPoint))
+                    {
+                        joinedLine = lineB;
+                        isNeighbour = true;
+                    }
+                }
+            }
+            return new Dictionary<string, object>
+            {
+                { "Neighbour", (isNeighbour) },
+                { "SharedEdge", (joinedLine) }
+            };
+
+        }
+
+        //find if two polys are adjacent, and returns the non adjacent edges
+        internal static List<int>FindNotAdjacentPolyToPolyEdges(Polygon2d polyA, Polygon2d polyB, double eps = 0, double minDim =0)
         {
             if (!ValidateObject.CheckPoly(polyA) || !ValidateObject.CheckPoly(polyB)) return null;
             List<int> lineIdList = new List<int>();
@@ -777,8 +753,8 @@ namespace SpacePlanning
             return lineIdList;
         }
 
-        //find if two polys are adjacent, and if yes, then returns the common edge between them
-        public static List<int> FindNotAdjacentPolyToLinesEdges(Polygon2d polyA, List<Line2d> lineList, double eps = 0, double minDim = 0)
+        //find the non adjacent edges of a poly to a given line list
+        internal static List<int> FindNotAdjacentPolyToLinesEdges(Polygon2d polyA, List<Line2d> lineList, double eps = 0, double minDim = 0)
         {
             if (!ValidateObject.CheckPoly(polyA)) return null;
             if (lineList == null) return null;
@@ -803,7 +779,7 @@ namespace SpacePlanning
 
 
         //finds if a line is adjacent to any of the lines in the given poly, returns true ifadjacent, else false
-        public static bool FindAdjacentPolyToALines(Polygon2d polyA, Line2d line, double eps = 0, double minDim = 0)
+        internal static bool FindAdjacentPolyToALine(Polygon2d polyA, Line2d line, double eps = 0, double minDim = 0)
         {
             if (!ValidateObject.CheckPoly(polyA)) return false;
             if (line == null) return false;
@@ -817,56 +793,6 @@ namespace SpacePlanning
             return false;
         }
 
-
-        //find if two polys are adjacent, and if yes, then returns the common edge between them
-        [MultiReturn(new[] { "Neighbour", "SharedEdge" })]
-        internal static Dictionary<string, object> FindPolyAdjacentEdgeEdit(Polygon2d polyA, Polygon2d polyB, double eps = 0)
-        {
-            if (!ValidateObject.CheckPoly(polyA) || !ValidateObject.CheckPoly(polyB)) return null;
-            Line2d joinedLine = null;
-            bool isNeighbour = false;
-            Polygon2d polyAReg = new Polygon2d(polyA.Points);
-            Polygon2d polyBReg = new Polygon2d(polyB.Points);
-
-            for (int i = 0; i < polyAReg.Points.Count; i++)
-            {
-                int a = i + 1;
-                if (i == polyAReg.Points.Count - 1) a = 0;
-                Line2d lineA = new Line2d(polyAReg.Points[i], polyAReg.Points[a]);
-                for (int j = 0; j < polyBReg.Points.Count; j++)
-                {
-                    int b = j + 1;
-                    if (j == polyBReg.Points.Count - 1) b = 0;
-                    Line2d lineB = new Line2d(polyBReg.Points[j], polyBReg.Points[b]);
-                    if(lineA.StartPoint.Compare(lineB.StartPoint) && lineA.EndPoint.Compare(lineB.EndPoint))
-                    {
-                        joinedLine = lineA;
-                        isNeighbour = true;
-                    }
-                    else if (lineA.EndPoint.Compare(lineB.StartPoint) && lineA.StartPoint.Compare(lineB.EndPoint))
-                    {
-                        joinedLine = lineB;
-                        isNeighbour = true;
-                    }
-                   /* bool checkAdj = GraphicsUtility.LineAdjacencyCheck(lineA, lineB, eps);
-                    if (checkAdj)
-                    {
-                        if (lineA.Length > lineB.Length) joinedLine = lineA;
-                        else joinedLine = lineB;
-                        //joinedLine = GraphicsUtility.JoinCollinearLines(lineA, lineB);
-                        isNeighbour = true;
-                        break;
-                    }
-                    */
-                }
-            }
-            return new Dictionary<string, object>
-            {
-                { "Neighbour", (isNeighbour) },
-                { "SharedEdge", (joinedLine) }
-            };
-
-        }
 
         //makes a square polygon2d
         public static Polygon2d SquareByCenter(Point2d center, double side = 5)
@@ -969,11 +895,10 @@ namespace SpacePlanning
             return pointFound;
 
         }
-
-
+        
         //places a point randomly inside a poly | padding should be between 0.2 to 1.0. -1 = anywhere, 0 = towards upper right, 1 = towards lower left
         [MultiReturn(new[] { "RandomPoint", "FoundPointList", "LineSelected"})]
-        internal static Dictionary<string, object> GetPointOnOneQuadrantTest(Polygon2d poly, int seed = 1, int side = -1, double scale = 0.5)
+        internal static Dictionary<string, object> GetPointOnOneQuadrant(Polygon2d poly, int seed = 1, int side = -1, double scale = 0.5)
         {
             if (!ValidateObject.CheckPoly(poly)) return null;
             Point2d centerFound = CentroidOfPoly(poly);

@@ -39,7 +39,7 @@ namespace SpacePlanning
         /// <search>
         /// make data stack, dept data object, program data object
         /// </search>
-        public static List<DeptData> MakeDataStack(string programDocumentPath, double circulationFactor = 1.2, bool stackingOptionsDept = false, bool stackingOptionsProg =false, int designSeed = 0)
+        public static List<DeptData> MakeDataStack(string programDocumentPath, double circulationFactor = 1.2, bool stackingOptionsDept = false, bool stackingOptionsProg =false)
         {
             double dim = 5;
             StreamReader reader;
@@ -57,7 +57,7 @@ namespace SpacePlanning
             reader = new StreamReader(File.OpenRead(@programDocumentPath));
             int readCount = 0;
             string docInfo = reader.ReadToEnd();
-            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg, designSeed);         
+            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg);         
 
         }
 
@@ -73,7 +73,7 @@ namespace SpacePlanning
         /// <param name="stackingOptionsProg"></param>
         /// <param name="designSeed"></param>
         /// <returns name ="DeptData"> List of Dept Data Object"</returns>
-        public static List<DeptData> MakeDataStackFromString(double circulationFactor=1.1, string programDocumentString="", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
+        public static List<DeptData> MakeDataStackFromString(double circulationFactor=1.1, string programDocumentString="", bool stackingOptionsDept = false, bool stackingOptionsProg = false)
         {
             if (programDocumentString == "") return null;
             double dim = 5;
@@ -175,7 +175,7 @@ namespace SpacePlanning
             for (int i = 0; i < deptDataStack.Count; i++) totalDeptArea += deptDataStack[i].DeptAreaNeeded;
             for (int i = 0; i < deptDataStack.Count; i++) deptDataStack[i].DeptAreaProportionNeeded = Math.Round((deptDataStack[i].DeptAreaNeeded / totalDeptArea), 3);
 
-            return SortProgramsByPrefInDept(deptDataStack, stackingOptionsProg, designSeed);
+            return SortProgramsByPrefInDept(deptDataStack, stackingOptionsProg);
 
         }
 
@@ -581,7 +581,7 @@ namespace SpacePlanning
         }
 
         //sorts a program data inside dept data based on PREFERENCEPOINT 
-        internal static List<DeptData> SortProgramsByPrefInDept(List<DeptData> deptDataInp, bool stackingOptions = false, int designSeed = 0)
+        internal static List<DeptData> SortProgramsByPrefInDept(List<DeptData> deptDataInp, bool stackingOptions = false)
         {
             double weight = 1; //
             if (deptDataInp == null) return null;

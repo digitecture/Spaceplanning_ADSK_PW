@@ -583,7 +583,7 @@ namespace SpacePlanning
                 double value = BasicUtility.RandomBetweenNumbers(new Random(iteration), 1, 0);
                 if (value > 0.5) side = 1;
                 else side = 0;
-                Dictionary<string, object> quadrantObj = PolygonUtility.GetPointOnOneQuadrantTest(orthoSiteOutline, iteration,side);
+                Dictionary<string, object> quadrantObj = PolygonUtility.GetPointOnOneQuadrant(orthoSiteOutline, iteration,side);
                 center = (Point2d)quadrantObj["RandomPoint"];
                 if(value > 0.65) center = PolygonUtility.PlaceRandomPointInsidePoly(orthoSiteOutline, iteration);
             }

@@ -23,20 +23,11 @@ namespace SpacePlanning
         private List<Point2d> _siteBoundingBox = new List<Point2d>();
         private double _dimX;
         private double _dimY;
+
         internal static int FORMCOUNT = 10;
-
-
         private static int MINCELL = 250, MAXCELL = 550;
 
-        //constructor
-        internal GridObject(List<Point2d> siteOutline, List<Point2d> siteBoundingBox, double dimensionX, double dimensionY)
-        {
 
-            _siteOutline = siteOutline;
-            _siteBoundingBox = siteBoundingBox;
-            _dimX = dimensionX;
-            _dimY = dimensionY;
-        }
 
 
         #region - Public Methods
@@ -218,42 +209,7 @@ namespace SpacePlanning
             return cellsPolyList;
         }
 
-        //make grahams scan algo based convex hull from an input list of points
-        /// <summary>
-        /// Makes convex hull for an input list of points based on Grahams scan algorithm.
-        /// Returns list of point2d.
-        /// </summary>
-        /// <param name="pointList">List of point2d whose convex hull needs to be made.</param>
-        /// <returns name="PointList">List of point2d representing the convex hull.</returns>
-        /// <search>
-        /// make convex hull based on grahams scan algorithm
-        /// </search>
-        internal static List<Point2d> ConvexHullFromPoint2dList(List<Point2d> pointList)
-        {
-            List<Point2d> convexHullPtList = new List<Point2d>();
-            int sizePtList = pointList.Count;
-            //get the lowest point in the list and place it on 0 index
-            PointUtility.GetLowestPointForGrahamsScan(ref pointList, sizePtList);
-            PointUtility.SortedPoint2dListForGrahamScan(ref pointList, sizePtList);
-            Stack tempStack = new Stack();
-            tempStack.Push(pointList[0]);
-            tempStack.Push(pointList[1]);
-            tempStack.Push(pointList[2]);
-            for (int i = 3; i < sizePtList; i++)
-            {
-                while (ValidateObject.CheckPointOrder(PointUtility.BeforeTopPointForGrahamScan(ref tempStack),
-                    (Point2d)tempStack.Peek(), pointList[i]) != 2 && tempStack.Count > 1) tempStack.Pop();
-                tempStack.Push(pointList[i]);
-            }
-            while (tempStack.Count > 0)
-            {
-                Point2d ptTop = (Point2d)tempStack.Peek();
-                convexHullPtList.Add(ptTop);
-                tempStack.Pop();
-            }
-            return convexHullPtList;
-        }
-
+    
         //creates grid lines on an input polygon2d
         /// <summary>
         /// Builds grid lines on an input polygon2d, based on input offset distance and multiplier
@@ -380,77 +336,6 @@ namespace SpacePlanning
         }
 
 
-        //makes orhtogonal form as polygon2d based on input ground coverage
-        /// <summary>
-        /// Builds the building outline form based on input site outline and ground coverage
-        /// </summary>
-        /// <param name="borderPoly">Orthogonal border polygon2d of the site outline</param>
-        /// <param name="origSitePoly">Original polygon2d of the site outline</param>
-        /// <param name="cellList">List of cell objects inside the site</param>
-        /// <param name="groundCoverage">Expected ground coverage, value between 0.2 to 0.8</param>
-        /// <param name="iteration">Number of times the node should iterate untill it retreives form satisfying ground coverage.</param>
-        /// <returns name="BuildingOutline">Polygon2d representing orthogonal poly outline.</returns>
-        /// <returns name="WholesomePolys">List of Polygon2d each wholesame having four sides.</returns>  
-        /// <returns name="SiteArea">Area of the site outline.</returns> 
-        /// <returns name="BuildingOutlineArea">Area of the building outline formed.</returns> 
-        /// <returns name="GroundCoverAchieved">Ground coverage achieved, value between 0.2 to 0.8.</returns> 
-        /// <returns name="SortedCells">Sorted cell objects.</returns> 
-        /// <search>
-        /// form maker, buildingoutline, orthogonal forms
-        /// </search>
-        [MultiReturn(new[] { "BuildingOutline","WholesomePolys", "SiteArea" , "BuildingOutlineArea", "GroundCoverAchieved", "SortedCells" })]
-        internal static Dictionary<string, object> FormMakeInSite(Polygon2d borderPolyInp, Polygon2d origSitePoly, 
-            List<Cell> cellList,double groundCoverage = 0.5, int iteration = 100, double notchDist = 10, bool randomToggle = false, bool notchToggle = true)
-        {
-            if (cellList == null) return null;
-            if (!ValidateObject.CheckPoly(borderPolyInp)) return null;
-            Polygon2d borderPoly = new Polygon2d(null);
-            if(notchToggle)
-            {
-                Dictionary<string, object> notchObj = PolygonUtility.RemoveAnyNotchesWithPoly(borderPolyInp, origSitePoly, notchDist);
-                borderPoly = (Polygon2d)notchObj["PolyNotchRemoved"];
-            }
-            bool blockPlaced = false;
-            int count = 0;
-            double areaSite = PolygonUtility.AreaPolygon(origSitePoly), eps = 0.05, areaPlaced = 0;
-            if (groundCoverage < eps) groundCoverage = 2 * eps;
-            if (groundCoverage > 0.8) groundCoverage = 0.8;
-            double groundCoverLow = groundCoverage - eps, groundCoverHigh = groundCoverage + eps;
-            Dictionary<string, object> wholeSomeData = new Dictionary<string, object>();
-            Random ran = new Random();
-            while (blockPlaced == false && count < iteration)
-            {
-                wholeSomeData = PolygonUtility.MakeWholesomeBlockInPoly(borderPoly, groundCoverage);
-                List<Polygon2d> polysWhole = (List<Polygon2d>)wholeSomeData["WholesomePolys"];
-
-                List<int> indicesList = BasicUtility.GenerateList(0, polysWhole.Count);
-                indicesList = BasicUtility.RandomizeList(indicesList, ran);
-                areaPlaced = 0;
-                for (int i = 0; i < polysWhole.Count; i++)
-                {
-                    if (randomToggle) { areaPlaced += PolygonUtility.AreaPolygon(polysWhole[indicesList[i]]); }
-                    else { areaPlaced += PolygonUtility.AreaPolygon(polysWhole[i]); }                 
-                }
-                if (areaPlaced < areaSite * groundCoverLow || areaPlaced > areaSite * groundCoverHigh) blockPlaced = false;
-                else blockPlaced = true;
-                count += 1;
-            }
-            List<Polygon2d> cleanWholesomePolyList = (List<Polygon2d>)wholeSomeData["WholesomePolys"];
-            Dictionary<string, object> mergeObject = MergePoly(cleanWholesomePolyList, cellList);
-            Polygon2d mergedPoly = (Polygon2d)mergeObject["MergedPoly"];
-            List<Cell> sortedCells = (List<Cell>)mergeObject["SortedCells"];
-            return new Dictionary<string, object>
-            {
-                { "BuildingOutline", (mergedPoly) },
-                { "WholesomePolys", (cleanWholesomePolyList) },
-                { "SiteArea", (areaSite) },
-                { "BuildingOutlineArea", (areaPlaced) },
-                { "GroundCoverAchieved", (areaPlaced/areaSite) },
-                { "SortedCells", (sortedCells)}
-            };
-        }
-
-
         /// <summary>
         /// Iteratively builds the building outline as per the input site coverage.
         /// </summary>
@@ -520,10 +405,8 @@ namespace SpacePlanning
             Trace.WriteLine("FORM BUILD OUTLINE ENDS+++++++++++++++++++++++++");
             return formBuildingOutlineObjBest;
         }
-
-
-
-
+        
+        //form building outline uses this function to make the building outline mutliple times, till it best satisfies the input requirement of site coverage
         [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired","SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         internal static Dictionary<string, object> BuildOutline(Polygon2d orthoSiteOutline, List<Cell> cellListInp, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints,
              [DefaultArgument("null")]List<double>weightList, double siteCoverage = 100, int iteration = 100, 
@@ -794,43 +677,7 @@ namespace SpacePlanning
                 { "CellNeighborMatrix", (cellNeighborMatrixPre) }
             };
         }
-
-
-
-        //bounding box from a group of cells
-        internal static Polygon2d FromCellsGetBoundingPoly(List<Cell> cellList)
-        {
-            if (cellList == null || cellList.Count == 0) return null;
-            List<Point2d> ptList = new List<Point2d>();
-            for (int i = 0; i < cellList.Count; i++) ptList.Add(cellList[i].CenterPoint);
-            Polygon2d poly =  new Polygon2d(ReadData.FromPointsGetBoundingPoly(ptList));
-            return PolygonUtility.OffsetPoly(poly, cellList[0].DimX / 2);
-        }
-
- 
-        //checks if cells are withing the range of given attractor points, with respective weight values.
-        internal static List<Cell> RemoveCellsBasedOnAttractors( List<Cell> cellListInp, [DefaultArgument("{}")]List<Point2d> attractorPointList, [DefaultArgument("{}")]List<double> weightList)
-        {
-            if (cellListInp == null || attractorPointList == null || weightList == null) return null;
-            List<Cell> cellList = cellListInp.Select(x => new Cell(x.CenterPoint, x.DimX, x.DimY,x.CellID)).ToList(); // example of deep copy           
-            List<Cell> selectedCells = new List<Cell>();
-            List<Polygon2d> circleList = new List<Polygon2d>();
-            for(int i = 0; i < attractorPointList.Count; i++) circleList.Add(PolygonUtility.CircleByRadius(attractorPointList[i], weightList[i]));
-            for (int i = 0; i < cellList.Count; i++)
-            {
-                bool inside = false;
-                for(int j = 0; j < circleList.Count; j++)
-                {
-                    Polygon2d currentPoly = circleList[j];
-                    if (GraphicsUtility.PointInsidePolygonTest(currentPoly, cellList[i].CenterPoint)) { inside = true; break; }            
-                }
-                if (!inside) selectedCells.Add(cellList[i]);
-
-            }// end of for loop
-            return selectedCells;
-        }
-
-       
+         
         //make cells inside polgon2d
         /// <summary>
         /// Builds cell objects inside a given polygon2d
@@ -867,6 +714,148 @@ namespace SpacePlanning
 
 
         #region - Private Methods
+
+
+        //bounding box from a group of cells
+        internal static Polygon2d FromCellsGetBoundingPoly(List<Cell> cellList)
+        {
+            if (cellList == null || cellList.Count == 0) return null;
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < cellList.Count; i++) ptList.Add(cellList[i].CenterPoint);
+            Polygon2d poly = new Polygon2d(ReadData.FromPointsGetBoundingPoly(ptList));
+            return PolygonUtility.OffsetPoly(poly, cellList[0].DimX / 2);
+        }
+
+        //checks if cells are withing the range of given attractor points, with respective weight values.
+        internal static List<Cell> RemoveCellsBasedOnAttractors(List<Cell> cellListInp, [DefaultArgument("{}")]List<Point2d> attractorPointList, [DefaultArgument("{}")]List<double> weightList)
+        {
+            if (cellListInp == null || attractorPointList == null || weightList == null) return null;
+            List<Cell> cellList = cellListInp.Select(x => new Cell(x.CenterPoint, x.DimX, x.DimY, x.CellID)).ToList(); // example of deep copy           
+            List<Cell> selectedCells = new List<Cell>();
+            List<Polygon2d> circleList = new List<Polygon2d>();
+            for (int i = 0; i < attractorPointList.Count; i++) circleList.Add(PolygonUtility.CircleByRadius(attractorPointList[i], weightList[i]));
+            for (int i = 0; i < cellList.Count; i++)
+            {
+                bool inside = false;
+                for (int j = 0; j < circleList.Count; j++)
+                {
+                    Polygon2d currentPoly = circleList[j];
+                    if (GraphicsUtility.PointInsidePolygonTest(currentPoly, cellList[i].CenterPoint)) { inside = true; break; }
+                }
+                if (!inside) selectedCells.Add(cellList[i]);
+
+            }// end of for loop
+            return selectedCells;
+        }
+
+
+        //makes orhtogonal form as polygon2d based on input site coverage
+        /// <summary>
+        /// Builds the building outline form based on input site outline and ground coverage
+        /// </summary>
+        /// <param name="borderPoly">Orthogonal border polygon2d of the site outline</param>
+        /// <param name="origSitePoly">Original polygon2d of the site outline</param>
+        /// <param name="cellList">List of cell objects inside the site</param>
+        /// <param name="groundCoverage">Expected ground coverage, value between 0.2 to 0.8</param>
+        /// <param name="iteration">Number of times the node should iterate untill it retreives form satisfying ground coverage.</param>
+        /// <returns name="BuildingOutline">Polygon2d representing orthogonal poly outline.</returns>
+        /// <returns name="WholesomePolys">List of Polygon2d each wholesame having four sides.</returns>  
+        /// <returns name="SiteArea">Area of the site outline.</returns> 
+        /// <returns name="BuildingOutlineArea">Area of the building outline formed.</returns> 
+        /// <returns name="GroundCoverAchieved">Ground coverage achieved, value between 0.2 to 0.8.</returns> 
+        /// <returns name="SortedCells">Sorted cell objects.</returns> 
+        /// <search>
+        /// form maker, buildingoutline, orthogonal forms
+        /// </search>
+        [MultiReturn(new[] { "BuildingOutline", "WholesomePolys", "SiteArea", "BuildingOutlineArea", "GroundCoverAchieved", "SortedCells" })]
+        internal static Dictionary<string, object> FormMakeInSite(Polygon2d borderPolyInp, Polygon2d origSitePoly,
+            List<Cell> cellList, double groundCoverage = 0.5, int iteration = 100, double notchDist = 10, bool randomToggle = false, bool notchToggle = true)
+        {
+            if (cellList == null) return null;
+            if (!ValidateObject.CheckPoly(borderPolyInp)) return null;
+            Polygon2d borderPoly = new Polygon2d(null);
+            if (notchToggle)
+            {
+                Dictionary<string, object> notchObj = PolygonUtility.RemoveAnyNotchesWithPoly(borderPolyInp, origSitePoly, notchDist);
+                borderPoly = (Polygon2d)notchObj["PolyNotchRemoved"];
+            }
+            bool blockPlaced = false;
+            int count = 0;
+            double areaSite = PolygonUtility.AreaPolygon(origSitePoly), eps = 0.05, areaPlaced = 0;
+            if (groundCoverage < eps) groundCoverage = 2 * eps;
+            if (groundCoverage > 0.8) groundCoverage = 0.8;
+            double groundCoverLow = groundCoverage - eps, groundCoverHigh = groundCoverage + eps;
+            Dictionary<string, object> wholeSomeData = new Dictionary<string, object>();
+            Random ran = new Random();
+            while (blockPlaced == false && count < iteration)
+            {
+                wholeSomeData = PolygonUtility.MakeWholesomeBlockInPoly(borderPoly, groundCoverage);
+                List<Polygon2d> polysWhole = (List<Polygon2d>)wholeSomeData["WholesomePolys"];
+
+                List<int> indicesList = BasicUtility.GenerateList(0, polysWhole.Count);
+                indicesList = BasicUtility.RandomizeList(indicesList, ran);
+                areaPlaced = 0;
+                for (int i = 0; i < polysWhole.Count; i++)
+                {
+                    if (randomToggle) { areaPlaced += PolygonUtility.AreaPolygon(polysWhole[indicesList[i]]); }
+                    else { areaPlaced += PolygonUtility.AreaPolygon(polysWhole[i]); }
+                }
+                if (areaPlaced < areaSite * groundCoverLow || areaPlaced > areaSite * groundCoverHigh) blockPlaced = false;
+                else blockPlaced = true;
+                count += 1;
+            }
+            List<Polygon2d> cleanWholesomePolyList = (List<Polygon2d>)wholeSomeData["WholesomePolys"];
+            Dictionary<string, object> mergeObject = MergePoly(cleanWholesomePolyList, cellList);
+            Polygon2d mergedPoly = (Polygon2d)mergeObject["MergedPoly"];
+            List<Cell> sortedCells = (List<Cell>)mergeObject["SortedCells"];
+            return new Dictionary<string, object>
+            {
+                { "BuildingOutline", (mergedPoly) },
+                { "WholesomePolys", (cleanWholesomePolyList) },
+                { "SiteArea", (areaSite) },
+                { "BuildingOutlineArea", (areaPlaced) },
+                { "GroundCoverAchieved", (areaPlaced/areaSite) },
+                { "SortedCells", (sortedCells)}
+            };
+        }
+
+
+        //make grahams scan algo based convex hull from an input list of points
+        /// <summary>
+        /// Makes convex hull for an input list of points based on Grahams scan algorithm.
+        /// Returns list of point2d.
+        /// </summary>
+        /// <param name="pointList">List of point2d whose convex hull needs to be made.</param>
+        /// <returns name="PointList">List of point2d representing the convex hull.</returns>
+        /// <search>
+        /// make convex hull based on grahams scan algorithm
+        /// </search>
+        internal static List<Point2d> ConvexHullFromPoint2dList(List<Point2d> pointList)
+        {
+            List<Point2d> convexHullPtList = new List<Point2d>();
+            int sizePtList = pointList.Count;
+            //get the lowest point in the list and place it on 0 index
+            PointUtility.GetLowestPointForGrahamsScan(ref pointList, sizePtList);
+            PointUtility.SortedPoint2dListForGrahamScan(ref pointList, sizePtList);
+            Stack tempStack = new Stack();
+            tempStack.Push(pointList[0]);
+            tempStack.Push(pointList[1]);
+            tempStack.Push(pointList[2]);
+            for (int i = 3; i < sizePtList; i++)
+            {
+                while (ValidateObject.CheckPointOrder(PointUtility.BeforeTopPointForGrahamScan(ref tempStack),
+                    (Point2d)tempStack.Peek(), pointList[i]) != 2 && tempStack.Count > 1) tempStack.Pop();
+                tempStack.Push(pointList[i]);
+            }
+            while (tempStack.Count > 0)
+            {
+                Point2d ptTop = (Point2d)tempStack.Peek();
+                convexHullPtList.Add(ptTop);
+                tempStack.Pop();
+            }
+            return convexHullPtList;
+        }
+
         //sorts a list of cells based on a equation
         [MultiReturn(new[] { "SortedCells", "SortedCellIndices", "XYEqualtionList" })]
         internal static Dictionary<string, object> SortCellList(List<Cell> cellLists)

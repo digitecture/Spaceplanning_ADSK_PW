@@ -51,14 +51,11 @@ namespace SpacePlanning
             List<string> prefValProgList = new List<string>();
             List<string> progAdjList = new List<string>();
             List<string> progTypeList = new List<string>();
-
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
             reader = new StreamReader(File.OpenRead(@programDocumentPath));
-            int readCount = 0;
             string docInfo = reader.ReadToEnd();
-            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg);         
-
+            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg);      
         }
 
      
@@ -92,11 +89,8 @@ namespace SpacePlanning
             List<List<string>> dataStack = new List<List<string>>();
             List<ProgramData> programDataStack = new List<ProgramData>();
             Stream res;
-
             int readCount = 0;
-
             string[] csvText = programDocumentString.Split('\n');
-            //Trace.WriteLine(csvText);
             foreach (string s in csvText)
             {
                 if (s.Length == 0) continue;
@@ -112,8 +106,6 @@ namespace SpacePlanning
                 deptIdList.Add(values[9]);
                 deptAdjList.Add(values[10]);
                 List<Cell> dummyCell = new List<Cell> { new Cell(Point2d.ByCoordinates(0, 0), 0, 0, 0, true) };
-                //List<string> adjList = new List<string>();
-                //adjList.Add(values[8]);
                 ProgramData progData = new ProgramData(Convert.ToInt32(values[0]), values[1], values[2], Convert.ToInt32(Convert.ToDouble(values[3])),
                 Convert.ToDouble(values[4]), Convert.ToInt32(values[6]), progAdjList, dummyCell, dim, dim, Convert.ToString(values[7]), stackingOptionsProg); // prev multipled circulationfactor with unit area of prog
                 programDataStack.Add(progData);
@@ -135,7 +127,6 @@ namespace SpacePlanning
                 }
             }
 
-
             List<List<string>> deptAdjProvList = new List<List<string>>();
             for (int i = 0; i < deptAdjSequenced.Count; i++)
             {
@@ -143,8 +134,6 @@ namespace SpacePlanning
                 List<string> adjList = adjacency.Split('.').ToList();
                 deptAdjProvList.Add(adjList);
             }
-
-            // Dictionary<string,object> deptAssemblies = FindPreferredProgs(deptIdSequenced, deptAdjProvList);
 
             List<DeptData> deptDataStack = new List<DeptData>();
             Dictionary<string, object> progAdjWeightObj = FindPreferredProgs(progIdList, progAdjList);
@@ -164,12 +153,8 @@ namespace SpacePlanning
             }// end of for loop statement
             Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList, progTypeList, progAdjList);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
-            //sort the depts by high area
-            //bool tag = true;
-            //if (!stackingOptionsProg) tag = true;
-            //else tag = false;
+ 
             deptDataStack = SortDeptData(deptDataStack, preferredDept, stackingOptionsProg);
-
             //added to compute area percentage for each dept
             double totalDeptArea = 0;
             for (int i = 0; i < deptDataStack.Count; i++) totalDeptArea += deptDataStack[i].DeptAreaNeeded;
@@ -185,7 +170,7 @@ namespace SpacePlanning
 
 
 
-        //read embedded .csv file and make data stack
+        //builds dept adjaceny weights based on program prefereences.
         /// <summary>
         /// Builds the data stack from the embedded program document.
         /// Returns the Dept Data object
@@ -236,13 +221,8 @@ namespace SpacePlanning
             List<string> deptNames = GetDeptNames(deptNameList);
             for (int i = 0; i < deptNames.Count; i++)
             {
-                for(int j = 0; j < kpuDeptList.Count; j++)
-                {
-                    if (deptNames[i] == kpuDeptList[j]) { kpuIndex = i; kpuIndices.Add(i); }
-                }
-             
-            }
-  
+                for(int j = 0; j < kpuDeptList.Count; j++) if (deptNames[i] == kpuDeptList[j]) { kpuIndex = i; kpuIndices.Add(i); }         
+            }  
 
             List<List<string>> NumberOfDeptNames = new List<List<string>>();
             List<List<string>> NumberOfDeptTop = new List<List<string>>();
@@ -290,8 +270,7 @@ namespace SpacePlanning
             depImpList = depImpList.Distinct().ToList();
             for (int i = 0; i < depImpList.Count(); i++) depImpList.Remove("");
             return new Dictionary<string, object>
-            {
- 
+            { 
                  { "DeptTopoList", (deptTopList) },
                  { "DeptTopoAdjacency", (deptNameAdjacencyList) },
                  { "EachDeptAdjDeptList", (NumberOfDeptNames) },
@@ -299,17 +278,15 @@ namespace SpacePlanning
                  { "DeptNamesUnique", (deptNames) },
                  { "MostFrequentDept", (mostFreq) },
                  { "MostFrequentDeptSorted", (depImpList) }
-
             };
         }
         
 
        
-        // build prog adjacency list based on popularity of the program
+        // builds adjacency weight list based on user program adjacency
         [MultiReturn(new[] { "IdList","AdjList", "AdjWeightList"})]
         public static Dictionary<string, object> FindPreferredProgs(List<string> idList, List<string> adjListInput)
-        {    
-           
+        {               
             List<string> itemAdjId = new List<string>();
             for (int i = 0; i < idList.Count; i++)
             {
@@ -333,7 +310,6 @@ namespace SpacePlanning
                 for(int j = 0; j < itemAdjId.Count; j++) if (i == numIdList[j]) count += 1;
                 adjWeightList.Add(count);
             }
-
             adjWeightList = BasicUtility.NormalizeList(adjWeightList, 0, 10);
             return new Dictionary<string, object>
             {
@@ -347,13 +323,13 @@ namespace SpacePlanning
     
 
 
-
+        //returns dept for a given program id
         internal static string FindDeptForProgId(List<string> deptName, int id = 5)
         {
             return deptName[id];
         }
 
-
+        //convert adjacency input from the program document into a list of dept id's adjacent for each dept
         internal static List<List<string>> MakeDeptTopology(List<string> adjList)
         {
             List<List<string>> stringNumber = new List<List<string>>();
@@ -454,7 +430,6 @@ namespace SpacePlanning
         {
             string type = geomList[0].GetType().ToString();
             List<Point2d> pointList = new List<Point2d>();
-            //Trace.WriteLine("list found is + " + type);
             List<NurbsCurve> nurbList = new List<NurbsCurve>();
             if (type.IndexOf("Line") != -1)
             {
@@ -472,14 +447,7 @@ namespace SpacePlanning
                 
                 nurbList = new List<NurbsCurve>();
                 for (int i = 0; i < geomList.Count; i++) { nurbList.Add((NurbsCurve)geomList[i]); }
-                /*
-                for (int i = 0; i < nurbList.Count; i++)
-                {
-                    Point2d pointPerCurve = Point2d.ByCoordinates(nurbList[i].StartPoint.X, nurbList[i].StartPoint.Y);
-                    pointList.Add(pointPerCurve);
-                    if (i == nurbList.Count) pointList.Add(Point2d.ByCoordinates(nurbList[i].EndPoint.X, nurbList[i].EndPoint.Y));
-                }
-                */
+     
             }
             else return null;
 
@@ -503,7 +471,6 @@ namespace SpacePlanning
                 pointList.Add(pointPerCurve);
                 if (i == curvList.Count) pointList.Add(Point2d.ByCoordinates(curvList[i].EndPoint.X, curvList[i].EndPoint.Y));
             }
-            //return new Polygon2d(pointList);
             return new Dictionary<string, object>
             {
                 { "InsetSiteOutline", (new Polygon2d(pointList)) }
@@ -564,7 +531,6 @@ namespace SpacePlanning
         //get program list quantity and make new list based on it
         internal static List<ProgramData> MakeProgramListBasedOnQuantity(List<ProgramData> progData)
         {
-            //List<ProgramData> progQuantityBasedList = new List<ProgramData>();
             List<ProgramData> progQuantityBasedList = progData.Select(x => new ProgramData(x)).ToList(); // example of deep copy
 
             for (int i = 0; i < progData.Count; i++)
@@ -587,7 +553,6 @@ namespace SpacePlanning
             if (deptDataInp == null) return null;
             List<DeptData> deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
 
-            //for (int i = 0; i < deptDataInp.Count; i++) deptData.Add(new DeptData(deptDataInp[i]));
             double eps = 01, inc = 0.01;
             for (int i = 0; i < deptData.Count; i++)
             {
@@ -641,9 +606,7 @@ namespace SpacePlanning
             List<string> deptFound = new List<string>();
             //Queue<string> preferredDeptQueue = new Queue<string>();
             for (int i = 0; i < preferredDept.Count; i++) weightList.Add(10000000 - (i + 1) * 1000);
-           
-           
-                
+                          
             for (int i = 0; i < deptData.Count; i++)
             {
                 bool match = false;
@@ -671,8 +634,7 @@ namespace SpacePlanning
                 else if (deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[i].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1)
                         surpluss = 1000000000 + eps + areaList[i];
                 else
-                        surpluss = areaList[i];
-               
+                        surpluss = areaList[i];               
 
                 double area = 0.25 * deptData[i].DeptAreaNeeded + surpluss;
                 deptData[i].DeptAdjacencyWeight = area;

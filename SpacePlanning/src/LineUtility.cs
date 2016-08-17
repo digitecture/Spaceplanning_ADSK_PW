@@ -33,7 +33,6 @@ namespace SpacePlanning
             return new Line2d(ptStart, ptEnd);
         }
 
-
         //given a poly, and a lineId, gives the max offset distance it can go inside a poly
         public static double FindMaxOffsetInPoly(Polygon2d poly, int lineId)
         {
@@ -54,11 +53,7 @@ namespace SpacePlanning
             else return -1;
             return PointUtility.DistanceBetweenPoints(midPt, farPt);
         }
-
-
-
-
-
+        
         //given a poly, and a lineId, gives the max offset distance it can go inside a poly
         public static Line2d FindBisectorLine(Polygon2d poly, int lineId)
         {
@@ -88,7 +83,6 @@ namespace SpacePlanning
             return GraphicsUtility.LinePolygonIntersection(poly.Points, bisectorLine);
 
         }
-
 
         //returns the midPt of a line
         public static Point2d LineMidPoint(Line2d line)
@@ -235,7 +229,7 @@ namespace SpacePlanning
             else return -1;
         }
 
-        //moves a line by a given distance inside a given poly
+        //moves a line by a given distance
         internal static Line2d Move(Line2d line, List<Point2d> poly, double distance)
         {
             Point2d midPt = LineMidPoint(line);
@@ -243,7 +237,6 @@ namespace SpacePlanning
             Vector2d vecToCenter = new Vector2d(midPt, centerPoly);
             Vector2d vecToCenterN = vecToCenter.Normalize();
             Vector2d vectScaled = vecToCenter.Scale(distance);
-
             Point2d start = new Point2d((line.StartPoint.X + vectScaled.X), (line.StartPoint.Y + vectScaled.Y));
             Point2d end = new Point2d((line.EndPoint.X + vectScaled.X), (line.EndPoint.Y + vectScaled.Y));
             return new Line2d(start, end);
@@ -349,7 +342,7 @@ namespace SpacePlanning
         }
 
         //removes duplicate lines from a list, based on the lines from another list
-        public static List<Line2d> RemoveDuplicateLinesFromAnotherList(List<Line2d> lineListOrig, List<Line2d> otherLineList)
+        internal static List<Line2d> RemoveDuplicateLinesFromAnotherList(List<Line2d> lineListOrig, List<Line2d> otherLineList)
         {
             //List<Line2d> lineEditedList = new List<Line2d>();
             //for (int i = 0; i < lineListOrig.Count; i++) lineEditedList.Add(lineListOrig[i]);
@@ -379,7 +372,7 @@ namespace SpacePlanning
         }
 
         //checks if two lines are same 
-        public static bool IsLineDuplicate(Line2d A, Line2d B)
+        internal static bool IsLineDuplicate(Line2d A, Line2d B)
         {
             bool check = false;
             double eps = 0.1;
@@ -396,7 +389,7 @@ namespace SpacePlanning
         }
 
         //removes duplicates lines from a list of lines
-        public static List<Line2d> CleanLines(List<Line2d> lineList)
+        internal static List<Line2d> CleanLines(List<Line2d> lineList)
         {
             List<Line2d> cleanList = new List<Line2d>();
             List<bool> taggedList = new List<bool>();

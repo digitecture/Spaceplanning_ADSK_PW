@@ -96,9 +96,7 @@ namespace SpacePlanning
 
             };
         }
-
-
-
+        
         //Builds Dept Topology Matrix , finds all the shared edges between dept polys, and updates department polygon2d's.
         /// <summary>
         /// Builds the department topology matrix internally and finds circulation network lines between department polygon2d's. 
@@ -110,49 +108,7 @@ namespace SpacePlanning
         /// <search>
         /// Department Circulation Network, Shared Edges between departments
         /// </search>
-       
-        internal static List<Line2d> RemoveNetworkRedundancy(List<Line2d> networkLines, double circulationFrequency = 10)
-        {
-            if (networkLines == null) return null;
-            circulationFrequency = 1 - circulationFrequency;
-            Polygon2d bBox = ReadData.GetBoundingBoxfromLines(networkLines);
-            List<double> spans = PolygonUtility.GetSpansXYFromPolygon2d(bBox.Points);// horizontal span 1st, then vertical span
-            List<Line2d> horizLines = new List<Line2d>(), vertLines = new List<Line2d>();
-            for(int i = 0; i < networkLines.Count; i++)
-            {
-                if (ValidateObject.CheckLineOrient(networkLines[i]) == 0) horizLines.Add(networkLines[i]);
-                else if (ValidateObject.CheckLineOrient(networkLines[i]) == 1) vertLines.Add(networkLines[i]);              
-            }
-            List<Line2d> selectedHorizLines = new List<Line2d>(), selectedVertLines = new List<Line2d>();
-            for(int i = 0; i < horizLines.Count; i++)
-            {
-                double thresDistance = circulationFrequency * spans[0];
-                int a = i, b = i + 1;
-                if (i == horizLines.Count - 1) b = 0;
-                Point2d midA = LineUtility.LineMidPoint(horizLines[a]), midB = LineUtility.LineMidPoint(horizLines[b]);
-                double xDist = Math.Abs(midA.Y - midB.Y);
-                if(xDist > thresDistance) { selectedHorizLines.Add(horizLines[a]) ; }
-            }
-
-            for (int i = 0; i < vertLines.Count; i++)
-            {
-                double thresDistance = circulationFrequency * spans[1];
-                int a = i, b = i + 1;
-                if (i == vertLines.Count - 1) b = 0;
-                Point2d midA = LineUtility.LineMidPoint(vertLines[a]), midB = LineUtility.LineMidPoint(vertLines[b]);
-                double yDist = Math.Abs(midA.X - midB.X);
-                if (yDist > thresDistance) { selectedVertLines.Add(vertLines[a]); }
-            }
-            List<Line2d> reducedLines = new List<Line2d>();
-            reducedLines.AddRange(selectedHorizLines);
-            reducedLines.AddRange(selectedVertLines);
-
-            return reducedLines;
-          
-        }
-
-
-
+              
         //Make circulation Polygons2d's between departments
         /// <summary>
         /// Builds cirulation polygon2d's between departments.
@@ -373,8 +329,48 @@ namespace SpacePlanning
             };
         }
 
+        internal static List<Line2d> RemoveNetworkRedundancy(List<Line2d> networkLines, double circulationFrequency = 10)
+        {
+            if (networkLines == null) return null;
+            circulationFrequency = 1 - circulationFrequency;
+            Polygon2d bBox = ReadData.GetBoundingBoxfromLines(networkLines);
+            List<double> spans = PolygonUtility.GetSpansXYFromPolygon2d(bBox.Points);// horizontal span 1st, then vertical span
+            List<Line2d> horizLines = new List<Line2d>(), vertLines = new List<Line2d>();
+            for (int i = 0; i < networkLines.Count; i++)
+            {
+                if (ValidateObject.CheckLineOrient(networkLines[i]) == 0) horizLines.Add(networkLines[i]);
+                else if (ValidateObject.CheckLineOrient(networkLines[i]) == 1) vertLines.Add(networkLines[i]);
+            }
+            List<Line2d> selectedHorizLines = new List<Line2d>(), selectedVertLines = new List<Line2d>();
+            for (int i = 0; i < horizLines.Count; i++)
+            {
+                double thresDistance = circulationFrequency * spans[0];
+                int a = i, b = i + 1;
+                if (i == horizLines.Count - 1) b = 0;
+                Point2d midA = LineUtility.LineMidPoint(horizLines[a]), midB = LineUtility.LineMidPoint(horizLines[b]);
+                double xDist = Math.Abs(midA.Y - midB.Y);
+                if (xDist > thresDistance) { selectedHorizLines.Add(horizLines[a]); }
+            }
+
+            for (int i = 0; i < vertLines.Count; i++)
+            {
+                double thresDistance = circulationFrequency * spans[1];
+                int a = i, b = i + 1;
+                if (i == vertLines.Count - 1) b = 0;
+                Point2d midA = LineUtility.LineMidPoint(vertLines[a]), midB = LineUtility.LineMidPoint(vertLines[b]);
+                double yDist = Math.Abs(midA.X - midB.X);
+                if (yDist > thresDistance) { selectedVertLines.Add(vertLines[a]); }
+            }
+            List<Line2d> reducedLines = new List<Line2d>();
+            reducedLines.AddRange(selectedHorizLines);
+            reducedLines.AddRange(selectedVertLines);
+
+            return reducedLines;
+
+        }
+
         #endregion
 
-        
+
     }
 }

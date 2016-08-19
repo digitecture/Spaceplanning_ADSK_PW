@@ -7,7 +7,7 @@ using Autodesk.DesignScript.Runtime;
 
 namespace SpacePlanning
 {
-    internal static class ValidateObject
+    public static class ValidateObject
     {
         #region - Private Methods
         // Given three colinear points p, q, r, the function checks if

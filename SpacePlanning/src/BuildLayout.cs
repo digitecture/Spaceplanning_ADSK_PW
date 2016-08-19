@@ -779,7 +779,7 @@ namespace SpacePlanning
 
 
 
-        //blocks are assigne based on offset distance, used for KPU Dept 
+        //blocks are assigne based on offset distance, uDsed for KPU Dept 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" })]
         public static Dictionary<string, object> FitRegDept( List<Polygon2d> polyList, List<double> areaList)
         {
@@ -932,8 +932,8 @@ namespace SpacePlanning
 
         //adds circulation polygons to a list of polygons and a container polygon
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly" })]
-        public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList,List<Polygon2d> containerPoly
-           , int designSeed = 2, double circulationWidth = 3)
+        public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList,List<Polygon2d> containerPoly,
+            double circulationWidth = 3)
         {
             //containerPoly = new Polygon2d(containerPoly.Points);
             List<Polygon2d> polyCleanList = new List<Polygon2d>();
@@ -953,7 +953,6 @@ namespace SpacePlanning
             List<int> lineIdList = new List<int>();
             for (int i=0;i<polyList.Count;i++)
             {
-                if (i > designSeed) break;
                 List<Line2d> lineList = new List<Line2d>();
                 for (int j = 0; j < polysToVerify.Count; j++) lineList.AddRange(polysToVerify[j].Lines);
                 lineIdList = PolygonUtility.FindNotAdjacentPolyToLinesEdges(polyList[i], lineList, 0, 0);
@@ -1180,7 +1179,7 @@ namespace SpacePlanning
                     areaAssigned = (double)publicDeptObj["AreaAssignedToBlock"];
                     exitLine = (Line2d)publicDeptObj["ExitLine"];
                     //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(publicDepts, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(publicDepts, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     publicDepts = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
@@ -1233,7 +1232,7 @@ namespace SpacePlanning
                     }
 
                     //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(kpuBlock, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(kpuBlock, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     kpuBlock = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
@@ -1322,7 +1321,7 @@ namespace SpacePlanning
 
                     
                     //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     everyDeptPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
                     AllDeptCircPolys.Add(cirPublicDeptPoly);
@@ -1488,7 +1487,7 @@ namespace SpacePlanning
                     areaAssigned = (double)publicDeptObj["AreaAssignedToBlock"];
                     exitLine = (Line2d)publicDeptObj["ExitLine"];
                     //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(publicDepts, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(publicDepts, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     publicDepts = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
@@ -1541,7 +1540,7 @@ namespace SpacePlanning
                     }
 
                     //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(kpuBlock, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(kpuBlock, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     kpuBlock = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
@@ -1626,11 +1625,9 @@ namespace SpacePlanning
                     List<Polygon2d> everyDeptPoly = (List<Polygon2d>)assignedByRatioObj["DeptPoly"];
                     leftOverPoly = (List<Polygon2d>)assignedByRatioObj["LeftOverPoly"];
                     areaAssigned = (double)assignedByRatioObj["AreaAdded"];
-
-
-
-                    //place circulation on Public Dept Poly
-                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                    
+                    //place circulation on reg Dept Poly
+                    Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     everyDeptPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
                     AllDeptCircPolys.Add(cirPublicDeptPoly);

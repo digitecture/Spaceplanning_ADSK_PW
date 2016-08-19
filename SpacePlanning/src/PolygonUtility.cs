@@ -180,7 +180,7 @@ namespace SpacePlanning
 
         //get a poly and find rectangular polys inside. then merge them together to form a big poly 
         [MultiReturn(new[] { "WholesomePolys", "PolysAfterSplit", "AllSplitLines"})]
-        public static Dictionary<string, object> MakeWholesomeBlockInPoly(Polygon2d poly, double dim = 10,double recompute = 5)
+        public static Dictionary<string, object> MakeWholesomeBlockInPoly(Polygon2d poly, double dim = 10,int designSeed = 5)
         {
             if (poly == null || poly.Points == null || poly.Points.Count == 0) return null;
             List<Polygon2d> wholesomePolyList = new List<Polygon2d>();
@@ -202,7 +202,7 @@ namespace SpacePlanning
             Stack<Polygon2d> splittedPolys = new Stack<Polygon2d>();
             Polygon2d currentPoly = new Polygon2d(SmoothPolygon(polyReg.Points, BuildLayout.SPACING));
             splittedPolys.Push(currentPoly);
-            Random ran = new Random();
+            Random ran = new Random(designSeed);
             int countBig = 0, maxRounds = 50;
             List<int> numSidesList = new List<int>();
             List<Polygon2d> allPolyAfterSplit = new List<Polygon2d>();

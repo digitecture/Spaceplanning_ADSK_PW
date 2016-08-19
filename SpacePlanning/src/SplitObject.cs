@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SpacePlanning
 {
-    internal static class SplitObject
+    public static class SplitObject
     {
 
         #region - Public Methods
@@ -67,7 +67,49 @@ namespace SpacePlanning
             polyAllReturn.Add(polyCirculationList);
             return polyAllReturn;
         }
-        
+
+        //subdivide a given poly into smaller parts till acceptable width is met, returns list of polydept grids and list of polys to compute circulation
+        public static List<Polygon2d> SplitRecursivelyMakePolyAndConnection(List<Polygon2d> polyList, double acceptableWidth = 10, double ratio = 0.5, bool tag = false, int numPoly = 2)
+        {
+            int designSeed = 0;
+            if (!ValidateObject.CheckPolyList(polyList)) return null;
+            int count = 0;
+            Queue<Polygon2d> polyQueue = new Queue<Polygon2d>();
+            List<List<Polygon2d>> polyAllReturn = new List<List<Polygon2d>>();
+            List<Polygon2d> polyBrokenList = new List<Polygon2d>();
+            for (int i = 0; i < polyList.Count; i++) polyQueue.Enqueue(polyList[i]);
+            Random rand = new Random(designSeed);
+            while (polyQueue.Count > 0 && count < numPoly)
+            {
+                Polygon2d currentPoly = polyQueue.Dequeue();
+                Dictionary<string, object> splitObj = SplitByRatio(currentPoly, ratio, 0);
+                if (tag) ratio = BasicUtility.RandomBetweenNumbers(rand, 0.7, 0.35);
+                if (splitObj == null) continue;
+                List<Polygon2d> polySplitList = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                if (ValidateObject.CheckPolyList(polySplitList) && polySplitList.Count > 1)
+                {
+                    polySplitList = PolygonUtility.SmoothPolygonList(polySplitList, 2);
+                    Polygon2d bbox1 = Polygon2d.ByPoints(ReadData.FromPointsGetBoundingPoly(polySplitList[0].Points));
+                    Polygon2d bbox2 = Polygon2d.ByPoints(ReadData.FromPointsGetBoundingPoly(polySplitList[1].Points));
+                    if (!ValidateObject.CheckPoly(bbox1) || !ValidateObject.CheckPoly(bbox2)) continue;
+                    if (bbox1.Lines[0].Length < acceptableWidth || bbox1.Lines[1].Length < acceptableWidth) polyBrokenList.Add(polySplitList[0]);
+                    else polyQueue.Enqueue(polySplitList[0]);
+                    if (bbox2.Lines[0].Length < acceptableWidth || bbox2.Lines[1].Length < acceptableWidth) polyBrokenList.Add(polySplitList[1]);
+                    else polyQueue.Enqueue(polySplitList[1]);
+                }
+                if (ValidateObject.CheckPolyList(polySplitList) && polySplitList.Count < 2)
+                {
+                    Polygon2d bbox1 = Polygon2d.ByPoints(ReadData.FromPointsGetBoundingPoly(polySplitList[0].Points));
+                    if (!ValidateObject.CheckPoly(bbox1)) continue;
+                    if (bbox1.Lines[0].Length < acceptableWidth || bbox1.Lines[1].Length < acceptableWidth) polyBrokenList.Add(polySplitList[0]);
+                    else polyQueue.Enqueue(polySplitList[0]);
+                }
+                count += 1;
+            }// end of while loop
+            for (int i = 0; i < polyQueue.Count; i++) polyBrokenList.Add(polyQueue.Dequeue());
+            return polyBrokenList;
+        }
+
         //splits a polygon into two based on ratio and dir
         [MultiReturn(new[] { "PolyAfterSplit", "SplitLine", "IntersectedPoints" })]
         public static Dictionary<string, object> SplitByRatio(Polygon2d polyOutline, double ratio = 0.5, int dir = 0)

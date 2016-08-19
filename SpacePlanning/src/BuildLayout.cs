@@ -1398,7 +1398,7 @@ namespace SpacePlanning
             bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false)
         {
             double acceptableWidth = 0;
-            double circulationWidth = 5;
+            double circulationWidth = 3;
             if (deptData == null) { return null; }
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");
@@ -1584,6 +1584,7 @@ namespace SpacePlanning
                             //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);  
                         }
                         acceptableWidth = Math.Sqrt(arealeft) / DIVISION;
+                        acceptableWidth = 35;
                         polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
 
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
@@ -1606,14 +1607,14 @@ namespace SpacePlanning
                         if (leftOverPoly == null) break;
                         prepareReg = true;
 
-                        /*
+                        
                         //add the circulation
-                        //place circulation on Public Dept Poly
-                        Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(leftOverPoly, currentPolyList, designSeed, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
+                        //place circulation on reg Dept Poly
+                        Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(leftOverPoly, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                         List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                         leftOverPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
                         AllDeptCircPolys.Add(cirPublicDeptPoly);
-                        */
+                        
 
                     }// end of prepare reg dept
                     double areaNeeded = deptItem.DeptAreaNeeded;
@@ -1626,11 +1627,14 @@ namespace SpacePlanning
                     leftOverPoly = (List<Polygon2d>)assignedByRatioObj["LeftOverPoly"];
                     areaAssigned = (double)assignedByRatioObj["AreaAdded"];
                     
+
+                    /*
                     //place circulation on reg Dept Poly
                     Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(everyDeptPoly, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
                     List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
                     everyDeptPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
                     AllDeptCircPolys.Add(cirPublicDeptPoly);
+                    */
 
 
 

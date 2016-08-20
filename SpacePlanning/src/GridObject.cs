@@ -468,18 +468,18 @@ namespace SpacePlanning
         /// <search>
         /// form maker, buildingoutline, orthogonal forms
         /// </search>
-        [MultiReturn(new[] { "BuildingOutline",  "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
-        public static Dictionary<string, object> FormBuildingOutline(Polygon2d orthoSiteOutline, 
+        [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired", "SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
+        public static Dictionary<string, object> FormBuildingOutline(Polygon2d orthoSiteOutline,
             List<Cell> cellList, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints, [DefaultArgument("null")]List<double> weightList,
-     double siteCoverage = 0.5, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10)
+     double siteCoverage = 100, int designSeed = 100, bool removeNotch = false, double minNotchDistance = 10, bool highIteration = false)
         {
-            bool highIteration = false;
-            if (highIteration == true) FORMCOUNT = 5;
+            //bool highIteration = true;
+            if (highIteration == true) FORMCOUNT = 15;
             Trace.WriteLine("FORM BUILD OUTLINE STARTS+++++++++++++++++++++++++");
             if (designSeed < 1) designSeed = 1;
             int count = 0, maxTry = 1;
             bool cellRefine = false;
-            int scanResolution = 8;
+            int scanResolution = 5;
             bool worked = false;
             double siteCoverAchieved = 0, scDifference = 0, scDifferenceBest = 10000;
             Dictionary<string, object> formBuildingOutlineObj = new Dictionary<string, object>();
@@ -526,7 +526,7 @@ namespace SpacePlanning
 
         [MultiReturn(new[] { "BuildingOutline", "SiteArea", "LeftOverArea", "BuildingOutlineArea", "SiteCoverageRequired","SiteCoverageAchieved", "CellList", "CellNeighborMatrix" })]
         internal static Dictionary<string, object> BuildOutline(Polygon2d orthoSiteOutline, List<Cell> cellListInp, [DefaultArgument("null")]List<DeptData> deptData, [DefaultArgument("null")]List<Point2d> attractorPoints,
-             [DefaultArgument("null")]List<double>weightList, double siteCoverage = 0.5, int iteration = 100, 
+             [DefaultArgument("null")]List<double>weightList, double siteCoverage = 100, int iteration = 100, 
             bool removeNotch = false, double minNotchDistance  = 10,int dummy=100, bool cellRefine = false)
         {
            
@@ -542,19 +542,19 @@ namespace SpacePlanning
             double areaRequired = 0;
             int count = 0, dir = 0, prevDir = 0, countInner =0, countCircleMode = 0, countExtremeMode = 0, extremePointIndex = 0;
             double areaSite = PolygonUtility.AreaPolygon(orthoSiteOutline), areaPlaced = 0;
-            if (deptData == null)
+            if (deptData == null || siteCoverage != 100)
             {
                 if (siteCoverage < eps) siteCoverage = 2 * eps;
                 if (siteCoverage > 0.8) siteCoverage = 0.8;
             }
             else
             {
-                for(int i = 0; i < deptData.Count; i++) areaRequired += deptData[i].DeptAreaNeeded;
+                for (int i = 0; i < deptData.Count; i++) areaRequired += deptData[i].DeptAreaNeeded;
                 siteCoverage = areaRequired / areaSite;
                 if (siteCoverage > 0.99) { siteCoverage = 0.9; }
             }
 
-            
+
             double areaBuilding = siteCoverage * areaSite, areaLeft = 10000;
             List<double> areaPartsList = new List<double>();
             for (int i = 0; i < number; i++)

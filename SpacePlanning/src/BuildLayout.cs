@@ -78,7 +78,7 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false, 
+            double acceptableWidth = 25 , double polyDivision = 8, int designSeed = 50, bool noExternalWall = false, 
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2, bool highIteration = false)
         {
             if (highIteration == true) DEPTCOUNT = 5;

@@ -68,11 +68,9 @@ namespace SpacePlanning
             polyAllReturn.Add(polyCirculationList);
             return polyAllReturn;
         }
-
-
         //splits a polygon into two based on ratio and dir
         [MultiReturn(new[] { "PolyAfterSplit", "SplitLine", "IntersectedPoints" })]
-        public static Dictionary<string, object> SplitByRatio(Polygon2d polyOutline, double ratio = 0.5, int dir = 0)
+        public static Dictionary<string, object> SplitByRatio(Polygon2d polyOutline, double ratio = 0.5, int dir = 0, double spacing = 0)
         {
             if (polyOutline == null) return null;
             if (polyOutline != null && polyOutline.Points == null) return null;
@@ -80,7 +78,8 @@ namespace SpacePlanning
             double extents = 5000;
             double minimumLength = 2, minWidth = 10, aspectRatio = 0, eps = 0.1;
             List<Point2d> polyOrig = polyOutline.Points;
-            List<Point2d> poly = PolygonUtility.SmoothPolygon(polyOrig, BuildLayout.SPACING);
+            if (spacing == 0) spacing = BuildLayout.SPACING;
+            List<Point2d> poly = PolygonUtility.SmoothPolygon(polyOrig, spacing);
             List<double> spans = PolygonUtility.GetSpansXYFromPolygon2d(poly);
             double horizontalSpan = spans[0], verticalSpan = spans[1];
             Point2d polyCenter = PolygonUtility.CentroidOfPoly(Polygon2d.ByPoints(poly));
@@ -102,6 +101,7 @@ namespace SpacePlanning
             Dictionary<string, object> intersectionReturn = MakeIntersections(poly, splitLine, BuildLayout.SPACING);
             List<Point2d> intersectedPoints = (List<Point2d>)intersectionReturn["IntersectedPoints"];
             List<Polygon2d> splittedPoly = (List<Polygon2d>)intersectionReturn["PolyAfterSplit"];
+            splittedPoly = PolygonUtility.SmoothPolygonList(splittedPoly, spacing);
 
             return new Dictionary<string, object>
             {
@@ -110,7 +110,8 @@ namespace SpacePlanning
                 { "IntersectedPoints", (intersectedPoints) }
             };
         }
-    
+
+ 
         //splits a polygon based on distance and random direction
         [MultiReturn(new[] { "PolyAfterSplit", "SplitLine", "IntersectedPoints", "PointASide", "PointBSide" })]
         public static Dictionary<string, object> SplitByDistance(Polygon2d polyOutline, Random ran, double distance = 10, int dir = 0, double spacing = 0)

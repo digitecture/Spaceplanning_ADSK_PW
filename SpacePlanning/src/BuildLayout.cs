@@ -279,7 +279,7 @@ namespace SpacePlanning
             Queue<Polygon2d> polygonAvailable = new Queue<Polygon2d>();
             for (int j = 0; j < deptPoly.Count; j++) { polygonAvailable.Enqueue(deptPoly[j]); }
             double areaAssigned = 0, eps = 50, max = 0.73, min = 0.27;
-            int count = 0, maxTry = 100;
+            int count = 0,countIn = 0, maxTry = 15;
             Random ran = new Random(designSeed);
             for(int i = 0; i < progData.Count; i++)
             {
@@ -289,6 +289,7 @@ namespace SpacePlanning
                 while (areaAssigned < areaNeeded && polygonAvailable.Count > 0)// && count < maxTry
                 {
                     ratio = BasicUtility.RandomBetweenNumbers(ran, max, min);
+                    ratio = 0.5;
                     Polygon2d currentPoly = polygonAvailable.Dequeue();
                     double areaPoly = PolygonUtility.AreaPolygon(currentPoly);
                     int compareArea = BasicUtility.CheckWithinRange(areaNeeded, areaPoly, eps);
@@ -298,6 +299,19 @@ namespace SpacePlanning
                         if (splitObj != null)
                         {
                             List<Polygon2d> polyAfterSplit = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                            if (polyAfterSplit == null)
+                            {
+                                ratio = 0.65;
+                                while(polyAfterSplit == null && countIn < maxTry)
+                                {
+                                    countIn += 1;
+                                    ratio -= 0.02;
+                                    currentPoly = new Polygon2d(PolygonUtility.SmoothPolygon(currentPoly.Points, 5),0);
+                                    splitObj = SplitObject.SplitByRatio(currentPoly, ratio,5);
+                                    if (splitObj == null) continue;
+                                    polyAfterSplit = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                                }
+                            }
                             if (polyAfterSplit == null) continue;
                             for (int j = 0; j < polyAfterSplit.Count; j++) polygonAvailable.Enqueue(polyAfterSplit[j]);
                             count += 1;
@@ -320,9 +334,7 @@ namespace SpacePlanning
                                 {
                                     progItem.PolyAssignedToProg.Add(currentPoly);
                                     areaAssigned += areaPoly;
-                                }
-                                
-                              
+                                }    
                             }                            
                             count += 1;
                         }
@@ -349,8 +361,6 @@ namespace SpacePlanning
                     }
                  
                 }// end of while
-
-              
                 polyList.Add(progItem.PolyAssignedToProg);
                 progItem.ProgAreaProvided = areaAssigned;
                 if (progItem.PolyAssignedToProg.Count > 1) { if (progItem.ProgramName.IndexOf("##") == -1) progItem.ProgramName += " ##"; }// + progItem.ProgID;  }

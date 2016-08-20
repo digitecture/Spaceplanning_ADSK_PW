@@ -69,7 +69,8 @@ namespace SpacePlanning
         }
 
         //subdivide a given poly into smaller parts till acceptable width is met, returns list of polydept grids and list of polys to compute circulation
-        public static List<Polygon2d> SplitRecursivelyMakePolyAndConnection(List<Polygon2d> polyList, double acceptableWidth = 10, double ratio = 0.5, bool tag = false, int numPoly = 2)
+        [MultiReturn(new[] { "PolyAfterSplit", "SplitLine" })]
+        public static Dictionary<string,object> SplitRecursivelyMakePolyAndConnection(List<Polygon2d> polyList, double acceptableWidth = 10, double ratio = 0.5, bool tag = false, int numPoly = 2)
         {
             int designSeed = 0;
             if (!ValidateObject.CheckPolyList(polyList)) return null;
@@ -79,13 +80,18 @@ namespace SpacePlanning
             List<Polygon2d> polyBrokenList = new List<Polygon2d>();
             for (int i = 0; i < polyList.Count; i++) polyQueue.Enqueue(polyList[i]);
             Random rand = new Random(designSeed);
+            List<Line2d> splittingLines = new List<Line2d>();
             while (polyQueue.Count > 0 && count < numPoly)
             {
                 Polygon2d currentPoly = polyQueue.Dequeue();
-                Dictionary<string, object> splitObj = SplitByRatio(currentPoly, ratio, 0);
+                Dictionary<string, object> splitObj = SplitByRatio(currentPoly, ratio, 0,3);
                 if (tag) ratio = BasicUtility.RandomBetweenNumbers(rand, 0.7, 0.35);
                 if (splitObj == null) continue;
                 List<Polygon2d> polySplitList = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                Line2d splitLine = (Line2d)splitObj["SplitLine"];
+                splittingLines.Add(splitLine);
+                for (int i = 0; i < polySplitList.Count; i++) polyQueue.Enqueue(polySplitList[i]);                
+                /*
                 if (ValidateObject.CheckPolyList(polySplitList) && polySplitList.Count > 1)
                 {
                     polySplitList = PolygonUtility.SmoothPolygonList(polySplitList, 2);
@@ -104,15 +110,22 @@ namespace SpacePlanning
                     if (bbox1.Lines[0].Length < acceptableWidth || bbox1.Lines[1].Length < acceptableWidth) polyBrokenList.Add(polySplitList[0]);
                     else polyQueue.Enqueue(polySplitList[0]);
                 }
+                */
                 count += 1;
+                polyBrokenList.AddRange(polySplitList);
             }// end of while loop
-            for (int i = 0; i < polyQueue.Count; i++) polyBrokenList.Add(polyQueue.Dequeue());
-            return polyBrokenList;
+            //for (int i = 0; i < polyQueue.Count; i++) polyBrokenList.Add(polyQueue.Dequeue());
+
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polyBrokenList) },
+                { "SplitLine", (splittingLines) }
+            };
         }
 
         //splits a polygon into two based on ratio and dir
         [MultiReturn(new[] { "PolyAfterSplit", "SplitLine", "IntersectedPoints" })]
-        public static Dictionary<string, object> SplitByRatio(Polygon2d polyOutline, double ratio = 0.5, int dir = 0)
+        public static Dictionary<string, object> SplitByRatio(Polygon2d polyOutline, double ratio = 0.5, int dir = 0, double spacing = 0)
         {
             if (polyOutline == null) return null;
             if (polyOutline != null && polyOutline.Points == null) return null;
@@ -120,7 +133,8 @@ namespace SpacePlanning
             double extents = 5000;
             double minimumLength = 2, minWidth = 10, aspectRatio = 0, eps = 0.1;
             List<Point2d> polyOrig = polyOutline.Points;
-            List<Point2d> poly = PolygonUtility.SmoothPolygon(polyOrig, BuildLayout.SPACING);
+            if (spacing == 0) spacing = BuildLayout.SPACING;            
+            List<Point2d> poly = PolygonUtility.SmoothPolygon(polyOrig, spacing);
             List<double> spans = PolygonUtility.GetSpansXYFromPolygon2d(poly);
             double horizontalSpan = spans[0], verticalSpan = spans[1];
             Point2d polyCenter = PolygonUtility.CentroidOfPoly(Polygon2d.ByPoints(poly));
@@ -142,6 +156,7 @@ namespace SpacePlanning
             Dictionary<string, object> intersectionReturn = MakeIntersections(poly, splitLine, BuildLayout.SPACING);
             List<Point2d> intersectedPoints = (List<Point2d>)intersectionReturn["IntersectedPoints"];
             List<Polygon2d> splittedPoly = (List<Polygon2d>)intersectionReturn["PolyAfterSplit"];
+            splittedPoly = PolygonUtility.SmoothPolygonList(splittedPoly, spacing);
 
             return new Dictionary<string, object>
             {

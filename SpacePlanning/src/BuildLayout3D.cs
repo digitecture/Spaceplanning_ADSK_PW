@@ -132,7 +132,6 @@ namespace SpacePlanning
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
                 //deptArrangement = BuildLayout.DeptPlacerNew(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
                 deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
-                string test = "";
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];

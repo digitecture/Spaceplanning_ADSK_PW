@@ -298,6 +298,7 @@ namespace SpacePlanning
                         if (splitObj != null)
                         {
                             List<Polygon2d> polyAfterSplit = (List<Polygon2d>)splitObj["PolyAfterSplit"];
+                            if (polyAfterSplit == null) continue;
                             for (int j = 0; j < polyAfterSplit.Count; j++) polygonAvailable.Enqueue(polyAfterSplit[j]);
                             count += 1;
                             continue;

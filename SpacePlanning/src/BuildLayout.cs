@@ -306,8 +306,8 @@ namespace SpacePlanning
                                 {
                                     countIn += 1;
                                     ratio -= 0.02;
-                                    currentPoly = new Polygon2d(PolygonUtility.SmoothPolygon(currentPoly.Points, 5),0);
-                                    splitObj = SplitObject.SplitByRatio(currentPoly, ratio,5);
+                                    currentPoly = new Polygon2d(PolygonUtility.SmoothPolygon(currentPoly.Points, 3),0);
+                                    splitObj = SplitObject.SplitByRatio(currentPoly, ratio,3);
                                     if (splitObj == null) continue;
                                     polyAfterSplit = (List<Polygon2d>)splitObj["PolyAfterSplit"];
                                 }
@@ -1476,9 +1476,6 @@ namespace SpacePlanning
                 double areaAssigned = 0;
                 DeptData deptItem = deptData[i];
 
-                //if (i > designSeed) break;
-
-
 
                 Line2d exitLine = new Line2d(new Point2d(0, 0), new Point2d(0, 100));
 
@@ -1499,10 +1496,13 @@ namespace SpacePlanning
                     exitLine = (Line2d)publicDeptObj["ExitLine"];
                     //place circulation on Public Dept Poly
                     Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(publicDepts, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
-                    //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
-                    List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
-                    publicDepts = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
-                    //AllDeptCircPolys.Add(cirPublicDeptPoly);
+                    List<Polygon2d> cirPublicDeptPoly = new List<Polygon2d>();
+                    if (circPublicDeptObj != null)
+                    {
+                        cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
+                        publicDepts = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
+                    }
+
                     AllDeptPolys.Add(publicDepts);
                     AllDeptAreaAdded.Add(areaAssigned);
                     AllDeptCircPolys.Add(cirPublicDeptPoly);
@@ -1552,9 +1552,13 @@ namespace SpacePlanning
 
                     //place circulation on Public Dept Poly
                     Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(kpuBlock, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
-                    //List<List<Polygon2d>> cirPublicDeptPoly = (List<List<Polygon2d>>)circPublicDeptObj["PolyAfterSplit"];
-                    List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
-                    kpuBlock = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
+                    List<Polygon2d> cirPublicDeptPoly = new List<Polygon2d>();
+                    if (circPublicDeptObj != null)
+                    {
+                        cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
+                        kpuBlock = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
+                    }
+                  
 
 
                     AllDeptPolys.Add(kpuBlock);
@@ -1622,8 +1626,14 @@ namespace SpacePlanning
                         //add the circulation
                         //place circulation on reg Dept Poly
                         Dictionary<string, object> circPublicDeptObj = AddCirculationPoly(leftOverPoly, currentPolyList, circulationWidth); // "PolyAfterSplit", "LeftOverPoly"
-                        List<Polygon2d> cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
-                        leftOverPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
+
+
+                        List<Polygon2d> cirPublicDeptPoly = new List<Polygon2d>();
+                        if (circPublicDeptObj != null)
+                        {
+                            cirPublicDeptPoly = (List<Polygon2d>)circPublicDeptObj["PolyAfterSplit"];
+                            leftOverPoly = (List<Polygon2d>)circPublicDeptObj["LeftOverPoly"];
+                        }                        
                         AllDeptCircPolys.Add(cirPublicDeptPoly);
                         
 

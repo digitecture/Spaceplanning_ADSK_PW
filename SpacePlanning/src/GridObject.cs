@@ -23,7 +23,7 @@ namespace SpacePlanning
         private List<Point2d> _siteBoundingBox = new List<Point2d>();
         private double _dimX;
         private double _dimY;
-        internal static int FORMCOUNT = 5;
+        internal static int FORMCOUNT = 3;
 
 
         private static int MINCELL = 250, MAXCELL = 550;

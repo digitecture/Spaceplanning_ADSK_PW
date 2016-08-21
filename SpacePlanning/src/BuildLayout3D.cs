@@ -108,7 +108,7 @@ namespace SpacePlanning
         /// <search>
         /// DeptData object, department arrangement on site
         /// </search>
-        [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
+        [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly", "SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3, bool noExternalWall = false,
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15)
         {

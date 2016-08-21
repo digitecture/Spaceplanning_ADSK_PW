@@ -197,6 +197,8 @@ namespace SpacePlanning
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
                 {
+                    //if (deptData == null || deptData[i].PolyAssignedToDept == null) continue;
+                    if (i > kpuProgramWidthList.Count - 1) i = 0;
                     Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList[i]);
                     deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
                 }

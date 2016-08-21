@@ -57,21 +57,21 @@ namespace SpacePlanning
             reader = new StreamReader(File.OpenRead(@programDocumentPath));
             int readCount = 0;
             string docInfo = reader.ReadToEnd();
-            return MakeDataStackFromString(circulationFactor, docInfo, stackingOptionsDept, stackingOptionsProg, designSeed);         
+            return MakeDataStackFromString(docInfo, circulationFactor, stackingOptionsDept, stackingOptionsProg, designSeed);         
 
         }
 
-     
+
         /// <summary>
         /// Make the data stack from the string node
         /// </summary>
-        /// <param name="circulationFactor"></param>
         /// <param name="programDocumentString"></param>
+        /// <param name="circulationFactor"></param> 
         /// <param name="stackingOptionsDept"></param>
         /// <param name="stackingOptionsProg"></param>
         /// <param name="designSeed"></param>
         /// <returns name ="DeptData"> List of Dept Data Object"</returns>
-        public static List<DeptData> MakeDataStackFromString(double circulationFactor = 1, string programDocumentString = "", bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
+        public static List<DeptData> MakeDataStackFromString(string programDocumentString, double circulationFactor = 1,  bool stackingOptionsDept = false, bool stackingOptionsProg = false, int designSeed = 0)
  {
            double dim = 5;
            StreamReader reader;

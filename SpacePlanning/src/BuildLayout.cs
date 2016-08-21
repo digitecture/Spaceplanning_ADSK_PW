@@ -135,14 +135,14 @@ namespace SpacePlanning
             Queue<ProgramData> programDataRetrieved = new Queue<ProgramData>();
             List<ProgramData> progDataAddedList = new List<ProgramData>();
             ProgramData copyProgData = new ProgramData(progData[0]);
-            int index = 0;
+            int index = 0, count = 0;
             for (int i = 0; i < progData.Count; i++) programDataRetrieved.Enqueue(progData[i]);
             for (int i = 0; i < deptPoly.Count; i++)
             {
                 Polygon2d poly = deptPoly[i];
                 if (!ValidateObject.CheckPoly(poly)) continue;
-                int dir = 0, count = 0,lineId =0;
-
+                int dir = 0, lineId =0;
+                count = 0;
                 List<double> spans = PolygonUtility.GetSpansXYFromPolygon2d(poly.Points);
                 double setSpan = 1000000000000, fac = 1.5;
                 if (spans[0] > spans[1]) { setSpan = spans[0]; dir = 1; } // poly is horizontal, dir should be 1
@@ -188,7 +188,8 @@ namespace SpacePlanning
                         setSpan -= dist;
                         progDataAddedList.Add(progItem);
                         count += 1;
-                    }          
+                    }
+                    //Trace.WriteLine("placeing programs for : " + count);          
                 }// end of while
                 //add the last left over poly for each dept poly
                 if (polyAfterSplitting.Count > 0)
@@ -212,6 +213,7 @@ namespace SpacePlanning
                 UpdatedProgramDataList.Add(progNew);
             }
             List<Polygon2d> cleanPolyList = ValidateObject.CheckAndCleanPolygon2dList(polyList);
+            Trace.WriteLine("end of placing Kpu programs for :" + count);
             return new Dictionary<string, object>
             {
                 { "ProgramData",(UpdatedProgramDataList) },

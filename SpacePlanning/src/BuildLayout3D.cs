@@ -190,22 +190,16 @@ namespace SpacePlanning
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
             List<List<Polygon2d>> polyPorgsAdded = new List<List<Polygon2d>>();
             List<ProgramData> progDataNew = new List<ProgramData>();
-            int count = 0;
             for (int i = 0; i < deptData.Count; i++)
             {
-                count += 1;
-                Trace.WriteLine("DeptData Obj count is : " + deptData.Count);
-                Trace.WriteLine("Index current is  : " + i);
-                Trace.WriteLine("Inside PlaceProgram2d for : " + count);
-                if (count > 100) break;
+
                 DeptData deptItem = deptData[i];
-                //if (i == 0)
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
                 {
-                    //if (deptData == null || deptData[i].PolyAssignedToDept == null) continue;
-                    if (i > kpuProgramWidthList.Count - 1) i = 0;
-                    Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList[i]);
+                    int index = i;
+                    if (i > kpuProgramWidthList.Count - 1) index = 0;
+                    Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList[index]);
                     deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
                     Trace.WriteLine("Placing kpu programs : ");
                 }
@@ -243,22 +237,16 @@ namespace SpacePlanning
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
             List<double> floorHeightList = deptDataInp[0].FloorHeightList;
             Dictionary<string, object> deptObj = new Dictionary<string, object>();
-            int count = 0;
             for (int i = 0; i < floorHeightList.Count; i++)
             {
-                count += 1;
-                Trace.WriteLine("Placing PROGRAM3D : " + count + " for : " + i);
-                if (count > 100) break;
                 deptObj = PlacePrograms2D(deptData, kpuProgramWidthList, minAllowedDim, designSeed, checkAspectRatio);
+                Trace.WriteLine("Returned from program2d");
                 List<DeptData> deptDataList = (List<DeptData>)deptObj["DeptData"];
-                List<DeptData> depInObj = deptDataList.Select(x => new DeptData(x)).ToList(); // example of deep copy new
+                List<DeptData> depInObj = deptDataList.Select(x => new DeptData(x)).ToList(); // example of deep copy 
                 for (int j = 0; j < depInObj.Count; j++)
                 {
                     if (depInObj[j].ProgramsInDept == null || depInObj[j].ProgramsInDept.Count < 1) continue;
-                    for (int k = 0; k < depInObj[j].ProgramsInDept.Count; k++)
-                    {
-                        depInObj[j].ProgramsInDept[k].ProgFloorLevel = depInObj[j].DeptFloorLevel;
-                    }
+                    for (int k = 0; k < depInObj[j].ProgramsInDept.Count; k++) depInObj[j].ProgramsInDept[k].ProgFloorLevel = depInObj[j].DeptFloorLevel;
                 }
                 deptObj["DeptData"] = depInObj;
             }

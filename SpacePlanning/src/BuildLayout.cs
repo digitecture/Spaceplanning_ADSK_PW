@@ -1437,7 +1437,7 @@ namespace SpacePlanning
 
                 Line2d exitLine = new Line2d(new Point2d(0, 0), new Point2d(0, 100));
 
-                // if dept is PUBLIC TYPE
+                // if dept is PUBLIC TYPE S
                 if ((deptItem.DepartmentType.IndexOf(PUBLIC.ToLower()) != -1 ||
                     deptItem.DepartmentType.IndexOf(PUBLIC.ToUpper()) != -1))
                 {

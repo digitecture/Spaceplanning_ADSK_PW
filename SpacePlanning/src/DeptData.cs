@@ -7,7 +7,7 @@ using System.Linq;
 namespace SpacePlanning
 {
     /// <summary>
-    /// Department Data object to store information related to departments from the input program document.
+    /// Departments Data object to store information related to departments from the input program document.
     /// </summary>
     public class DeptData
     {

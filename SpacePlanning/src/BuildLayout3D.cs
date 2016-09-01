@@ -46,33 +46,57 @@ namespace SpacePlanning
 
             //KPUDept
             //DeptData KPUDept = new DeptData(deptData[0]);
-            int index = 1;
-            bool deptUpperLimit = false;
-            List<List<DeptData>> deptRegPerFloorList = new List<List<DeptData>>();
-            for (int i = 0; i < floorHeightList.Count; i++)            {
+            int index = 1, kpuIndex = 1;
+            List<List<DeptData>> deptPerFloorList = new List<List<DeptData>>();
+            for (int i = 0; i < floorHeightList.Count; i++)
+            {
                 List<DeptData> deptInFloor = new List<DeptData>();
-                DeptData KPUDept = new DeptData(deptData[0]);
-                KPUDept.DeptFloorLevel = i;
-                deptInFloor.Add(KPUDept);
-                if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;
-                for (int j = 0; j < numDeptPerFloor; j++)
+             
+                if (i==0)// ground lvl
                 {
-                    DeptData REGDept = new DeptData(deptData[index]);
-                    REGDept.DeptFloorLevel = i;
-                    deptInFloor.Add(REGDept);
-                    index += 1;
-                    //if (index > deptData.Count-1) { deptUpperLimit = true; break; }
-                    if (index > deptData.Count - 1) index = 1;
+                    deptInFloor = deptData;
                 }
-                deptRegPerFloorList.Add(deptInFloor);
-                //if (deptUpperLimit) break;
+                else
+                {
+                    //find the kpu dept from the list of orig deptData
+                    DeptData KPUDept = new DeptData(deptData[0]);
+                    for (int k = 0; k< deptData.Count; k++)
+                    {
+                        if ((deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
+                        {
+                            KPUDept = new DeptData(deptData[k]);
+                            kpuIndex = k;
+                            break;
+                        }
+                    }
+                    KPUDept.DeptFloorLevel = i;
+                    deptInFloor.Add(KPUDept);
+                    if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;
+                    for (int j = 0; j < numDeptPerFloor; j++)
+                    {
+                        if (index == kpuIndex)
+                        {
+                            index += 1;
+                            if (index > deptData.Count - 1) index = 2;
+                        }
+
+                        DeptData REGDept = new DeptData(deptData[index]);
+                        REGDept.DeptFloorLevel = i;
+                        deptInFloor.Add(REGDept);
+                        index += 1;
+                        if (index > deptData.Count - 1) index = 1;
+                    }
+                }
+
+                deptPerFloorList.Add(deptInFloor);
             }
 
             List<DeptData> deptAll = new List<DeptData>();
             for (int i = 0; i < floorHeightList.Count; i++)
             {
                 // replaced deptData with deptRegPerFloorList[i]
-                deptObj = PlaceDepartments2D(deptRegPerFloorList[i], buildingOutline, kpuDepthList, attractorPoint,designSeed, circulationWidth, noExternalWall);
+                deptObj = PlaceDepartments2D(deptPerFloorList[i], buildingOutline, kpuDepthList, attractorPoint,designSeed, circulationWidth, noExternalWall);
+                if (deptObj == null || (List<DeptData>)deptObj["DeptData"] == null) continue;
                 List<DeptData> deptDataList = (List<DeptData>)deptObj["DeptData"];
                 //for (int j = 0; j < deptDataList.Count; j++) { deptDataList[j].DeptFloorLevel = i; }
                 List<DeptData> depInObj = deptDataList.Select(x => new DeptData(x)).ToList(); // example of deep copy

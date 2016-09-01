@@ -506,6 +506,226 @@ namespace SpacePlanning
                 { "PolyForCirculation", (polyCoverList) }
             };
         }
+
+
+        //splits a polygon based on offset direction
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "LineOptions", "SortedLengths" })]
+        internal static Dictionary<string, object> CreateBlocksByLines(Polygon2d polyOutline, Polygon2d containerPoly, double distance = 10,
+            double areaTarget = 10, double minDist = 20, bool tag = true, double parameter = 0.5, bool stackOptions = false, int designSeed = 5)
+        {
+            int index = 0;
+            if (!ValidateObject.CheckPoly(polyOutline)) return null;
+            if (parameter <= 0 && parameter >= 1) parameter = 0.5;
+            Polygon2d poly = new Polygon2d(polyOutline.Points, 0);
+            List<double> lineLength = new List<double>();
+            List<Line2d> lineOptions = new List<Line2d>();
+            Dictionary<string, object> checkLineOffsetObject = ValidateObject.CheckLinesOffsetInPoly(poly, containerPoly, distance, tag);
+            List<bool> offsetAble = (List<bool>)checkLineOffsetObject["Offsetables"];
+            for (int i = 0; i < poly.Points.Count; i++)
+            {
+                if (offsetAble[i] == true)
+                {
+                    lineLength.Add(poly.Lines[i].Length);
+                    //lineOptions.Add(poly.Lines[i]);
+                }
+                else lineLength.Add(0);
+            }
+
+            //for(int i = 0; i < lineOptions.Count; i++) lineLength.Add(lineOptions[i].Length);
+
+            List<int> sortedIndices = BasicUtility.Quicksort(lineLength);
+            Trace.WriteLine("Whats going on 1");
+            if (sortedIndices == null) return null;
+            if (sortedIndices != null && sortedIndices.Count > 1) sortedIndices.Reverse();
+            // randomize the line indices to pick any line as found
+            if (stackOptions && sortedIndices != null)
+            {
+                List<int> dupSortedIndices = sortedIndices.Select(x => x).ToList();
+                Random nRan = new Random(designSeed);
+                //sortedIndices = BasicUtility.RandomizeList(dupSortedIndices, nRan);
+                //index = (int)BasicUtility.RandomBetweenNumbers(nRan, sortedIndices.Count - 1, 0);
+                //index = 1;
+            }
+            for (int i = 0; i < poly.Points.Count; i++) if (lineLength[i] > 0 && i != sortedIndices[index]) { lineOptions.Add(poly.Lines[i]); }
+
+            // add a funct, which takes a lineid, poly, areatarget
+            // it checks what parameter it should split to have it meet area requirement correctly
+            poly = BuildPolyToSatisfyArea(poly, sortedIndices[index], areaTarget, distance);
+            //poly = AddPointToPoly(poly, sortedIndices[index], parameter);
+            Trace.WriteLine("Whats going on 2");
+            Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(poly, sortedIndices[index], distance, minDist);
+            Polygon2d polyBlock = (Polygon2d)splitObj["PolyAfterSplit"];
+            double areaObtained = PolygonUtility.AreaPolygon(polyBlock);
+            Trace.WriteLine("Area obtained is : " + areaObtained);
+            Polygon2d leftPoly = (Polygon2d)splitObj["LeftOverPoly"];
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (polyBlock) },
+                { "LeftOverPoly", (leftPoly) },
+                { "LineOptions" , (lineOptions) },
+                { "SortedLengths", (sortedIndices) }
+            };
+
+        }
+
+
+        //gets a poly and its lineId and distance,
+        //checks if area is more then it will provide a parameter value
+        internal static Polygon2d BuildPolyToSatisfyArea(Polygon2d poly, int lineId = 0, double areaTarget = 100, double offsetDistance = 10)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(poly.Points, 0);
+            List<Point2d> ptList = new List<Point2d>();
+
+            double lineLength = poly.Lines[lineId].Length;
+            double areaAvailable = lineLength * offsetDistance, eps = 10;
+            //int compareArea = BasicUtility.CheckWithinRange(areaTarget, areaAvailable, eps);
+            if (areaTarget / areaAvailable < 0.9) // current poly area is more =  compareArea == 1
+            {
+                double lineLengthExpected = areaTarget / offsetDistance;
+                double parameter = lineLengthExpected / lineLength;
+                if (parameter >= 1 || parameter <= 0) return poly;
+                return AddPointToPoly(poly, lineId, parameter);
+            }
+            else return poly;
+        }
+
+        // adds a point2d to a provided polygon with a given line id
+        internal static Polygon2d AddPointToPoly(Polygon2d poly, Point2d givenPoint, int lineId = 0)
+        {
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(poly.Points, 0);
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < poly.Points.Count; i++)
+            {
+                int a = i, b = i + 1;
+                if (i == poly.Points.Count - 1) b = 0;
+                ptList.Add(poly.Points[i]);
+                if (a == lineId)
+                {
+                    ptList.Add(givenPoint);
+                }
+            }
+            return new Polygon2d(ptList, 0);
+        }
+
+
+
+        // adds a point2d to a provided polygon with a given line id
+        internal static Polygon2d AddPointToPoly(Polygon2d poly, int lineId = 0, double parameter = 0.5)
+        {
+            if (parameter == 0) return poly;
+            if (!ValidateObject.CheckPoly(poly)) return null;
+            poly = new Polygon2d(poly.Points, 0);
+            if (parameter < 0 || parameter >= 1) parameter = 0.5;
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < poly.Points.Count; i++)
+            {
+                int a = i, b = i + 1;
+                if (i == poly.Points.Count - 1) b = 0;
+                ptList.Add(poly.Points[i]);
+                if (a == lineId)
+                {
+                    Vector2d vec = new Vector2d(poly.Points[a], poly.Points[b]);
+                    Point2d added = VectorUtility.VectorAddToPoint(poly.Points[a], vec, parameter);
+                    ptList.Add(added);
+                }
+            }
+            return new Polygon2d(ptList, 0);
+        }
+
+
+        //blocks are assigne based on offset distance, used for inpatient blocks
+        [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock", "FalseLines", "LineOptions", "PointAdded" })]
+        internal static Dictionary<string, object> AssignBlocksBasedOnDistance(List<Polygon2d> polyList, double kpuDepth,
+            double area, double thresDistance = 10, int iteration = 5, bool noExternalWall = false,
+            bool stackOptions = false)
+        {
+            double parameter = 0.5;
+            if (!ValidateObject.CheckPolyList(polyList)) return null;
+            if (parameter <= 0 && parameter >= 1) parameter = 0.5;
+            PriorityQueue<double, Polygon2d> priorityPolyQueue = new PriorityQueue<double, Polygon2d>();
+            List<Polygon2d> blockPolyList = new List<Polygon2d>();
+            List<Polygon2d> leftoverPolyList = new List<Polygon2d>();
+            List<Line2d> falseLines = new List<Line2d>();
+            List<Line2d> lineOptions = new List<Line2d>();
+            Stack<Polygon2d> polyLeftList = new Stack<Polygon2d>();
+            double areaAdded = 0;
+            Point2d pointAdd = new Point2d(0, 0);
+            //if (area == 0) area = 0.8 * PolygonUtility.AreaPolygon(poly);
+            for (int i = 0; i < polyList.Count; i++)
+            {
+                double areaPoly = PolygonUtility.AreaPolygon(polyList[i]); // negated to make sorted dictionary store in negative 
+                priorityPolyQueue.Enqueue(-1 * areaPoly, polyList[i]);
+            }
+            for (int i = 0; i < polyList.Count; i++)
+            {
+                if (areaAdded > area) break;
+                Polygon2d poly = polyList[i];
+                int count = 0, maxTry = 100;
+                poly = new Polygon2d(poly.Points);
+                // if (externalInclude) area = 0.25*area;
+                polyLeftList.Push(poly);
+                bool error = false;
+                //int number = 4;
+                int number = (int)BasicUtility.RandomBetweenNumbers(new Random(iteration), 7, 4);
+                //while starts
+                Random ran = new Random(iteration);
+                double a = 60, b = 20;
+
+                double maxValue = kpuDepth * 2, minValue = kpuDepth * 0.3;
+                while (polyLeftList.Count > 0 && areaAdded < area) //count<recompute count < maxTry
+                {
+                    double areaLeftToAdd = area - areaAdded;
+                    error = false;
+                    Polygon2d currentPoly = polyLeftList.Pop();
+                    Polygon2d tempPoly = new Polygon2d(currentPoly.Points, 0);
+                    Dictionary<string, object> splitObject = CreateBlocksByLines(currentPoly, poly, kpuDepth, areaLeftToAdd, thresDistance, noExternalWall, parameter, stackOptions, iteration);
+                    if (splitObject == null) { count += 1; Trace.WriteLine("Split errored"); continue; }
+
+                    Polygon2d blockPoly = (Polygon2d)splitObject["PolyAfterSplit"];
+                    Polygon2d leftPoly = (Polygon2d)splitObject["LeftOverPoly"];
+                    lineOptions = (List<Line2d>)splitObject["LineOptions"];
+                    Dictionary<string, object> addPtObj = LayoutUtility.AddPointToFitPoly(leftPoly, poly, kpuDepth, thresDistance, iteration);
+                    leftPoly = (Polygon2d)addPtObj["PolyAddedPts"];
+                    falseLines = (List<Line2d>)addPtObj["FalseLineList"];
+                    pointAdd = (Point2d)addPtObj["PointAdded"];
+                    areaAdded += PolygonUtility.AreaPolygon(blockPoly);
+                    polyLeftList.Push(leftPoly);
+                    blockPolyList.Add(blockPoly);
+                    count += 1;
+
+                    if (lineOptions.Count == 0 || PolygonUtility.AreaPolygon(blockPoly) < 0) error = true;
+                    else
+                    {
+                        // need to do something with the line we get
+                        for (int j = 0; j < lineOptions.Count; j++)
+                        {
+                            if (lineOptions[j].Length > thresDistance) { error = false; break; }
+                            else error = true;
+                        }
+                    }
+                    if (error) break;
+                    if (noExternalWall && count > number) break;
+                }// end of while loop
+
+                Trace.WriteLine("Exit the while");
+            }// end of for loop
+
+
+            leftoverPolyList.AddRange(polyLeftList);
+            blockPolyList = PolygonUtility.CleanPolygonList(blockPolyList);
+            leftoverPolyList = PolygonUtility.CleanPolygonList(leftoverPolyList);
+            return new Dictionary<string, object>
+            {
+                { "PolyAfterSplit", (blockPolyList) },
+                { "LeftOverPoly", (leftoverPolyList) },
+                { "AreaAssignedToBlock", (areaAdded)},
+                { "FalseLines", (falseLines) },
+                { "LineOptions", (lineOptions) },
+                { "PointAdded" , (pointAdd)}
+            };
+        }
         #endregion
 
 

@@ -100,7 +100,7 @@ namespace SpacePlanning
         /// </summary>
         public string ProgramName
         {
-            get { return _progName; }
+            get { if (this == null) return null;  return _progName; }
             set { _progName = value; }
         }
         /// <summary>

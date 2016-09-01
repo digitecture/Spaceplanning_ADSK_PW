@@ -549,11 +549,11 @@ namespace SpacePlanning
         //sorts a program data inside dept data based on PREFERENCEPOINT 
         internal static List<DeptData> SortProgramsByPrefInDept(List<DeptData> deptDataInp, bool stackingOptions = false)
         {
-            double weight = 1; //
+            double weight = 0; //
             if (deptDataInp == null) return null;
             List<DeptData> deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
 
-            double eps = 01, inc = 0.01;
+            double eps = 0, inc = 0.01;
             for (int i = 0; i < deptData.Count; i++)
             {
                 DeptData deptItem = deptData[i];
@@ -564,7 +564,7 @@ namespace SpacePlanning
                 for (int j = 0; j < progItems.Count; j++)
                 {
                     double key = progItems[j].ProgPreferenceVal + eps + weight * progItems[j].ProgAdjacencyWeight;
-                    //double key = progItems[j].ProgPreferenceVal + eps;
+                    //sortedPrograms.Add(key, progItems[j]);
                     try { sortedPrograms.Add(key, progItems[j]); }
                     catch { Random rand = new Random(j);  key += rand.NextDouble(); sortedPrograms.Add(key, progItems[j]); }
                     progItems[j].ProgramCombinedAdjWeight = key;

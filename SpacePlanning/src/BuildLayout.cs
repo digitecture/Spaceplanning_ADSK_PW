@@ -365,16 +365,10 @@ namespace SpacePlanning
                 return BuildLayout3D.PlacePrograms2D(deptData, kpuProgramWidthList, minAllowedDim, designSeed, checkAspectRatio);
             }
         }
-
-
-
         #endregion
 
         
         #region - Private Methods  
-
-       
-
         [MultiReturn(new[] { "DeptPoly", "LeftOverPoly", "AllPolys", "AreaAdded", "AllNodes" })]
         internal static Dictionary<string, object> FitRegDept(double deptAreaTarget, List<Polygon2d> polyList)
         {

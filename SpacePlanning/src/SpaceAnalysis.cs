@@ -548,6 +548,7 @@ namespace SpacePlanning
 
             bool kpuPlaced = false;
             Color kpuColor = colorListSelected[0];
+            Color pubColor = colorListSelected[1];
             List<List<Surface>> srfListAll = new List<List<Surface>>();
             List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
             for (int i = 0; i < polyProgsList.Count; i++)
@@ -564,6 +565,10 @@ namespace SpacePlanning
                 //if (i == 0)
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) && !kpuPlaced) { col = kpuColor; kpuPlaced = true; }
+                
+                if ((deptItem.DepartmentType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 ||
+              deptItem.DepartmentType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1)) { col = pubColor; }
+
                 List<Surface> srfList = new List<Surface>();
                 List<Display.Display> displayList = new List<Display.Display>();
                 for (int j = 0; j < polyProgs.Count; j++)

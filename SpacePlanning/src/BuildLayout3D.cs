@@ -46,12 +46,12 @@ namespace SpacePlanning
 
             //KPUDept
             //DeptData KPUDept = new DeptData(deptData[0]);
-            int index = 1, kpuIndex = 1;
+            int index = 2, kpuIndex = 1;
             List<List<DeptData>> deptPerFloorList = new List<List<DeptData>>();
             for (int i = 0; i < floorHeightList.Count; i++)
             {
                 List<DeptData> deptInFloor = new List<DeptData>();
-             
+                DeptData KPUDept = new DeptData(deptData[kpuIndex]);
                 if (i==0)// ground lvl
                 {
                     deptInFloor = deptData;
@@ -59,7 +59,7 @@ namespace SpacePlanning
                 else
                 {
                     //find the kpu dept from the list of orig deptData
-                    DeptData KPUDept = new DeptData(deptData[0]);
+                    /*
                     for (int k = 0; k< deptData.Count; k++)
                     {
                         if ((deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
@@ -69,22 +69,24 @@ namespace SpacePlanning
                             break;
                         }
                     }
+                    */
                     KPUDept.DeptFloorLevel = i;
                     deptInFloor.Add(KPUDept);
                     if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;
                     for (int j = 0; j < numDeptPerFloor; j++)
                     {
+                        /*
                         if (index == kpuIndex)
                         {
                             index += 1;
                             if (index > deptData.Count - 1) index = 2;
                         }
-
+                        */
                         DeptData REGDept = new DeptData(deptData[index]);
                         REGDept.DeptFloorLevel = i;
                         deptInFloor.Add(REGDept);
                         index += 1;
-                        if (index > deptData.Count - 1) index = 1;
+                        if (index > deptData.Count - 1) index = 2;
                     }
                 }
                 deptPerFloorList.Add(deptInFloor);

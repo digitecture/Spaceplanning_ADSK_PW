@@ -487,9 +487,6 @@ namespace SpacePlanning
 
             List<int> indices = new List<int>();
             for (int i = 0; i < currentPoly.Points.Count; i++) indices.Add(i);
-
-
-
             Stack<int> lineIdStack = new Stack<int>();
             Queue<int> lineIdQueue = new Queue<int>();
             for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
@@ -507,7 +504,7 @@ namespace SpacePlanning
                 lineId = lineIdQueue.Dequeue();
                 countMain += 1;
                 bool error = false;
-                double maxLength = areaLeftToBeAdded / kpuDepth;
+                double maxLength = areaLeftToBeAdded / kpuDepth, extremeLength = 200;
 
                 double param = 0;
                 if (currentPoly.Lines[lineId].Length > maxLength)
@@ -518,13 +515,12 @@ namespace SpacePlanning
                     lineIdStack = new Stack<int>();
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
-
                     // lineId = lineIdStack.Pop();
                     lineId = lineIdQueue.Dequeue();
                 }
 
 
-                if (currentPoly.Lines[lineId].Length > 200)
+                if (currentPoly.Lines[lineId].Length > extremeLength)
                 {
                     Trace.WriteLine("Too Long for a dept");
                     param = 0.5;

@@ -245,7 +245,7 @@ namespace SpacePlanning
             List<Polygon2d> polyCoverList = new List<Polygon2d>();
 
 
-            //SORT THE POLYSUBDIVS
+            //SORT THE POLYSUBDIVS NEW
             Point2d center = PolygonUtility.CentroidOfPolyList(deptPoly);
             List<int> sortedPolyIndices = PolygonUtility.SortPolygonsFromAPoint(deptPoly, center);
             List<Polygon2d> sortedPolySubDivs = new List<Polygon2d>();

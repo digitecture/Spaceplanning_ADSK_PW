@@ -9,7 +9,7 @@ using System.Linq;
 namespace SpacePlanning
 {
     /// <summary>
-    /// Builds department and programs polygons based on input contextual data.
+    /// Builds department and programs polygons based  input contextual data.
     /// </summary>
     public static class BuildLayout
     {

@@ -22,7 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>C:\Users\t_dassu\AppData\Roaming\Dynamo\Dynamo Core\1.1\packages\SpacePlanning\SpacePlanning.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\subha\AppData\Roaming\Dynamo\Dynamo Core\1.1\packages\SpacePlanning\bin\SpacePlannning.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>bin\Release\SpacePlanning.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\SpacePlanning.xml</DocumentationFile>
     <RegisterForComInterop>true</RegisterForComInterop>
   </PropertyGroup>
   <ItemGroup>
@@ -56,23 +56,26 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="ProtoAssociative">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoAssociative.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoAssociative.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoCore">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoCore.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoGeometry.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry.customization">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoGeometry.customization.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoGeometry.customization.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ProtoImperative">
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoImperative.dll</HintPath>
+    </Reference>
     <Reference Include="ProtoScript">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoScript.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoScript.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

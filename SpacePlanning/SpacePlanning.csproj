@@ -17,12 +17,12 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\AppData\Roaming\Dynamo\Dynamo Core\1.0\packages\SpacePlanning\bin\</OutputPath>
+    <OutputPath>..\..\..\..\..\AppData\Roaming\Dynamo\Dynamo Core\1.1\packages\SpacePlanning\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>C:\Users\t_dassu\AppData\Roaming\Dynamo\Dynamo Core\1.0\packages\SpacePlanning\SpacePlanning.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\t_dassu\AppData\Roaming\Dynamo\Dynamo Core\1.1\packages\SpacePlanning\SpacePlanning.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,19 +37,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Display">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.0\Display.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\Display.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DSCoreNodes">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.0\DSCoreNodes.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\DSCoreNodes.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DynamoCore">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.0\DynamoCore.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\DynamoCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DynamoServices">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.0\DynamoServices.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -69,10 +69,6 @@
     </Reference>
     <Reference Include="ProtoGeometry.customization">
       <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoGeometry.customization.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ProtoImperative">
-      <HintPath>D:\SUBHAJIT WORKS\03 DYNAMO RESOURCES\ZeroTouchEssentials-master\ZeroTouchEssentials-master\ProtoImperative.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoScript">

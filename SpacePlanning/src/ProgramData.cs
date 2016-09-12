@@ -84,7 +84,7 @@ namespace SpacePlanning
             _areaGiven = other.ProgAreaProvided;
             _IsAreaSatsifed = other.IsAreaSatisfied;
             _CellsAssigned = new List<Cell>();
-            _adjacencyWeight = other.AdjacencyWeight;
+            _adjacencyWeight = other.ProgAdjacencyWeight;
             _combinedProgramWeight = other.ProgramCombinedAdjWeight;
             _progNameShort = other.ProgramNameShort;
             _floorLevel = other.ProgFloorLevel;
@@ -100,7 +100,7 @@ namespace SpacePlanning
         /// </summary>
         public string ProgramName
         {
-            get { return _progName; }
+            get { if (this == null) return null;  return _progName; }
             set { _progName = value; }
         }
         /// <summary>
@@ -162,7 +162,7 @@ namespace SpacePlanning
         /// <summary>
         /// Computed Adjacency weight value of the program.
         /// </summary>
-        public double AdjacencyWeight
+        public double ProgAdjacencyWeight
         {
             get { return _adjacencyWeight; }
             set { _adjacencyWeight = value; }

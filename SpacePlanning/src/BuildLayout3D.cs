@@ -33,9 +33,8 @@ namespace SpacePlanning
         /// <search>
         /// DeptData object, department arrangement on site
         /// </search>
-        [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false,
+        [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
+        public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint,int designSeed = 50, double circulationWidth = 5, bool noExternalWall = false,
             bool unlimitedKPU = true, int numDeptPerFloor = 2)
         {
             Trace.WriteLine("Dept 3d mode");
@@ -47,34 +46,58 @@ namespace SpacePlanning
 
             //KPUDept
             //DeptData KPUDept = new DeptData(deptData[0]);
-            int index = 1;
-            bool deptUpperLimit = false;
-            List<List<DeptData>> deptRegPerFloorList = new List<List<DeptData>>();
-            for (int i = 0; i < floorHeightList.Count; i++)            {
+            int index = 2, kpuIndex = 1;
+            List<List<DeptData>> deptPerFloorList = new List<List<DeptData>>();
+            for (int i = 0; i < floorHeightList.Count; i++)
+            {
                 List<DeptData> deptInFloor = new List<DeptData>();
-                DeptData KPUDept = new DeptData(deptData[0]);
-                KPUDept.DeptFloorLevel = i;
-                deptInFloor.Add(KPUDept);
-                if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;
-                for (int j = 0; j < numDeptPerFloor; j++)
+                DeptData KPUDept = new DeptData(deptData[kpuIndex]);
+                if (i==0)// ground lvl
                 {
-                    DeptData REGDept = new DeptData(deptData[index]);
-                    REGDept.DeptFloorLevel = i;
-                    deptInFloor.Add(REGDept);
-                    index += 1;
-                    //if (index > deptData.Count-1) { deptUpperLimit = true; break; }
-                    if (index > deptData.Count - 1) index = 1;
+                    deptInFloor = deptData;
                 }
-                deptRegPerFloorList.Add(deptInFloor);
-                //if (deptUpperLimit) break;
+                else
+                {
+                    //find the kpu dept from the list of orig deptData
+                    /*
+                    for (int k = 0; k< deptData.Count; k++)
+                    {
+                        if ((deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || deptData[k].DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
+                        {
+                            KPUDept = new DeptData(deptData[k]);
+                            kpuIndex = k;
+                            break;
+                        }
+                    }
+                    */
+                    KPUDept.DeptFloorLevel = i;
+                    deptInFloor.Add(KPUDept);
+                    if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;
+                    for (int j = 0; j < numDeptPerFloor; j++)
+                    {
+                        /*
+                        if (index == kpuIndex)
+                        {
+                            index += 1;
+                            if (index > deptData.Count - 1) index = 2;
+                        }
+                        */
+                        DeptData REGDept = new DeptData(deptData[index]);
+                        REGDept.DeptFloorLevel = i;
+                        deptInFloor.Add(REGDept);
+                        index += 1;
+                        if (index > deptData.Count - 1) index = 2;
+                    }
+                }
+                deptPerFloorList.Add(deptInFloor);
             }
 
             List<DeptData> deptAll = new List<DeptData>();
             for (int i = 0; i < floorHeightList.Count; i++)
             {
                 // replaced deptData with deptRegPerFloorList[i]
-                deptObj = PlaceDepartments2D(deptRegPerFloorList[i], buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth,
-                                        polyDivision, designSeed, noExternalWall);
+                deptObj = PlaceDepartments2D(deptPerFloorList[i], buildingOutline, kpuDepthList, attractorPoint,designSeed, circulationWidth, noExternalWall);
+                if (deptObj == null || (List<DeptData>)deptObj["DeptData"] == null) continue;
                 List<DeptData> deptDataList = (List<DeptData>)deptObj["DeptData"];
                 //for (int j = 0; j < deptDataList.Count; j++) { deptDataList[j].DeptFloorLevel = i; }
                 List<DeptData> depInObj = deptDataList.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -110,14 +133,11 @@ namespace SpacePlanning
         /// <search>
         /// DeptData object, department arrangement on site
         /// </search>
-        [MultiReturn(new[] { "DeptData", "LeftOverPolys" })]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, List<double> kpuWidthList,
-            double acceptableWidth, double polyDivision = 8, int designSeed = 50, bool noExternalWall = false,
+        [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly", "SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
+        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3, bool noExternalWall = false,
             bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15)
         {
-
-
-            if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
+            //if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
             double circulationFreq = 8;
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
@@ -128,13 +148,15 @@ namespace SpacePlanning
             Random ran = new Random(designSeed);
             bool stackOptionsDept = deptData[0].StackingOptions;
             bool stackOptionsProg = deptData[0].ProgramsInDept[0].StackingOptions;
+            List<double> kpuWidthList = new List<double>() { 10 };
             while (deptPlaced == false && count < BuildLayout.DEPTCOUNT)//MAXCOUNT
             {
                 double parameter = BasicUtility.RandomBetweenNumbers(ran, 0.9, 0.5);
                 if (!stackOptionsDept) parameter = 0;
                 //parameter = 0;
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
-                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, kpuDepthList, kpuWidthList, acceptableWidth, circulationFreq, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg, parameter);
+                //deptArrangement = BuildLayout.DeptPlacerNew(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
+                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];
@@ -164,6 +186,7 @@ namespace SpacePlanning
                     designSeed += 1;
                     Trace.WriteLine("DeptPlacer returned null, rejected for: " + count);
                 }
+                deptPlaced = true;
                 count += 1;
                 Trace.WriteLine(" EXIT PLACE DEPARTMENTS +++++++++++++++++++++++++++++++++");
             }// end of while loop
@@ -198,7 +221,9 @@ namespace SpacePlanning
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
                 {
                     Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList);
-                    deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
+                    //deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
+                    if (placedPrimaryProg != null) deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
+                    else deptData[i].ProgramsInDept = null;
                 }
                 else
                 {
@@ -241,10 +266,7 @@ namespace SpacePlanning
                 for (int j = 0; j < depInObj.Count; j++)
                 {
                     if (depInObj[j].ProgramsInDept == null || depInObj[j].ProgramsInDept.Count < 1) continue;
-                    for (int k = 0; k < depInObj[j].ProgramsInDept.Count; k++)
-                    {
-                        depInObj[j].ProgramsInDept[k].ProgFloorLevel = depInObj[j].DeptFloorLevel;
-                    }
+                    for (int k = 0; k < depInObj[j].ProgramsInDept.Count; k++) depInObj[j].ProgramsInDept[k].ProgFloorLevel = depInObj[j].DeptFloorLevel;
                 }
                 deptObj["DeptData"] = depInObj;
 

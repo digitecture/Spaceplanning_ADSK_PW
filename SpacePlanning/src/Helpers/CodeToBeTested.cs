@@ -160,7 +160,7 @@ namespace SpacePlanning
         }
 
         //line and polygon intersection - not using now
-        internal static List<Point2d> LinePolygonIntersectionIndex(List<Point2d> poly, Line2d testLine)
+        internal static List<Point2d> LinePolygonIntersection(List<Point2d> poly, Line2d testLine)
         {
             int n = poly.Count;
             double eps = 0.00000001;

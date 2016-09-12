@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using stuffer;
 using Autodesk.DesignScript.Runtime;
-using System.Diagnostics;
+
 
 namespace SpacePlanning
 {
-    internal static class ValidateObject
+    public static class ValidateObject
     {
         #region - Private Methods
         // Given three colinear points p, q, r, the function checks if
         // point q lies on line segment 'pr'
-        internal static bool CheckOnSegment(Point2d p, Point2d q, Point2d r)
+        internal static bool CheckOnSegment(Point2d p, Point2d q, Point2d r, double eps = 0.02)
         {
-            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) &&
-                q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y)) return true;
+            if (q.X <= Math.Max(p.X, r.X) + eps && q.X >= Math.Min(p.X, r.X) - eps &&
+                q.Y <= Math.Max(p.Y, r.Y) + eps && q.Y >= Math.Min(p.Y, r.Y) - eps)  return true;
             return false;
         }
 
@@ -33,11 +33,57 @@ namespace SpacePlanning
             return result;
         }
 
+
+        //compare if twow lines are same or not
+        public static bool CheckIfTwoLinesSame(Line2d lineA, Line2d lineB)
+        {
+            if (lineA == null && lineB == null) return false;
+            Point2d startA = lineA.StartPoint, endA = lineA.EndPoint;
+            Point2d startB = lineB.StartPoint, endB = lineB.EndPoint;
+            if (lineA.Length == lineB.Length && startA.Compare(startB) && endA.Compare(endB)) return true; 
+            else return false;
+      
+        }
+        //checks if two polys overlap, true if overlap, false if no overlap
+        public static bool CheckPolyPolyOverlap(Polygon2d polyA, Polygon2d polyB)
+        {
+            List<Point2d> ptList = polyA.Points;
+            for(int i = 0; i < ptList.Count; i++)
+            {
+               if( GraphicsUtility.PointInsidePolygonTest(polyB, ptList[i])) return true;
+            }
+            return false;
+        }
+
+        //checks if one poly is inside another, true if it is inside, false, if not inside - NEEDS TESTING MORE
+        public static bool CheckPolyInsideOuterPoly(Polygon2d insidePoly, Polygon2d outerPoly)
+        {
+            Polygon2d polyIns = new Polygon2d(insidePoly.Points);
+            Polygon2d polyOut = new Polygon2d(outerPoly.Points);
+            Point2d centerOut = PolygonUtility.CentroidOfPoly(polyOut);
+            List<Point2d> ptInsidePoly = new List<Point2d>();
+            for(int i = 0; i < polyIns.Points.Count; i++)
+            {
+                Vector2d vec = new Vector2d(polyIns.Points[i], centerOut);
+                Point2d shiftedPt = VectorUtility.VectorAddToPoint(polyIns.Points[i], vec, 0.2);
+                //ptInsidePoly.Add(polyIns.Points[i]);
+                ptInsidePoly.Add(shiftedPt);
+            }
+
+            for(int i = 0; i < ptInsidePoly.Count; i++)
+            {
+                if(!GraphicsUtility.PointInsidePolygonTest(polyOut, ptInsidePoly[i])) return false;
+            }
+            return true;
+        }
+
         //checks a polygon2d if its orthogonal or non orthogonal
         public static bool CheckPolygon2dOrtho(Polygon2d nonOrthoPoly, double eps = 0)
         {
+            if (!CheckPoly(nonOrthoPoly)) return false;
             bool result = true;
             Polygon2d polyNew = new Polygon2d(nonOrthoPoly.Points);
+            if (CheckPoly(polyNew)) return false;
             List<Line2d> lineList = polyNew.Lines;
             for (int j = 0; j < lineList.Count; j++) if (!CheckLineOrthogonal(lineList[j])) { result = false; break; }
             return result;

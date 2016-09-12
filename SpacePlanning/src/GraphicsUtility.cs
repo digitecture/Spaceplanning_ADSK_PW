@@ -18,10 +18,10 @@ using System.Diagnostics;
 
 namespace SpacePlanning
 {
-    internal class GraphicsUtility
+    public class GraphicsUtility
     {
         #region - Public Methods
-        //checks if a point is inside a polygon or not
+        //checks if a point is inside a polygon or not , returns true if inside, false if outside
         public static bool PointInsidePolygonTest(Polygon2d poly, Point2d testPoint)
         {
             if (!ValidateObject.CheckPoly(poly) || testPoint == null) return false;
@@ -53,9 +53,10 @@ namespace SpacePlanning
             return lineJoined;
         }
 
-        //checks if two lines are collinear or not 
+        //checks if two lines are collinear or not returns true if collinear, else false 
         public static bool LineAdjacencyCheck(Line2d lineA, Line2d lineB, double eps = 0)
         {
+            if (lineA == null || lineB == null) return false;
             Point2d pA = lineA.StartPoint, qA = lineA.EndPoint;
             Point2d pB = lineB.StartPoint, qB = lineB.EndPoint;
 
@@ -144,6 +145,8 @@ namespace SpacePlanning
             return ptList;
         }
 
+   
+
         #endregion
 
 
@@ -191,16 +194,7 @@ namespace SpacePlanning
             return cleanLineList;
         }
 
-        // find the closest point to a point from a group of cells
-        internal static int FindClosestPointIndex(List<Cell> cellList, Point2d pt)
-        {
-            List<Point2d> ptList = new List<Point2d>();
-            for (int i = 0; i < cellList.Count; i++)
-            {
-                if (cellList[i].CellAvailable) ptList.Add(cellList[i].CenterPoint);
-            }
-            return PolygonUtility.FindClosestPointIndex(ptList, pt);
-        }
+  
 
 
         // find the centroid of a group of  cells

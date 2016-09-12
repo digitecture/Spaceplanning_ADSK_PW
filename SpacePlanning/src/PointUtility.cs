@@ -53,7 +53,7 @@ namespace SpacePlanning
         }
 
         //generate points on a circle and then randomize their sequence
-        public static List<Point2d> PointGenerator(int tag, int size)
+        public static List<Point2d> RandomPointGeneratorOnCircle(int tag, int size)
         {
             List<Point2d> pointGen = new List<Point2d>();
             double rad = 1000;
@@ -107,9 +107,8 @@ namespace SpacePlanning
             return sortedPtList;
         }
 
-
         //random point selector from a list
-        public static Dictionary<int, object> PointSelector(Random ran, List<Point2d> poly)
+        public static Dictionary<int, object> RandomPointSelector(Random ran, List<Point2d> poly)
         {
             Dictionary<int, object> output = new Dictionary<int, object>();
             double num = ran.NextDouble();
@@ -170,6 +169,61 @@ namespace SpacePlanning
             };
         }
 
+        // find the closest point to a point from a point list
+        internal static int FindClosestLineFromPoint(List<Line2d> lineList, Point2d pt)
+        {
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < lineList.Count; i++) ptList.Add(LineUtility.LineMidPoint(lineList[i]));
+            return FindClosestPointIndex(ptList, pt);
+        }
+
+        // find the farthest point to a point from a point list
+        internal static int FindFarPointIndex(List<Point2d> ptList, Point2d pt)
+        {
+            int index = 0;
+            double maxDist = 0;
+            for (int i = 0; i < ptList.Count; i++)
+            {
+                Point2d centerPt = ptList[i];
+                double calcDist = DistanceBetweenPoints(centerPt, pt);
+                if (calcDist > maxDist)
+                {
+                    maxDist = calcDist;
+                    index = i;
+                }
+            }
+            return index;
+        }
+
+        // find the closest point to a point from a group of cells
+        internal static int FindClosestPointIndex(List<Cell> cellList, Point2d pt)
+        {
+            List<Point2d> ptList = new List<Point2d>();
+            for (int i = 0; i < cellList.Count; i++)
+            {
+                if (cellList[i].CellAvailable) ptList.Add(cellList[i].CenterPoint);
+            }
+            return FindClosestPointIndex(ptList, pt);
+        }
+
+        // find the closest point to a point from a point list
+        internal static int FindClosestPointIndex(List<Point2d> ptList, Point2d pt)
+        {
+            int index = 0;
+            double minDist = 100000000;
+            for (int i = 0; i < ptList.Count; i++)
+            {
+                Point2d centerPt = ptList[i];
+                double calcDist = DistanceBetweenPoints(centerPt, pt);
+                if (calcDist < minDist)
+                {
+                    minDist = calcDist;
+                    index = i;
+                }
+            }
+            return index;
+        }
+
         //returns the point having highest x,y value from a list - using now
         internal static int HighestPointFromList(List<Point2d> ptList)
         {
@@ -199,7 +253,7 @@ namespace SpacePlanning
             return PolygonUtility.OrderPolygon2dPoints(poly, cleanedPtList, pIndex); //intersectedPoints
         }
 
-        //find lowest point from a list ( only used in the Grahams Scan Convex Hull Algo )
+        //find lowest point from a list of points ( only used in the Grahams Scan Convex Hull Algo )
         internal static void GetLowestPointForGrahamsScan(ref List<Point2d> ptList, int size)
         {
             Point2d lowestPoint = ptList[0];
@@ -208,7 +262,7 @@ namespace SpacePlanning
                 if (lowestPoint.Y > ptList[0].Y || (lowestPoint.Y == ptList[i].Y && lowestPoint.X > ptList[i].X)) lowestPoint = ptList[i];
 
             }
-            int rootPosition = ElementPosition(ptList, size, lowestPoint);
+            int rootPosition = ElementPositionPointList(ptList, size, lowestPoint);
             if (rootPosition != -1) ChangePlaces(ref ptList, 0, rootPosition);
 
         }
@@ -222,14 +276,13 @@ namespace SpacePlanning
             return Math.Sqrt(xLen * xLen + yLen * yLen);
         }
 
-        //distance between points
+        //distance between points by line length
         internal static double DistanceBetweenPointsByLine(Point2d ptA, Point2d ptB)
         {
             if (ptA == null || ptB == null) return 0;
             Line2d line = new Line2d(ptA, ptB);
             return line.Length;
         }
-
 
         //sort point array for Grahams scan algo to find convex hull
         internal static void SortedPoint2dListForGrahamScan(ref List<Point2d> ptList, int size)
@@ -258,7 +311,7 @@ namespace SpacePlanning
         }
 
         // get element position in a list
-        internal static int ElementPosition(List<Point2d> ptList, int size, Point2d pt)
+        internal static int ElementPositionPointList(List<Point2d> ptList, int size, Point2d pt)
         {
             for (int i = 0; i < size; ++i)
             {
@@ -301,7 +354,7 @@ namespace SpacePlanning
 
         }
 
-        //returns only unique point2d from a list of points
+        //returns only unique point2d from a list of points (same as cleanDuplicatePoint2d, but this one needs more testing)
         internal static List<Point2d> ReturnUniquePoints(List<Point2d> testList)
         {
             List<Point2d> cleanList = new List<Point2d>();
@@ -355,6 +408,7 @@ namespace SpacePlanning
             }
             return cleanList;
         }
+       
         //get next to top point on Stack for Graham Scan algo
         internal static Point2d BeforeTopPointForGrahamScan(ref Stack myStack)
         {
@@ -370,7 +424,7 @@ namespace SpacePlanning
             return pt;
         }
 
-        // sorts two points clockwise, with respect to a reference point
+        // sorts two points clockwise, with respect to a reference point returns -1 if pointA comes first, returns 1, if pointB comes first, else on error returns 0
         internal static int SortCornersClockwise(Point2d A, Point2d B)
         {
             double aTanA, aTanB;
@@ -382,7 +436,7 @@ namespace SpacePlanning
             return 0;
         }
 
-        // finds the angle between two points wrt Origin - not sure
+        // finds the angle between two points wrt Origin - needs testing
         internal static double AngleBetweenPoint2d(Point2d A, Point2d center)
         {
             double angle = Math.Acos((A.X - center.X) / PointUtility.DistanceBetweenPoints(center, A));
@@ -390,7 +444,7 @@ namespace SpacePlanning
             return angle; //return angle*180/Math.PI;
         }
 
-        //from point2d list get the range2d
+        //from point2d list get the range2d of its bounding box
         internal static Range2d FromPoint2dGetRange2D(List<Point2d> point2dList)
         {
             List<double> xCordList = new List<double>();
@@ -416,19 +470,7 @@ namespace SpacePlanning
         }
 
 
-        //returns the points on the required side of a given line, 0 is left or up, 1 is right or down
-        internal static List<Point2d> PointOnSide(Line2d line, List<Point2d> ptList, int side)
-        {
-            if (line == null || !ValidateObject.CheckPointList(ptList)) return null;
-            List<Point2d> selectedPts = new List<Point2d>();
-            if(side == 0)
-            {
-
-            }
-
-            return selectedPts;
-
-        }
+   
         #endregion
 
 

@@ -7,7 +7,7 @@ using System.Linq;
 namespace SpacePlanning
 {
     /// <summary>
-    /// Department Data object to store information related to departments from the input program document.
+    /// Departments Data object to store information related to departments from the input program document.
     /// </summary>
     public class DeptData
     {
@@ -36,10 +36,14 @@ namespace SpacePlanning
         private bool _mode3D;
         private int _floorLevel;
         private int _numDeptPerFloor = 0;
+        private string _deptId;
+        private List<string> _deptAdj = new List<string>();
+
+        private List<Polygon2d> _deptCirculatonPoly;
 
 
         #region - internal constructor
-        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions)
+        internal DeptData(string deptName, List<ProgramData> programDataList, double circulationFactor, double dimX, double dimY, bool stackingOptions, string deptId, List<string> deptAdjacency)
         {
             _deptName = deptName;
             _progDataList = programDataList;
@@ -52,11 +56,11 @@ namespace SpacePlanning
             _CellsAssigned = new List<Cell>();
             _gridX = dimX;
             _gridY = dimY;
-            _deptType = CalcDepartmentType();
+            _deptType = CalcDepartmentTypePublic();
             _polyDepts = null;
             _deptAreaProportion = 0;
             _deptAreaProportionAchieved = 0;
-            _deptAbrv = _deptName +" = " + _deptName.Substring(0, 2).ToUpper() + " @ " + _deptType;//_deptName.Split(' ').Select(s => s[0]).ToString();
+            _deptAbrv = _deptName +" = " + _deptName.Substring(0, 2).ToUpper() + " @ " + _deptType;
             _deptAdjacencyWeight = 0;
             _stackingOptions = stackingOptions;
 
@@ -65,6 +69,10 @@ namespace SpacePlanning
             _flrHeightList.Add(0);
             _floorLevel = 0;
 
+            _deptId = deptId;
+            _deptAdj = deptAdjacency;
+
+            _deptCirculatonPoly = new List<Polygon2d>();
         }
 
         internal DeptData(DeptData other)
@@ -94,6 +102,10 @@ namespace SpacePlanning
             _floorLevel = other.DeptFloorLevel;
             _numDeptPerFloor = other.NumDeptPerFloor;
 
+            _deptId = other.DeptId;
+            _deptAdj = other.DeptAdjacencyProvided;
+            _deptCirculatonPoly = other.DeptCirculationPoly;
+
             if (other.PolyAssignedToDept != null && other.PolyAssignedToDept.Count > 0) _polyDepts = other.PolyAssignedToDept;
             else _polyDepts = null;
         }
@@ -109,6 +121,31 @@ namespace SpacePlanning
         {
             get { return _deptAreaProportion; }
             set { _deptAreaProportion = value; }
+        }
+
+
+        /// <summary>
+        /// Required area proportion for each department on site.
+        /// </summary>
+        public List<Polygon2d> DeptCirculationPoly
+        {
+            get { return _deptCirculatonPoly; }
+            set { _deptCirculatonPoly = value; }
+        }
+        /// <summary>
+        /// Department Id.
+        /// </summary>
+        public string DeptId
+        {
+            get { return _deptId; }
+        }
+
+        /// <summary>
+        /// Department Adjacency as provided.
+        /// </summary>
+        public List<string> DeptAdjacencyProvided
+        {
+            get { return _deptAdj; }
         }
 
         /// <summary>
@@ -344,6 +381,15 @@ namespace SpacePlanning
                 if (_progDataList[i].ProgramType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || _progDataList[i].ProgramType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) count += 1;
             int perc = count / _progDataList.Count;
             if (perc > 0.50) return BuildLayout.KPU.ToUpper();
+            else return BuildLayout.REG.ToUpper();
+        }
+
+
+        internal string CalcDepartmentTypePublic()
+        {
+            if (_progDataList == null) return "";
+            if (_progDataList[0].ProgramType.IndexOf(BuildLayout.KPU.ToLower()) != -1 || _progDataList[0].ProgramType.IndexOf(BuildLayout.KPU.ToUpper()) != -1) return BuildLayout.KPU.ToUpper();
+            else if (_progDataList[0].ProgramType.IndexOf(BuildLayout.PUBLIC.ToLower()) != -1 || _progDataList[0].ProgramType.IndexOf(BuildLayout.PUBLIC.ToUpper()) != -1) return BuildLayout.PUBLIC.ToUpper();
             else return BuildLayout.REG.ToUpper();
         }
 

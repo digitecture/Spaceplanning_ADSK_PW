@@ -14,7 +14,7 @@ namespace SpacePlanning
     public static class BuildLayout
     {
         
-        internal static double SPACING = 20; //higher value makes code faster, 6, 10 was good too
+        internal static double SPACING = 20; //higher value makes code faster, 6, 10 worked fine too
         internal static double SPACING2 = 20;
         internal static Random RANGENERATE = new Random();
         internal static double RECURSE = 0;

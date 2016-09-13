@@ -636,7 +636,6 @@ namespace SpacePlanning
                 leftPolyList.Add(leftPoly);
 
                 if (PolygonUtility.AreaPolygon(splitPoly) > 2) polySplitList.Add(splitPoly);
-
                 
             }
             List<Line2d> lineListCorridor = new List<Line2d>();
@@ -644,15 +643,12 @@ namespace SpacePlanning
             for (int i = 0; i < polySplitList.Count; i++)
             {
                 List<Line2d> lines = polySplitList[i].Lines;
-                for(int j=0; j < lines.Count; j++) if (lines[j].Length > 5) lineListCorridor.Add(lines[j]);
-           
+                for(int j=0; j < lines.Count; j++) if (lines[j].Length > 5) lineListCorridor.Add(lines[j]);           
             }
             Line2d exitLine = new Line2d(new Point2d(0, 0), new Point2d(0, 100));
             int index = PointUtility.FindClosestLineFromPoint(lineListCorridor, center);
             if (lineListCorridor.Count > 0)  exitLine = lineListCorridor[index];
             else exitLine = null;
-
-
             return new Dictionary<string, object>
             {
                 { "PolyAfterSplit", (polySplitList) },

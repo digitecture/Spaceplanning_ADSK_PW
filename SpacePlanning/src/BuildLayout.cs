@@ -230,9 +230,6 @@ namespace SpacePlanning
             for (int k = 0; k < sortedPolyIndices.Count; k++) { sortedPolySubDivs.Add(deptPoly[sortedPolyIndices[k]]); }
             deptPoly = sortedPolySubDivs; 
 
-
-            //Stack<ProgramData> programDataRetrieved = new Stack<ProgramData>();
-            //Stack<Polygon2d> polygonAvailable = new Stack<Polygon2d>();
             Queue<Polygon2d> polygonAvailable = new Queue<Polygon2d>();
             for (int j = 0; j < deptPoly.Count; j++) { polygonAvailable.Enqueue(deptPoly[j]); }
             double areaAssigned = 0, eps = 50, max = 0.73, min = 0.27;
@@ -770,14 +767,14 @@ namespace SpacePlanning
 
 
 
-        //dept assignment new way
+        //dept assignment new way ws
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" ,"SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
         internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, Point2d attractorPoint, List<double> kpuDepthList,
             int designSeed = 5, bool noExternalWall = false,
-            bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false)
+            bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false, double circulationWidth = 3)
         {
             double acceptableWidth = 0;
-            double circulationWidth = 3;
+            //double circulationWidth = 3;
             if (deptData == null) { return null; }
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");

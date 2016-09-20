@@ -156,7 +156,7 @@ namespace SpacePlanning
                 //parameter = 0;
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
                 //deptArrangement = BuildLayout.DeptPlacerNew(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
-                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
+                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg, circulationWidth);
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];
@@ -175,7 +175,7 @@ namespace SpacePlanning
                         if (ValidateObject.CheckPolyList(eachDeptPoly)) deptPlaced = true;
                         else { deptPlaced = false; Trace.WriteLine("dept arrangement bad polys, rejected"); break; }
                         bool orthoResult = ValidateObject.CheckPolygon2dListOrtho(deptPolysTogether, eps);
-                        Trace.WriteLine("The poly formed is : " + orthoResult);
+                        //Trace.WriteLine("The poly formed is : " + orthoResult);
                         if (orthoResult) deptPlaced = true;
                         else { deptPlaced = false; Trace.WriteLine("dept arrangement non orthogonal, rejected"); break; }
                     }

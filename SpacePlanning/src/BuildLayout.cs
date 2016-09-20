@@ -662,7 +662,7 @@ namespace SpacePlanning
 
         //adds circulation polygons to a list of polygons and a container polygon
         [MultiReturn(new[] { "DeptData" })]
-        public static Dictionary<string, object> GetDataToDeptData(List<DeptData> deptData,List<List<List<Polygon2d>>> deptPolyList, List<List<double>> areaAssignedDeptList, List<List<List<Polygon2d>>> deptCircPolyList)
+        internal static Dictionary<string, object> GetDataToDeptData(List<DeptData> deptData,List<List<List<Polygon2d>>> deptPolyList, List<List<double>> areaAssignedDeptList, List<List<List<Polygon2d>>> deptCircPolyList)
         {
             if (deptData == null) return null;
             List<DeptData> deptDataInp = deptData;
@@ -700,7 +700,7 @@ namespace SpacePlanning
 
         //adds circulation polygons to a list of polygons and a container polygon
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly" })]
-        public static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList,List<Polygon2d> containerPoly,
+        internal static Dictionary<string, object> AddCirculationPoly(List<Polygon2d> polyList,List<Polygon2d> containerPoly,
             double circulationWidth = 3)
         {
             //containerPoly = new Polygon2d(containerPoly.Points);
@@ -773,7 +773,7 @@ namespace SpacePlanning
 
         //dept assignment new way
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" ,"SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, Point2d attractorPoint, List<double> kpuDepthList,
+        internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, Point2d attractorPoint, List<double> kpuDepthList,
             int designSeed = 5, bool noExternalWall = false,
             bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false)
         {

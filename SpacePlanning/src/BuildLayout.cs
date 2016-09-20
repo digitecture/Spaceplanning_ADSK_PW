@@ -41,7 +41,6 @@ namespace SpacePlanning
         /// <param name="acceptableWidth">Acceptable width in meters while allocating area and polygon2d to each dept on site.</param>
         /// <param name="polyDivision">Point division of each polygon2d. Lower number represents high point count per polygon2d.</param>
         /// <param name="designSeed">Values to restart dept placment algorithm and return another design output.</param>
-        /// <param name="noExternalWall">Boolean toggle to turn on or off requirement of external wall for KPU.</param>
         /// <param name="unlimitedKPU">Boolean toggle to turn on or off unlimied KPU placement.</param>
         /// <param name="mode3D">Boolean toggle to turn on or off 3d mode.</param>
         /// <param name="totalBuildingHeight">Total height of the building.</param>
@@ -55,9 +54,9 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, Point2d attractorPoint, List<double> kpuDepthList, 
-             int designSeed = 50, double circulationWidth = 5, bool noExternalWall = false, bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2, bool highIteration = false)
+             int designSeed = 50, double circulationWidth = 5,bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2)
         {
-            if (highIteration == true) DEPTCOUNT = 5;
+           
             //double acceptableWidth;
             double polyDivision = 8;
             List<DeptData> deptDataInp = deptData;
@@ -79,11 +78,11 @@ namespace SpacePlanning
             if (deptData[0].Mode3D)
             {
                 return BuildLayout3D.PlaceDepartments3D(deptData, buildingOutline, kpuDepthList, attractorPoint, 
-                                        designSeed, circulationWidth,noExternalWall, unlimitedKPU, numDeptPerFloor);
+                                        designSeed, circulationWidth, unlimitedKPU, numDeptPerFloor);
             }
             else {
                 return BuildLayout3D.PlaceDepartments2D(deptData, buildingOutline, kpuDepthList, attractorPoint,
-                                        designSeed, circulationWidth,noExternalWall, unlimitedKPU);
+                                        designSeed, circulationWidth, unlimitedKPU);
             }  
         }
 
@@ -770,8 +769,7 @@ namespace SpacePlanning
         //dept assignment new way ws
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" ,"SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
         internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, Point2d attractorPoint, List<double> kpuDepthList,
-            int designSeed = 5, bool noExternalWall = false,
-            bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false, double circulationWidth = 3)
+            int designSeed = 5, bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false, double circulationWidth = 3)
         {
             double acceptableWidth = 0;
             //double circulationWidth = 3;

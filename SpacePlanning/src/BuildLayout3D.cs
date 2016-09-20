@@ -34,7 +34,7 @@ namespace SpacePlanning
         /// DeptData object, department arrangement on site
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint,int designSeed = 50, double circulationWidth = 5, bool noExternalWall = false,
+        public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint,int designSeed = 50, double circulationWidth = 5, 
             bool unlimitedKPU = true, int numDeptPerFloor = 2)
         {
             Trace.WriteLine("Dept 3d mode");
@@ -96,7 +96,7 @@ namespace SpacePlanning
             for (int i = 0; i < floorHeightList.Count; i++)
             {
                 // replaced deptData with deptRegPerFloorList[i]
-                deptObj = PlaceDepartments2D(deptPerFloorList[i], buildingOutline, kpuDepthList, attractorPoint,designSeed, circulationWidth, noExternalWall);
+                deptObj = PlaceDepartments2D(deptPerFloorList[i], buildingOutline, kpuDepthList, attractorPoint,designSeed, circulationWidth);
                 if (deptObj == null || (List<DeptData>)deptObj["DeptData"] == null) continue;
                 List<DeptData> deptDataList = (List<DeptData>)deptObj["DeptData"];
                 //for (int j = 0; j < deptDataList.Count; j++) { deptDataList[j].DeptFloorLevel = i; }
@@ -134,8 +134,8 @@ namespace SpacePlanning
         /// DeptData object, department arrangement on site
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly", "SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3, bool noExternalWall = false,
-            bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15)
+        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3,
+            bool unlimitedKPU = true)
         {
             //if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
             double circulationFreq = 8;
@@ -156,7 +156,7 @@ namespace SpacePlanning
                 //parameter = 0;
                 Trace.WriteLine("PLACE DEPT STARTS , Lets arrange dept again ++++++++++++++++ : " + count);
                 //deptArrangement = BuildLayout.DeptPlacerNew(deptData, buildingOutline, attractorPoint,kpuDepthList, designSeed, circulationWidth, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg);
-                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, noExternalWall, unlimitedKPU, stackOptionsDept, stackOptionsProg, circulationWidth);
+                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, attractorPoint, kpuDepthList, designSeed, unlimitedKPU, stackOptionsDept, stackOptionsProg, circulationWidth);
                 if (deptArrangement != null)
                 {
                     List<DeptData> deptDataUpdated = (List<DeptData>)deptArrangement["DeptData"];

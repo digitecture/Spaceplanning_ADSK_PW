@@ -1,0 +1,13 @@
+PROGRAM ID,PROGRAM NAME,ZONE/ DEPARTMENT,QUANTITY,AREA,TOTAL AREA,PREFERENCEPOINT VALUE,PROGRAM TYPE,ADJACENT PROGRAMS,DEPT ID,ADJACENT DEPT
+0,Public Toilet,Family Public Support,2,160,320,6,PUBLIC,,0,3.2
+1,Lobby,Family Public Support,1,550,550,10,PUBLIC,,0,2
+2,Patient Room,Inpatient Area,22,420,9240,10,KPU,,1,3.4
+3,Exam Room General,Exam Area,6,400,2400,10,KPU,,2,0.1
+4,Alcove Charting Room,Clinic Support,4,75,300,10,REGULAR,,3,4.2.0
+5,Team Work station,Clinic Support,2,288,576,9,REGULAR,,3,
+6,Soiled Utility,Clinic Support,1,300,300,8,REGULAR,,3,
+7,Nourishment Room Family,Clinic Support,1,65,65,7,REGULAR,,3,
+8,Staff Lounge,Shared Staff Support,1,420,420,9,REGULAR,,4,3.2
+9,Kitchen,Shared Staff Support,1,150,150,8,REGULAR,,4,
+10,Conference,Shared Staff Support,3,300,900,10,REGULAR,,4,
+11,Staff Respite Room,Shared Staff Support,1,80,80,7,REGULAR,,4,

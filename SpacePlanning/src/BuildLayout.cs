@@ -462,7 +462,6 @@ namespace SpacePlanning
             if (mode)
             {
                 Dictionary<string, object> kpuDeptObj = SplitObject.AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, area, thresDistance, designSeed, false, stackOptions);
-
                 if (kpuDeptObj == null) return null;
                 kpuDeptBlocks = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                 leftOverBlocks = (List<Polygon2d>)kpuDeptObj["LeftOverPoly"];
@@ -891,6 +890,7 @@ namespace SpacePlanning
                     }
                     catch
                     {
+                        Trace.WriteLine("fitkpu needs go to catch statement");
                         kpuDeptObj = FitKPUDept(leftOverBlocks[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
                         kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                         leftOverBlocks[0] = (Polygon2d)kpuDeptObj["LeftOverPoly"];

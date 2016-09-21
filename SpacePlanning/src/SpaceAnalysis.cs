@@ -548,7 +548,7 @@ namespace SpacePlanning
 
             bool kpuPlaced = false;
             Color kpuColor = colorListSelected[0];
-            Color pubColor = colorListSelected[1];
+            Color pubColor = Color.ByARGB(transparency, 255, 0, 0);//colorListSelected[1];
             List<List<Surface>> srfListAll = new List<List<Surface>>();
             List<List<Display.Display>> displayListAll = new List<List<Display.Display>>();
             for (int i = 0; i < polyProgsList.Count; i++)

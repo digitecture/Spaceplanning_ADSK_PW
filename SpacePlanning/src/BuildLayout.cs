@@ -320,15 +320,13 @@ namespace SpacePlanning
                 if (progItem.PolyAssignedToProg.Count > 1)
                 {
                     if (progItem.ProgramName.IndexOf("##") == -1)
-                    {
-                        
+                    {                        
                         string programId = Regex.Match(progItem.ProgramName, @"\d+").Value;
                         string addValue = "-"+ programId + " ##";
                         progItem.ProgramName += addValue;
                     }
                    
-                }// + progItem.ProgID;  }
-                string k = ""+progItem.ProgramName[0];
+                }               
                 count = 0;
                 areaAssigned = 0;
             }// end of for loop

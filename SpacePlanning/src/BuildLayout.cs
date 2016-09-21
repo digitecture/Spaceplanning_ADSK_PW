@@ -210,7 +210,7 @@ namespace SpacePlanning
         /// <param name="recompute">This value is used to restart computing the node every time its value is changed.</param>
         /// <returns></returns>
         [MultiReturn(new[] { "PolyAfterSplit", "ProgramData" })]
-        internal static Dictionary<string, object> PlaceREGPrograms(DeptData deptDataInp,double minAllowedDim = 5, int designSeed = 10, bool checkAspectRatio = true)
+        internal static Dictionary<string, object> PlaceREGPrograms(DeptData deptDataInp,double minAllowedDim = 5, int designSeed = 10, bool checkAspectRatio = false)
         {
             if (deptDataInp == null) return null;
             double ratio = 0.5;
@@ -230,9 +230,10 @@ namespace SpacePlanning
             for (int k = 0; k < sortedPolyIndices.Count; k++) { sortedPolySubDivs.Add(deptPoly[sortedPolyIndices[k]]); }
             deptPoly = sortedPolySubDivs; 
 
-            Queue<Polygon2d> polygonAvailable = new Queue<Polygon2d>();
-            for (int j = 0; j < deptPoly.Count; j++) { polygonAvailable.Enqueue(deptPoly[j]); }
-            double areaAssigned = 0, eps = 50, max = 0.73, min = 0.27;
+            //Queue<Polygon2d> polygonAvailable = new Queue<Polygon2d>();
+            Stack<Polygon2d> polygonAvailable = new Stack<Polygon2d>();
+            for (int j = 0; j < deptPoly.Count; j++) { polygonAvailable.Push(deptPoly[j]); }
+            double areaAssigned = 0, eps = 10, max = 0.73, min = 0.27;
             int count = 0,countIn = 0, maxTry = 15;
             Random ran = new Random(designSeed);
             for(int i = 0; i < progData.Count; i++)
@@ -240,14 +241,16 @@ namespace SpacePlanning
                 ProgramData progItem = progData[i];
                 progItem.PolyAssignedToProg = new List<Polygon2d>();
                 double areaNeeded = progItem.ProgAreaNeeded;
-                while (areaAssigned < areaNeeded && polygonAvailable.Count > 0)// && count < maxTry
+                double areaLeftTobeadded = areaNeeded;
+                while (areaLeftTobeadded > 50 && polygonAvailable.Count > 0)// && count < maxTry
                 {
-                    ratio = BasicUtility.RandomBetweenNumbers(ran, max, min);
+                    //ratio = BasicUtility.RandomBetweenNumbers(ran, max, min);
                     ratio = 0.5;
-                    Polygon2d currentPoly = polygonAvailable.Dequeue();
+                    Polygon2d currentPoly = polygonAvailable.Pop();
                     double areaPoly = PolygonUtility.AreaPolygon(currentPoly);
                     int compareArea = BasicUtility.CheckWithinRange(areaNeeded, areaPoly, eps);
-                    if (compareArea == 1) // current poly area is more =  compareArea == 1
+                    Trace.WriteLine("compare area found : " + compareArea);
+                    if (compareArea == 1) // current poly area is more =  compareArea == 1 , then split the poly into two
                     {
                         Dictionary<string,object> splitObj = SplitObject.SplitByRatio(currentPoly, ratio);
                         if (splitObj != null)
@@ -267,13 +270,12 @@ namespace SpacePlanning
                                 }
                             }
                             if (polyAfterSplit == null) continue;
-                            for (int j = 0; j < polyAfterSplit.Count; j++) polygonAvailable.Enqueue(polyAfterSplit[j]);
+                            for (int j = 0; j < polyAfterSplit.Count; j++) polygonAvailable.Push(polyAfterSplit[j]);
                             count += 1;
                             continue;
                         }
-                        else
-                        {
-                            //area within range
+                        else 
+                        {                            
                             if (ValidateObject.CheckPoly(currentPoly))
                             {
                                 if (checkAspectRatio)
@@ -313,7 +315,8 @@ namespace SpacePlanning
                         }
                         count += 1;
                     }
-                 
+
+                    areaLeftTobeadded = areaNeeded - areaAssigned;                 
                 }// end of while
                 polyList.Add(progItem.PolyAssignedToProg);
                 progItem.ProgAreaProvided = areaAssigned;

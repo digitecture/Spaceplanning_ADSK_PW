@@ -154,7 +154,7 @@ namespace SpacePlanning
             Dictionary<string, object> programDocObj = FindPreferredDepts(deptNameList, progTypeList, progAdjList);
             List<string> preferredDept = (List<string>)programDocObj["MostFrequentDeptSorted"];
  
-            deptDataStack = SortDeptData(deptDataStack, preferredDept, stackingOptionsProg);
+            deptDataStack = SortDeptData(deptDataStack, preferredDept);
             //added to compute area percentage for each dept
             double totalDeptArea = 0;
             for (int i = 0; i < deptDataStack.Count; i++) totalDeptArea += deptDataStack[i].DeptAreaNeeded;
@@ -597,9 +597,9 @@ namespace SpacePlanning
 
 
         //sorts a deptdata based on area 
-        internal static List<DeptData> SortDeptData(List<DeptData> deptDataInp, List<string> preferredDept, bool tag = false)
+        internal static List<DeptData> SortDeptData(List<DeptData> deptDataInp, List<string> preferredDept)
         {
-
+            bool tag = true;
             List<DeptData> deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
             SortedDictionary<double, DeptData> sortedD = new SortedDictionary<double, DeptData>();
             List<double> areaList = new List<double>(), weightList = new List<double>();

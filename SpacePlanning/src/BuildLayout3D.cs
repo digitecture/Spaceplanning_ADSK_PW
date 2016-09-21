@@ -134,8 +134,8 @@ namespace SpacePlanning
         /// DeptData object, department arrangement on site
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys" , "OtherDeptPoly", "SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, double circulationWidth = 3,
-            bool unlimitedKPU = true)
+        public static Dictionary<string, object> PlaceDepartments2D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint, int designSeed = 50, 
+            double circulationWidth = 3,bool unlimitedKPU = true)
         {
             //if (polyDivision >= 1 && polyDivision < 30) { BuildLayout.SPACING = polyDivision; BuildLayout.SPACING2 = polyDivision; }
             double circulationFreq = 8;
@@ -206,11 +206,13 @@ namespace SpacePlanning
         /// <param name="checkAspectRatio">Boolean value to toggle check aspect ratio of the programs.</param>
         /// <returns name="DeptData">Updated department data object.</returns>
         [MultiReturn(new[] { "DeptData" })]
-        public static Dictionary<string, object> PlacePrograms2D(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, int designSeed = 5, bool checkAspectRatio = false)
+        public static Dictionary<string, object> PlacePrograms2D(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, 
+            int designSeed = 5, bool checkAspectRatio = false)
         {
             if (deptData == null) return null;
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
+            bool stackOptionsProg = deptData[0].ProgramsInDept[0].StackingOptions;
             List<List<Polygon2d>> polyPorgsAdded = new List<List<Polygon2d>>();
             List<ProgramData> progDataNew = new List<ProgramData>();
             for (int i = 0; i < deptData.Count; i++)
@@ -227,6 +229,15 @@ namespace SpacePlanning
                 }
                 else
                 {
+                    if (stackOptionsProg)
+                    {
+                        if (deptData[i].ProgramsInDept != null || deptData[i].ProgramsInDept.Count > 0)
+                        {
+                            deptData[i].ProgramsInDept = ReadData.RandomizeProgramList(deptData[i].ProgramsInDept, designSeed);
+                            Trace.WriteLine("Randomized programlist");
+                        }
+                    }
+
                     Dictionary<string, object> placedSecondaryProg = BuildLayout.PlaceREGPrograms(deptData[i], minAllowedDim, designSeed, checkAspectRatio);
                     if (placedSecondaryProg != null) deptData[i].ProgramsInDept = (List<ProgramData>)placedSecondaryProg["ProgramData"];
                     else deptData[i].ProgramsInDept = null;

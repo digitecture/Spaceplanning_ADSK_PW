@@ -78,7 +78,7 @@ namespace SpacePlanning
         internal DeptData(DeptData other)
         {
             _deptName = other.DepartmentName;
-            _progDataList = other.ProgramsInDept;
+            _progDataList = other.ProgramsInDept;  //other.ProgramsInDept.Select(x => new ProgramData(x)).ToList(); //
             _numCellsDept = other.NumCellsNeededDept();
             _cirFactor = other.DeptCirFactor;
             _deptAreaNeeded = other.AreaEachDept();

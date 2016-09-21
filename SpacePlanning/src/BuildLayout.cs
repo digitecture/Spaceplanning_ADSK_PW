@@ -22,6 +22,7 @@ namespace SpacePlanning
         internal static Point2d REFERENCEPOINT = new Point2d(0,0);
         internal static int DEPTCOUNT = 5;
         internal static double DIVISION = 4;
+        internal static double GRIDWIDTH = 35;
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";
@@ -55,7 +56,8 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, Point2d attractorPoint, List<double> kpuDepthList, 
-             int designSeed = 50, double circulationWidth = 5,bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, double avgFloorHeight = 15, int numDeptPerFloor = 2)
+             int designSeed = 50, double circulationWidth = 5,bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, 
+             double avgFloorHeight = 15, int numDeptPerFloor = 2)
         {
            
             //double acceptableWidth;
@@ -215,13 +217,18 @@ namespace SpacePlanning
             if (deptDataInp == null) return null;
             double ratio = 0.5;
             DeptData deptData = new DeptData(deptDataInp);
+            //DeptData deptData = deptDataInp.Select(x => new DeptData(x));
+            //List<DeptData> tempList1 = new List<DeptData> { deptDataInp };
+            //List<DeptData> tempList2 = tempList1.Select(x => new DeptData(x)).ToList();
+            //DeptData deptData = tempList2[0];
+            
+
             List<Polygon2d> deptPoly = deptData.PolyAssignedToDept;
             List<ProgramData> progData = deptData.ProgramsInDept;
             if (!ValidateObject.CheckPolyList(deptPoly)) return null;
             if (progData == null || progData.Count == 0) return null;
             List<List<Polygon2d>> polyList = new List<List<Polygon2d>>();
             List<Polygon2d> polyCoverList = new List<Polygon2d>();
-
 
             //SORT THE POLYSUBDIVS NEW
             Point2d center = PolygonUtility.CentroidOfPolyList(deptPoly);
@@ -249,7 +256,7 @@ namespace SpacePlanning
                     Polygon2d currentPoly = polygonAvailable.Pop();
                     double areaPoly = PolygonUtility.AreaPolygon(currentPoly);
                     int compareArea = BasicUtility.CheckWithinRange(areaNeeded, areaPoly, eps);
-                    Trace.WriteLine("compare area found : " + compareArea);
+                    //Trace.WriteLine("compare area found : " + compareArea);
                     if (compareArea == 1) // current poly area is more =  compareArea == 1 , then split the poly into two
                     {
                         Dictionary<string,object> splitObj = SplitObject.SplitByRatio(currentPoly, ratio);
@@ -322,7 +329,7 @@ namespace SpacePlanning
                 progItem.ProgAreaProvided = areaAssigned;
                 if (progItem.PolyAssignedToProg.Count > 1)
                 {
-                    if (progItem.ProgramName.IndexOf("##") == -1)
+                    if (progItem.ProgramName.IndexOf("-") == -1)
                     {
                         //string programId = Regex.Match(progItem.ProgramName, @"\d+").Value + "/" + i.ToString();
                         //string addValue = "-"+ programId + " ##";
@@ -361,7 +368,7 @@ namespace SpacePlanning
         /// <returns name="DeptData">Updated department data object.</returns>
         [MultiReturn(new[] { "DeptData" })]
         public static Dictionary<string, object> PlacePrograms(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, 
-            int designSeed = 5, bool checkAspectRatio = false)
+            int designSeed = 5, bool checkAspectRatio = false, bool stackOptionsProg = true)
         {
             if (deptData == null) return null;
             List<DeptData> deptDataInp = deptData;
@@ -945,13 +952,8 @@ namespace SpacePlanning
                         //Point2d ptToSort = center;
                         double arealeft = 0;
                         for (int j = 0; j < leftOverPoly.Count; j++) { arealeft += PolygonUtility.AreaPolygon(leftOverPoly[j]); }
-                        if (stackOptionsProg)
-                        {
-                            double upper = arealeft / 6, lower = arealeft / 12;
-                            //acceptableWidth = BasicUtility.RandomBetweenNumbers(new Random(designSeed), upper, lower);  
-                        }
-                        acceptableWidth = Math.Sqrt(arealeft) / DIVISION;
-                        acceptableWidth = 35;
+                        //acceptableWidth = Math.Sqrt(arealeft) / DIVISION;
+                        acceptableWidth = GRIDWIDTH;
                         polySubDivs = SplitObject.SplitRecursivelyToSubdividePoly(leftOverPoly, acceptableWidth, ratio);
 
                         bool checkPoly1 = ValidateObject.CheckPolygon2dListOrtho(polySubDivs[0], 0.5);
@@ -1027,12 +1029,6 @@ namespace SpacePlanning
             for (int i = 0; i < UpdatedDeptData.Count; i++)
             {
                 UpdatedDeptData[i].DeptAreaProportionAchieved = Math.Round((UpdatedDeptData[i].DeptAreaProvided / totalDeptArea), 3);
-                if (stackOptionsProg)
-                {
-                    if (UpdatedDeptData[i].ProgramsInDept != null || UpdatedDeptData[i].ProgramsInDept.Count > 0)
-                        UpdatedDeptData[i].ProgramsInDept = ReadData.RandomizeProgramList(UpdatedDeptData[i].ProgramsInDept, designSeed);             
-                }
-
             }
             if (leftOverPoly.Count == 0) leftOverPoly = null;
             Trace.WriteLine("DEPT PLACE KPU ENDS +++++++++++++++++++++++++++++++");

@@ -323,9 +323,11 @@ namespace SpacePlanning
                 if (progItem.PolyAssignedToProg.Count > 1)
                 {
                     if (progItem.ProgramName.IndexOf("##") == -1)
-                    {                        
-                        string programId = Regex.Match(progItem.ProgramName, @"\d+").Value;
-                        string addValue = "-"+ programId + " ##";
+                    {
+                        //string programId = Regex.Match(progItem.ProgramName, @"\d+").Value + "/" + i.ToString();
+                        //string addValue = "-"+ programId + " ##";
+                        string programId = "" + i.ToString();
+                        string addValue = " -" + programId + "-";
                         progItem.ProgramName += addValue;
                     }
                    

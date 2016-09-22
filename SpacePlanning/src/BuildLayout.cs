@@ -981,14 +981,14 @@ namespace SpacePlanning
                         AllDeptCircPolys.Add(cirREGPoly);    
                     }// end of prepare reg dept
                     double areaNeeded = deptItem.DeptAreaNeeded;
-                    Dictionary<string, object> assignedByRatioObj = FitRegDept(areaNeeded, leftOverPoly);
+                    Dictionary<string, object> fitRegDepObj = FitRegDept(areaNeeded, leftOverPoly);
                     currentPolyList = leftOverPoly;
-                    if (assignedByRatioObj == null) continue;
+                    if (fitRegDepObj == null) continue;
                     //Trace.WriteLine("Assignment worked " + i);
-                    List<Polygon2d> everyDeptPoly = (List<Polygon2d>)assignedByRatioObj["DeptPoly"];
-                    leftOverPoly = (List<Polygon2d>)assignedByRatioObj["LeftOverPoly"];
-                    areaAssigned = (double)assignedByRatioObj["AreaAdded"];    
-                    List<Node> AllNodesList = (List<Node>)assignedByRatioObj["AllNodes"];
+                    List<Polygon2d> everyDeptPoly = (List<Polygon2d>)fitRegDepObj["DeptPoly"];
+                    leftOverPoly = (List<Polygon2d>)fitRegDepObj["LeftOverPoly"];
+                    areaAssigned = (double)fitRegDepObj["AreaAdded"];    
+                    List<Node> AllNodesList = (List<Node>)fitRegDepObj["AllNodes"];
                     AllDeptAreaAdded.Add(areaAssigned);
                     AllDeptPolys.Add(everyDeptPoly);
                     //

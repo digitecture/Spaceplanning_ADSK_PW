@@ -620,13 +620,13 @@ namespace SpacePlanning
             List<int> indicesRandom = BasicUtility.RandomizeList(indices, ran);
             List<DeptData> deptListOut = new List<DeptData>();
             int a = 0, b = 1;
-            if (num > 0.5) a = 1; b = 0;
+            if (num > 0.5) { a = 1; b = 0; }
             deptListOut.Add(deptListNew[a]);
             deptListOut.Add(deptListNew[b]);
             for (int i = 0; i < deptListNew.Count; i++)
             {
                 int index = indicesRandom[i];
-                if (index == a || index == b) continue;
+                if (index ==a || index ==b) continue;
                 deptListOut.Add(deptListNew[index]);
             }           
             return deptListOut;

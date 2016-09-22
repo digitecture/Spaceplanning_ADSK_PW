@@ -198,12 +198,12 @@ namespace SpacePlanning
                 if (deptArrangement == null) { designSeed += (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed), 100, 10);  countSuccess += 1; continue; }
                 List<DeptData> deptDataCheck = (List<DeptData>)deptArrangement["DeptData"];
                 numDeptSuccess = LayoutUtility.CheckDeptPlaced(deptDataCheck);
-                Trace.WriteLine("Num Dept Success : " + numDeptSuccess + " , " + numDeptSuccess*1.0 / deptDataCheck.Count);
-                Trace.WriteLine("Best Found so Far : " + numDeptSuccessBest);
-                Trace.WriteLine("Iterating for : " + countSuccess);
+                //Trace.WriteLine("Num Dept Success : " + numDeptSuccess + " , " + numDeptSuccess*1.0 / deptDataCheck.Count);
+                //Trace.WriteLine("Best Found so Far : " + numDeptSuccessBest);
+                //Trace.WriteLine("Iterating for : " + countSuccess);
                 if (numDeptSuccess*1.0 / deptDataCheck.Count > 0.75)
                 {
-                    Trace.WriteLine("So I think this is it the best : " + numDeptSuccess);
+                    //Trace.WriteLine("So I think this is it the best : " + numDeptSuccess);
                     worked = true; break;
                 }
                 else designSeed += (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed),100,10);
@@ -239,15 +239,16 @@ namespace SpacePlanning
             bool stackOptionsProg = deptData[0].ProgramsInDept[0].StackingOptions;
             List<List<Polygon2d>> polyPorgsAdded = new List<List<Polygon2d>>();
             List<ProgramData> progDataNew = new List<ProgramData>();
+            int kpuWidthIndex = 0;
             for (int i = 0; i < deptData.Count; i++)
             {
                 DeptData deptItem = deptData[i];
-                //if (i == 0)
                 if ((deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToLower()) != -1 ||
                 deptItem.DepartmentType.IndexOf(BuildLayout.KPU.ToUpper()) != -1))
                 {
-                    Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList);
-                    //deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
+                    Dictionary<string, object> placedPrimaryProg = BuildLayout.PlaceKPUPrograms(deptData[i].PolyAssignedToDept, deptData[i].ProgramsInDept, kpuProgramWidthList[kpuWidthIndex]);
+                    kpuWidthIndex += 1;
+                    if (kpuWidthIndex > kpuProgramWidthList.Count - 1) kpuWidthIndex = 0;
                     if (placedPrimaryProg != null) deptData[i].ProgramsInDept = (List<ProgramData>)placedPrimaryProg["ProgramData"];
                     else deptData[i].ProgramsInDept = null;
                 }

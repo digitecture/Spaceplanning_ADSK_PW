@@ -105,7 +105,7 @@ namespace SpacePlanning
         /// <returns name="ProgramData">Updated program data object.</returns>
         /// <returns name="ProgramsAddedCount">Number of program units added.</returns>
         [MultiReturn(new[] { "ProgramData", "ProgramsAddedCount" })]
-        internal static Dictionary<string, object> PlaceKPUPrograms(List<Polygon2d> deptPoly, List<ProgramData> progData, List<double> primaryProgramWidthList, int space = 10)
+        internal static Dictionary<string, object> PlaceKPUPrograms(List<Polygon2d> deptPoly, List<ProgramData> progData, double primaryProgramWidth, int space = 10)
         {
 
             if (!ValidateObject.CheckPolyList(deptPoly)) return null;
@@ -136,9 +136,9 @@ namespace SpacePlanning
                 int lineOrient = ValidateObject.CheckLineOrient(currentPoly.Lines[0]);
                 if (lineOrient == dir) lineId = 0;
                 else lineId = 1;                
-                if (i > 2) index += 1;
-                if (index > primaryProgramWidthList.Count - 1) index = 0;
-                double primaryProgramWidth = primaryProgramWidthList[index];
+                //if (i > 2) index += 1;
+                //if (index > primaryProgramWidthList.Count - 1) index = 0;
+                //double primaryProgramWidth = primaryProgramWidthList[index];
                 while (setSpan > primaryProgramWidth && count < 200)
                 {
                     if (programDataRetrieved.Count == 0) programDataRetrieved.Enqueue(copyProgData);
@@ -826,14 +826,12 @@ namespace SpacePlanning
             List<Polygon2d> leftOverBlocks = polyList;
             List<Polygon2d> polySubdivSaved = new List<Polygon2d>();
             Polygon2d currentPoly = polyList[0];
-            List<double> areaEachKPUList = new List<double>();
-            double areaKpu = 0;
-            for (int j = 0; j < kpuDepthList.Count; j++) areaEachKPUList.Add(1000);  //areaEachKPUList.Add(kpuWidthList[j] * kpuDepthList[j]);
             int kpuNum = 0;
+            int index = 0;
             for (int i = 0; i < deptData.Count; i++)
             {
                 List<Polygon2d> currentPolyList = new List<Polygon2d>();
-                int index = i;
+               
                 double thresDistance = 20;
                 double areaAssigned = 0;
                 DeptData deptItem = deptData[i];
@@ -882,9 +880,10 @@ namespace SpacePlanning
                     double areaNeeded = areaNeededDept[i];
                     double areaLeftOverBlocks = 0;
                     for (int k = 0; k < leftOverBlocks.Count; k++) areaLeftOverBlocks += PolygonUtility.AreaPolygon(leftOverBlocks[k]);
-                    //if (unlimitedKPU) areaNeeded = 0.9 * areaLeftOverBlocks;
-                    if (index > kpuDepthList.Count - 1) index = 0;
+                    //if (unlimitedKPU) areaNeeded = 0.9 * areaLeftOverBlocks;                    
                     double kpuDepth = kpuDepthList[index];
+                    index += 1;
+                    if (index > kpuDepthList.Count - 1) index = 0;
                     Dictionary<string, object> kpuDeptObj = new Dictionary<string, object>();
                     List<Polygon2d> kpuBlock = new List<Polygon2d>();
                     //currentPoly = leftOverBlocks[0];

@@ -56,8 +56,8 @@ namespace SpacePlanning
         /// DeptData object, department arrangement on site
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
-        public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, Point2d attractorPoint, List<double> kpuDepthList, 
-             int designSeed = 50, double circulationWidth = 5,bool kpuPlacementMode = true, bool mode3D = false, double totalBuildingHeight = 60, 
+        public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, Point2d attractorPoint, List<double> kpuDepthList,
+             int designSeed = 50, double circulationWidth = 5, bool kpuPlacementMode = true, bool mode3D = false, bool randomizeAdjacency = false, int designAdjacency = 50, double totalBuildingHeight = 60, 
              double avgFloorHeight = 15, int numDeptPerFloor = 2)
         {
            
@@ -66,6 +66,9 @@ namespace SpacePlanning
             List<DeptData> deptDataInp = deptData;
             Dictionary<string, object> obj = new Dictionary<string, object>();
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
+
+            if (randomizeAdjacency)
+                deptData = ReadData.SelectiveRandomizeDeptList(deptData, designAdjacency);
             List<double> heightList = new List<double>();
             if (mode3D == true)
             {
@@ -875,7 +878,7 @@ namespace SpacePlanning
                 }// end of public dept placement
                 
                 else if ((deptItem.DepartmentType.IndexOf(KPU.ToLower()) != -1 ||
-                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1))// key planning unit - to disabled multiple kpu same lvl use => // && !kpuPlaced
+                    deptItem.DepartmentType.IndexOf(KPU.ToUpper()) != -1))// key planning unit - to disable multiple kpu same lvl use => // && !kpuPlaced
                 {
                     double areaNeeded = areaNeededDept[i];
                     double areaLeftOverBlocks = 0;

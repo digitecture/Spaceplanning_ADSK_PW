@@ -595,6 +595,43 @@ namespace SpacePlanning
         }
 
 
+        //randomize dept data
+        internal static List<DeptData> RandomizeDeptList(List<DeptData> deptList, int designSeed = 0)
+        {
+            if (deptList == null) return null;
+            List<DeptData> deptListNew = deptList.Select(x => new DeptData(x)).ToList();
+            List<int> indices = new List<int>();
+            for (int i = 0; i < deptList.Count; i++) indices.Add(i);
+            List<int> indicesRandom = BasicUtility.RandomizeList(indices, new Random(designSeed));
+            List<DeptData> deptListOut = new List<DeptData>();
+            for (int i = 0; i < deptListNew.Count; i++) deptListOut.Add(deptListNew[indicesRandom[i]]);
+            return deptListOut;
+        }
+
+        //randomize dept data
+        internal static List<DeptData> SelectiveRandomizeDeptList(List<DeptData> deptList, int designSeed = 0)
+        {
+            if (deptList == null) return null;
+            List<DeptData> deptListNew = deptList.Select(x => new DeptData(x)).ToList();
+            List<int> indices = new List<int>();
+            for (int i = 0; i < deptList.Count; i++) indices.Add(i);
+            Random ran = new Random(designSeed);
+            double num = BasicUtility.RandomBetweenNumbers(ran, 1, 0);
+            List<int> indicesRandom = BasicUtility.RandomizeList(indices, ran);
+            List<DeptData> deptListOut = new List<DeptData>();
+            int a = 0, b = 1;
+            if (num > 0.5) a = 1; b = 0;
+            deptListOut.Add(deptListNew[a]);
+            deptListOut.Add(deptListNew[b]);
+            for (int i = 0; i < deptListNew.Count; i++)
+            {
+                int index = indicesRandom[i];
+                if (index == a || index == b) continue;
+                deptListOut.Add(deptListNew[index]);
+            }           
+            return deptListOut;
+        }
+
 
         //sorts a deptdata based on area 
         internal static List<DeptData> SortDeptData(List<DeptData> deptDataInp, List<string> preferredDept)

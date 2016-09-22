@@ -70,6 +70,7 @@ namespace SpacePlanning
                         }
                     }
                     */
+                    deptInFloor.Clear();
                     KPUDept.DeptFloorLevel = i;
                     deptInFloor.Add(KPUDept);
                     if (numDeptPerFloor < 0 || numDeptPerFloor > 4) numDeptPerFloor = 2;

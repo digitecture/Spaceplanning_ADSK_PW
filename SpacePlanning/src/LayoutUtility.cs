@@ -338,6 +338,17 @@ namespace SpacePlanning
         }
 
 
+        //checks number of depts are succesfullyplaced
+        internal static int CheckDeptPlaced(List<DeptData> deptData)
+        {
+            if (deptData == null) return 0;
+            int numDeptSuccess = 0;
+            for(int i = 0; i < deptData.Count; i++)
+            {
+                if (deptData[i].DeptAreaProvided > 0 && deptData[i].PolyAssignedToDept.Count > 0) numDeptSuccess += 1;
+            }
+            return numDeptSuccess;
+        }
         #endregion
 
 

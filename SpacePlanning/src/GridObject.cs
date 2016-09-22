@@ -360,7 +360,7 @@ namespace SpacePlanning
         {
             bool highIteration = false;
             if (highIteration == true) FORMCOUNT = 5;
-            Trace.WriteLine("FORM BUILD OUTLINE STARTS+++++++++++++++++++++++++");
+            //Trace.WriteLine("FORM BUILD OUTLINE STARTS+++++++++++++++++++++++++");
             if (designSeed < 1) designSeed = 1;
             int count = 0, maxTry = 1;
             bool cellRefine = false;
@@ -376,7 +376,7 @@ namespace SpacePlanning
             {
                 //if (attractorPoints.Count == 0 || weightList.Count == 0) { attractorPoints = null; weightList = null; }
                 count += 1;
-                Trace.WriteLine("||||||||||||||||||||||||||||||trying to get the form we want : " + count);
+                //Trace.WriteLine("||||||||||||||||||||||||||||||trying to get the form we want : " + count);
                 formBuildingOutlineObj = BuildOutline(orthoSiteOutline, cellList, deptData, attractorPoints, weightList, siteCoverage, designSeed, removeNotch, minNotchDistance, dummy, cellRefine);
 
                 if (formBuildingOutlineObj == null)
@@ -399,10 +399,11 @@ namespace SpacePlanning
                     }
                     if (scDifference < scDifferenceBest) { formBuildingOutlineObjBest = formBuildingOutlineObj; scDifferenceBest = scDifference; }
                 }
-                Trace.WriteLine("+++++++++++++++Difference in GC is : " + Math.Abs(siteCoverAchieved - siteCoverage));
+                //Trace.WriteLine("+++++++++++++++Difference in GC is : " + Math.Abs(siteCoverAchieved - siteCoverage));
             }// end of while loop
-            //formBuildingOutlineObjBest["BuildingOutlineArea"] = count;
-            Trace.WriteLine("FORM BUILD OUTLINE ENDS+++++++++++++++++++++++++");
+             //formBuildingOutlineObjBest["BuildingOutlineArea"] = count;
+
+            //Trace.WriteLine("FORM BUILD OUTLINE ENDS+++++++++++++++++++++++++");
             return formBuildingOutlineObjBest;
         }
         
@@ -485,7 +486,7 @@ namespace SpacePlanning
             {               
                 prevDir = dir;
                 count += 1;
-                Trace.WriteLine("lets place square again  ========================== : " + count);
+                //Trace.WriteLine("lets place square again  ========================== : " + count);
                 if (!deQueueMode)
                 {
                     dir = 0;
@@ -533,11 +534,11 @@ namespace SpacePlanning
 
                 }// end of for loop
                 if (!found) { deQueueMode = true; }
-                else Trace.WriteLine("Cell Found, count = " + count + "!! Area left: " + areaLeft);
+                //else Trace.WriteLine("Cell Found, count = " + count + "!! Area left: " + areaLeft);
                 if (deQueueMode && !circleMode)
                 {
-                    if (polySqrStack.Count > 0) { currentPoly = polySqrStack.Dequeue(); Trace.WriteLine("After Popped , Stack has : " + polySqrStack.Count); polySquares.Add(currentPoly); }
-                    else { Trace.WriteLine("Breaking , When count is : " + count); break; }
+                    if (polySqrStack.Count > 0) { currentPoly = polySqrStack.Dequeue(); polySquares.Add(currentPoly); }
+                    else {  break; }
                 }
                 double areaPrevLeft = areaLeft;
                 areaPlaced = AreaFromCells(selectedCells);

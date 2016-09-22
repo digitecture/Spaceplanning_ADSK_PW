@@ -71,7 +71,7 @@ namespace SpacePlanning
             {
                 int numFloors = (int)Math.Floor(totalBuildingHeight / avgFloorHeight);
                 for (int i = 0; i < numFloors; i++) heightList.Add((i) * avgFloorHeight);
-                Trace.WriteLine("Heightlist formed");
+                //Trace.WriteLine("Heightlist formed");
                 for (int i = 0; i < deptData.Count; i++)
                 {
                     deptData[i].Mode3D = true;
@@ -530,7 +530,7 @@ namespace SpacePlanning
                 double param = 0;
                 if (currentPoly.Lines[lineId].Length > maxLength)
                 {
-                    Trace.WriteLine("Max length found");
+                    //Trace.WriteLine("Max length found");
                     param = maxLength / currentPoly.Lines[lineId].Length;
                     currentPoly = SplitObject.AddPointToPoly(currentPoly, lineId, param);
                     lineIdStack = new Stack<int>();
@@ -793,7 +793,7 @@ namespace SpacePlanning
             double acceptableWidth = 0;
             if (deptData == null) { return null; }
             if (!ValidateObject.CheckPolyList(polyList)) return null;
-            Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");
+            //Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");
             List<double> AllDeptAreaAdded = new List<double>();
             List<List<Polygon2d>> AllDeptPolys = new List<List<Polygon2d>>();
             List<List<Polygon2d>> AllDeptCircPolys = new List<List<Polygon2d>>();
@@ -899,7 +899,8 @@ namespace SpacePlanning
                     }
                     catch
                     {
-                        Trace.WriteLine("fitkpu needs go to catch statement");
+                        //Trace.WriteLine("fitkpu needs go to catch statement");
+                        kpuPlacementMode = !kpuPlacementMode;
                         kpuDeptObj = FitKPUDept(leftOverBlocks[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine, kpuPlacementMode); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
                         kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                         leftOverBlocks[0] = (Polygon2d)kpuDeptObj["LeftOverPoly"];
@@ -981,7 +982,7 @@ namespace SpacePlanning
                     Dictionary<string, object> assignedByRatioObj = FitRegDept(areaNeeded, leftOverPoly);
                     currentPolyList = leftOverPoly;
                     if (assignedByRatioObj == null) continue;
-                    Trace.WriteLine("Assignment worked " + i);
+                    //Trace.WriteLine("Assignment worked " + i);
                     List<Polygon2d> everyDeptPoly = (List<Polygon2d>)assignedByRatioObj["DeptPoly"];
                     leftOverPoly = (List<Polygon2d>)assignedByRatioObj["LeftOverPoly"];
                     areaAssigned = (double)assignedByRatioObj["AreaAdded"];    
@@ -1001,7 +1002,7 @@ namespace SpacePlanning
                 DeptData newDeptData = new DeptData(deptData[i]);
                 if (i < AllDeptAreaAdded.Count)
                 {
-                    Trace.WriteLine("Dept playing : " + i);
+                    //Trace.WriteLine("Dept playing : " + i);
                     newDeptData.DeptAreaProvided = AllDeptAreaAdded[i];
                     newDeptData.PolyAssignedToDept = AllDeptPolys[i];
                     if (i < AllDeptCircPolys.Count) newDeptData.DeptCirculationPoly = AllDeptCircPolys[i];
@@ -1023,7 +1024,7 @@ namespace SpacePlanning
                 UpdatedDeptData[i].DeptAreaProportionAchieved = Math.Round((UpdatedDeptData[i].DeptAreaProvided / totalDeptArea), 3);
             }
             if (leftOverPoly.Count == 0) leftOverPoly = null;
-            Trace.WriteLine("DEPT PLACE KPU ENDS +++++++++++++++++++++++++++++++");
+            //Trace.WriteLine("DEPT PLACE KPU ENDS +++++++++++++++++++++++++++++++");
             return new Dictionary<string, object>
             {
                 { "DeptData", (UpdatedDeptData) },

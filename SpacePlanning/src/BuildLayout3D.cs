@@ -37,7 +37,7 @@ namespace SpacePlanning
         public static Dictionary<string, object> PlaceDepartments3D(List<DeptData> deptData, List<Polygon2d> buildingOutline, List<double> kpuDepthList, Point2d attractorPoint,int designSeed = 50, double circulationWidth = 5, 
             bool unlimitedKPU = true, int numDeptPerFloor = 2)
         {
-            Trace.WriteLine("Dept 3d mode");
+            //Trace.WriteLine("Dept 3d mode");
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
 
@@ -167,15 +167,13 @@ namespace SpacePlanning
                     {
                         if (ValidateObject.CheckPolyList(deptAllPolys[i])) deptPolysTogether.AddRange(deptAllPolys[i]);
                     }
-
-                    if (deptAllPolys.Count > 0) Trace.WriteLine("dept arrangement not null, lets check further");
+                    
                     for (int i = 0; i < deptAllPolys.Count; i++)
                     {
                         List<Polygon2d> eachDeptPoly = deptAllPolys[i];
                         if (ValidateObject.CheckPolyList(eachDeptPoly)) deptPlaced = true;
                         else { deptPlaced = false; Trace.WriteLine("dept arrangement bad polys, rejected"); break; }
                         bool orthoResult = ValidateObject.CheckPolygon2dListOrtho(deptPolysTogether, eps);
-                        //Trace.WriteLine("The poly formed is : " + orthoResult);
                         if (orthoResult) deptPlaced = true;
                         else { deptPlaced = false; Trace.WriteLine("dept arrangement non orthogonal, rejected"); break; }
                     }
@@ -184,13 +182,39 @@ namespace SpacePlanning
                 {
                     deptPlaced = false;
                     designSeed += 1;
-                    Trace.WriteLine("DeptPlacer returned null, rejected for: " + count);
                 }
                 deptPlaced = true;
                 count += 1;
-                Trace.WriteLine(" EXIT PLACE DEPARTMENTS +++++++++++++++++++++++++++++++++");
             }// end of while loop
-            return deptArrangement;
+
+            
+            //check for number of dept polys have area greater 0
+            int countSuccess = 0;
+            bool worked = false;
+            int numDeptSuccess = 0, numDeptSuccessBest = -1;
+            Dictionary<string, object> deptArrangementBest = deptArrangement;
+            while (countSuccess < BuildLayout.DEPTCOUNT*20 && !worked)
+            {
+                if (deptArrangement == null) { designSeed += (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed), 100, 10);  countSuccess += 1; continue; }
+                List<DeptData> deptDataCheck = (List<DeptData>)deptArrangement["DeptData"];
+                numDeptSuccess = LayoutUtility.CheckDeptPlaced(deptDataCheck);
+                Trace.WriteLine("Num Dept Success : " + numDeptSuccess + " , " + numDeptSuccess*1.0 / deptDataCheck.Count);
+                Trace.WriteLine("Best Found so Far : " + numDeptSuccessBest);
+                Trace.WriteLine("Iterating for : " + countSuccess);
+                if (numDeptSuccess*1.0 / deptDataCheck.Count > 0.75)
+                {
+                    Trace.WriteLine("So I think this is it the best : " + numDeptSuccess);
+                    worked = true; break;
+                }
+                else designSeed += (int)BasicUtility.RandomBetweenNumbers(new Random(designSeed),100,10);
+                if (numDeptSuccess > numDeptSuccessBest) { numDeptSuccessBest = numDeptSuccess; deptArrangementBest = deptArrangement; }                
+                countSuccess += 1;
+                deptArrangement = BuildLayout.DeptPlacer(deptData, buildingOutline, 
+                    attractorPoint, kpuDepthList, designSeed, unlimitedKPU, stackOptionsDept, stackOptionsProg, circulationWidth); 
+            }// end of while loop
+            //-------------------------------------------------------------------
+            
+            return deptArrangementBest;
         }
 
 
@@ -234,7 +258,6 @@ namespace SpacePlanning
                         if (deptData[i].ProgramsInDept != null || deptData[i].ProgramsInDept.Count > 0)
                         {
                             deptData[i].ProgramsInDept = ReadData.RandomizeProgramList(deptData[i].ProgramsInDept, designSeed);
-                            Trace.WriteLine("Randomized programlist");
                         }
                     }
 
@@ -264,7 +287,7 @@ namespace SpacePlanning
         [MultiReturn(new[] { "DeptData" })]
         public static Dictionary<string, object> PlacePrograms3D(List<DeptData> deptData, List<double> kpuProgramWidthList, double minAllowedDim = 5, int designSeed = 5, bool checkAspectRatio = false)
         {
-            Trace.WriteLine("Dept 3d mode");
+            //Trace.WriteLine("Dept 3d mode");
             List<DeptData> deptDataInp = deptData;
             deptData = deptDataInp.Select(x => new DeptData(x)).ToList(); // example of deep copy
             List<double> floorHeightList = deptDataInp[0].FloorHeightList;

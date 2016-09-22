@@ -534,7 +534,6 @@ namespace SpacePlanning
             //for(int i = 0; i < lineOptions.Count; i++) lineLength.Add(lineOptions[i].Length);
 
             List<int> sortedIndices = BasicUtility.Quicksort(lineLength);
-            Trace.WriteLine("Whats going on 1");
             if (sortedIndices == null) return null;
             if (sortedIndices != null && sortedIndices.Count > 1) sortedIndices.Reverse();
             // randomize the line indices to pick any line as found
@@ -542,21 +541,15 @@ namespace SpacePlanning
             {
                 List<int> dupSortedIndices = sortedIndices.Select(x => x).ToList();
                 Random nRan = new Random(designSeed);
-                //sortedIndices = BasicUtility.RandomizeList(dupSortedIndices, nRan);
-                //index = (int)BasicUtility.RandomBetweenNumbers(nRan, sortedIndices.Count - 1, 0);
-                //index = 1;
             }
             for (int i = 0; i < poly.Points.Count; i++) if (lineLength[i] > 0 && i != sortedIndices[index]) { lineOptions.Add(poly.Lines[i]); }
 
             // add a funct, which takes a lineid, poly, areatarget
             // it checks what parameter it should split to have it meet area requirement correctly
             poly = BuildPolyToSatisfyArea(poly, sortedIndices[index], areaTarget, distance);
-            //poly = AddPointToPoly(poly, sortedIndices[index], parameter);
-            Trace.WriteLine("Whats going on 2");
             Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(poly, sortedIndices[index], distance, minDist);
             Polygon2d polyBlock = (Polygon2d)splitObj["PolyAfterSplit"];
             double areaObtained = PolygonUtility.AreaPolygon(polyBlock);
-            Trace.WriteLine("Area obtained is : " + areaObtained);
             Polygon2d leftPoly = (Polygon2d)splitObj["LeftOverPoly"];
             return new Dictionary<string, object>
             {
@@ -708,8 +701,6 @@ namespace SpacePlanning
                     if (error) break;
                     if (noExternalWall && count > number) break;
                 }// end of while loop
-
-                Trace.WriteLine("Exit the while");
             }// end of for loop
 
 

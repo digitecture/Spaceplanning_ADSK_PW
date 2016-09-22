@@ -538,13 +538,13 @@ namespace SpacePlanning
                 pointFoundList.Add(nonOrthoPoly.Points[a]);
                 if (ValidateObject.CheckLineOrient(lineA) == -1) // found non ortho
                 {
-                    Trace.WriteLine("Line C Orientation = " + ValidateObject.CheckLineOrient(lineC));
-                    Trace.WriteLine("Line D Orientation = " + ValidateObject.CheckLineOrient(lineB));
+                    //Trace.WriteLine("Line C Orientation = " + ValidateObject.CheckLineOrient(lineC));
+                    //Trace.WriteLine("Line D Orientation = " + ValidateObject.CheckLineOrient(lineB));
                     if (ValidateObject.CheckLineOrient(lineC) == ValidateObject.CheckLineOrient(lineB)) // prev and post lines have same orientation
                     {
                         if(ValidateObject.CheckLineOrient(lineC) == 1)//vertical
                         {
-                            Trace.WriteLine("Vertical found");
+                            //Trace.WriteLine("Vertical found");
                             Point2d midPt = LineUtility.LineMidPoint(lineA);
                             Point2d A1 = new Point2d(midPt.X, ptA.Y);
                             Point2d A2 = new Point2d(midPt.X, ptB.Y);
@@ -553,7 +553,7 @@ namespace SpacePlanning
                         }
                         else // treat as horizontal
                         {
-                            Trace.WriteLine("Horizontal found");
+                           //Trace.WriteLine("Horizontal found");
                             Point2d midPt = LineUtility.LineMidPoint(lineA);
                             Point2d A1 = new Point2d(ptA.X,midPt.Y);
                             Point2d A2 = new Point2d(ptB.X, midPt.Y);
@@ -564,7 +564,7 @@ namespace SpacePlanning
                     }
                     else// prev and post lines have different orientation
                     {
-                        Trace.WriteLine("Different orientation found");
+                        //Trace.WriteLine("Different orientation found");
                         //can do any of the above two methods
                         Point2d midPt = LineUtility.LineMidPoint(lineA);
                         //Point2d A1 = new Point2d(nonOrthoPoly.Points[a].X, midPt.Y);

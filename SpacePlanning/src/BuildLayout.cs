@@ -23,6 +23,7 @@ namespace SpacePlanning
         internal static int DEPTCOUNT = 5;
         internal static double DIVISION = 4;
         internal static double GRIDWIDTH = 35;
+        internal static double PROGAREATOLERANCE = 50;
 
         internal const string KPU = "kpu";
         internal const string REG = "regular";
@@ -43,7 +44,7 @@ namespace SpacePlanning
         /// <param name="acceptableWidth">Acceptable width in meters while allocating area and polygon2d to each dept on site.</param>
         /// <param name="polyDivision">Point division of each polygon2d. Lower number represents high point count per polygon2d.</param>
         /// <param name="designSeed">Values to restart dept placment algorithm and return another design output.</param>
-        /// <param name="unlimitedKPU">Boolean toggle to turn on or off unlimied KPU placement.</param>
+        /// <param name="kpuPlacementMode">If true selects mode A to place KPU Depts and if selects mode B to place it.</param>
         /// <param name="mode3D">Boolean toggle to turn on or off 3d mode.</param>
         /// <param name="totalBuildingHeight">Total height of the building.</param>
         /// <param name="avgFloorHeight">Floor height of the building.</param>
@@ -56,7 +57,7 @@ namespace SpacePlanning
         /// </search>
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly", "SubdividedPoly" })]//"CirculationPolys", "OtherDeptMainPoly" 
         public static Dictionary<string, object> PlaceDepartments(List<DeptData> deptData, List<Polygon2d> buildingOutline, Point2d attractorPoint, List<double> kpuDepthList, 
-             int designSeed = 50, double circulationWidth = 5,bool unlimitedKPU = true, bool mode3D = false, double totalBuildingHeight = 60, 
+             int designSeed = 50, double circulationWidth = 5,bool kpuPlacementMode = true, bool mode3D = false, double totalBuildingHeight = 60, 
              double avgFloorHeight = 15, int numDeptPerFloor = 2)
         {
            
@@ -81,11 +82,11 @@ namespace SpacePlanning
             if (deptData[0].Mode3D)
             {
                 return BuildLayout3D.PlaceDepartments3D(deptData, buildingOutline, kpuDepthList, attractorPoint, 
-                                        designSeed, circulationWidth, unlimitedKPU, numDeptPerFloor);
+                                        designSeed, circulationWidth, kpuPlacementMode, numDeptPerFloor);
             }
             else {
                 return BuildLayout3D.PlaceDepartments2D(deptData, buildingOutline, kpuDepthList, attractorPoint,
-                                        designSeed, circulationWidth, unlimitedKPU);
+                                        designSeed, circulationWidth, kpuPlacementMode);
             }  
         }
 
@@ -249,7 +250,7 @@ namespace SpacePlanning
                 progItem.PolyAssignedToProg = new List<Polygon2d>();
                 double areaNeeded = progItem.ProgAreaNeeded;
                 double areaLeftTobeadded = areaNeeded;
-                while (areaLeftTobeadded > 50 && polygonAvailable.Count > 0)// && count < maxTry
+                while (areaLeftTobeadded > PROGAREATOLERANCE && polygonAvailable.Count > 0)// && count < maxTry
                 {
                     //ratio = BasicUtility.RandomBetweenNumbers(ran, max, min);
                     ratio = 0.5;
@@ -466,8 +467,8 @@ namespace SpacePlanning
         //places KPU dept with window or external wall need
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" })]
         public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
-            double area, double thresDistance = 10, int designSeed = 5, double circulationWidth = 3, bool stackOptions = false, 
-            Line2d exitLine = null, bool mode = false)
+            double area, double thresDistance = 10, int designSeed = 5, double circulationWidth = 3, bool stackOptionsDept = false, 
+            Line2d exitLine = null, bool kpuPlacementMode = false)
         {
 
             if (!ValidateObject.CheckPoly(poly)) return null;
@@ -477,9 +478,11 @@ namespace SpacePlanning
 
             List<Polygon2d> kpuDeptBlocks = new List<Polygon2d>(), leftOverBlocks = new List<Polygon2d>() { currentPoly };
             double areaAssigned = 0;
-            if (mode)
+
+                 
+            if (kpuPlacementMode)
             {
-                Dictionary<string, object> kpuDeptObj = SplitObject.AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, area, thresDistance, designSeed, false, stackOptions);
+                Dictionary<string, object> kpuDeptObj = SplitObject.AssignBlocksBasedOnDistance(leftOverBlocks, kpuDepth, area, thresDistance, designSeed, false, stackOptionsDept);
                 if (kpuDeptObj == null) return null;
                 kpuDeptBlocks = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                 leftOverBlocks = (List<Polygon2d>)kpuDeptObj["LeftOverPoly"];
@@ -489,10 +492,11 @@ namespace SpacePlanning
                 return new Dictionary<string, object>
                 {
                     { "PolyAfterSplit", (kpuDeptBlocks) },
-                    { "LeftOverPoly", (leftOverBlocks) },
+                    { "LeftOverPoly", (leftOverBlocks[0]) },
                     { "AreaAssignedToBlock", (areaAssigned) },
                 };
             }
+            
 
 
             Polygon2d polyCorridors = currentPoly;
@@ -508,16 +512,16 @@ namespace SpacePlanning
             Queue<int> lineIdQueue = new Queue<int>();
             for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
             for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
-            if (stackOptions)
+            
+            if (stackOptionsDept)
             {
                 indices = BasicUtility.RandomizeList(indices, new Random(designSeed));
                 lineIdQueue.Clear();
                 for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(indices[i]);
-
             }
+            
             while (areaAdded < area && lineIdQueue.Count > 0 && countMain < 1000)
             {
-                //lineId = lineIdStack.Pop();
                 lineId = lineIdQueue.Dequeue();
                 countMain += 1;
                 bool error = false;
@@ -532,20 +536,17 @@ namespace SpacePlanning
                     lineIdStack = new Stack<int>();
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
-                    // lineId = lineIdStack.Pop();
                     lineId = lineIdQueue.Dequeue();
                 }
 
 
                 if (currentPoly.Lines[lineId].Length > extremeLength)
                 {
-                    Trace.WriteLine("Too Long for a dept");
                     param = 0.5;
                     currentPoly = SplitObject.AddPointToPoly(currentPoly, lineId, param);
                     lineIdStack = new Stack<int>();
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
                     for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
-                    // lineId = lineIdStack.Pop();
                     lineId = lineIdQueue.Dequeue();
                 }
 
@@ -565,17 +566,13 @@ namespace SpacePlanning
                         for (int i = 0; i < currentPoly.Points.Count; i++) lineIdStack.Push(i);
                         for (int i = 0; i < currentPoly.Points.Count; i++) lineIdQueue.Enqueue(i);
                         lineId = lineIdQueue.Dequeue();
-                        //lineId = lineIdStack.Pop();
                     }
 
                 }
                 if (!checkOffset || currentPoly.Lines[lineId].Length <= kpuDepth) continue;
                 if (!PolygonUtility.FindAdjacentPolyToALine(poly, currentPoly.Lines[lineId])) continue;
-                if (stackOptions)
-                {
-                    if (ValidateObject.CheckIfTwoLinesSame(currentPoly.Lines[lineId], exitLine)) continue;
-                }
-
+                
+                if (stackOptionsDept) if (ValidateObject.CheckIfTwoLinesSame(currentPoly.Lines[lineId], exitLine)) continue;
 
                 Dictionary<string, object> splitObj = SplitObject.SplitByOffsetFromLine(currentPoly, lineId, kpuDepth, thresDistance);
                 Polygon2d polySplit = (Polygon2d)splitObj["PolyAfterSplit"];
@@ -791,10 +788,9 @@ namespace SpacePlanning
         //dept assignment new way ws
         [MultiReturn(new[] { "DeptData", "LeftOverPolys", "OtherDeptPoly" ,"SubdividedPoly"})]//"CirculationPolys", "OtherDeptMainPoly" 
         internal static Dictionary<string, object> DeptPlacer(List<DeptData> deptData, List<Polygon2d> polyList, Point2d attractorPoint, List<double> kpuDepthList,
-            int designSeed = 5, bool unlimitedKPU = true, bool stackOptionsDept = false, bool stackOptionsProg = false, double circulationWidth = 3)
+            int designSeed = 5, bool kpuPlacementMode = false, bool stackOptionsDept = false, bool stackOptionsProg = false, double circulationWidth = 3)
         {
             double acceptableWidth = 0;
-            //double circulationWidth = 3;
             if (deptData == null) { return null; }
             if (!ValidateObject.CheckPolyList(polyList)) return null;
             Trace.WriteLine("DEPT PLACE KPU STARTS +++++++++++++++++++++++++++++");
@@ -806,10 +802,8 @@ namespace SpacePlanning
             List<Polygon2d> subDividedPoly = new List<Polygon2d>();
             int count = 0, maxTry = 20;
             bool prepareReg = false, kpuPlaced = false, noKpuMode = false;// to disable multiple KPU
-            double areaAvailable = 0, ratio = 0.6;
-
-            ratio = BasicUtility.RandomBetweenNumbers(new Random(designSeed), 0.76, 0.23);
-
+            double  ratio = 0.6;
+            if(stackOptionsDept) ratio = BasicUtility.RandomBetweenNumbers(new Random(designSeed), 0.76, 0.23);
             double totalAreaInPoly = 0;
             for (int i = 0; i < polyList.Count; i++) totalAreaInPoly += Math.Abs(PolygonUtility.AreaPolygon(polyList[i]));
 
@@ -888,9 +882,7 @@ namespace SpacePlanning
                     double areaNeeded = areaNeededDept[i];
                     double areaLeftOverBlocks = 0;
                     for (int k = 0; k < leftOverBlocks.Count; k++) areaLeftOverBlocks += PolygonUtility.AreaPolygon(leftOverBlocks[k]);
-                    if (unlimitedKPU) areaNeeded = 0.9 * areaLeftOverBlocks;
-                    //else areaNeeded = 6000;
-                    //if(!stackOptionsDept && areaNeeded> 0.75 * areaLeftOverBlocks) areaNeeded = 0.75 * areaLeftOverBlocks;
+                    //if (unlimitedKPU) areaNeeded = 0.9 * areaLeftOverBlocks;
                     if (index > kpuDepthList.Count - 1) index = 0;
                     double kpuDepth = kpuDepthList[index];
                     Dictionary<string, object> kpuDeptObj = new Dictionary<string, object>();
@@ -898,7 +890,7 @@ namespace SpacePlanning
                     //currentPoly = leftOverBlocks[0];
                     //currentPolyList = leftOverBlocks;
                     for (int j = 0; j < leftOverBlocks.Count; j++) currentPolyList.Add(new Polygon2d(leftOverBlocks[j].Points));
-                    kpuDeptObj = FitKPUDept(currentPolyList[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine, stackOptionsDept); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
+                    kpuDeptObj = FitKPUDept(currentPolyList[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine, kpuPlacementMode); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
                     try
                     {
                         kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
@@ -908,7 +900,7 @@ namespace SpacePlanning
                     catch
                     {
                         Trace.WriteLine("fitkpu needs go to catch statement");
-                        kpuDeptObj = FitKPUDept(leftOverBlocks[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
+                        kpuDeptObj = FitKPUDept(leftOverBlocks[0], kpuDepth, areaNeeded, thresDistance, designSeed, 3, stackOptionsDept, exitLine, kpuPlacementMode); // "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" 
                         kpuBlock = (List<Polygon2d>)kpuDeptObj["PolyAfterSplit"];
                         leftOverBlocks[0] = (Polygon2d)kpuDeptObj["LeftOverPoly"];
                         areaAssigned = (double)kpuDeptObj["AreaAssignedToBlock"];

@@ -725,7 +725,7 @@ namespace SpacePlanning
         /// <returns name="progPolyOrigin">Centroid of the polygons representing programs.</returns>
         /// <returns name="progNameAsText">Name of the programs.</returns>
         /// <search>
-        /// visualize program polgons, program polylines
+        /// visualize program polgons, program polylines, program elements
         /// </search>
         [MultiReturn(new[] { "progPolygons", "progPolyOrigin", "progNameAsText" })]
         internal static Dictionary<string, object> VisualizeProgramPolyLinesAndOrigin2D(List<DeptData> deptData, double height = 0, double heightPolylines = 0, bool fullProgramNames = true)

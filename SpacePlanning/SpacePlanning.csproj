@@ -28,12 +28,13 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>bin\Release\SpacePlanning.xml</DocumentationFile>
-    <RegisterForComInterop>true</RegisterForComInterop>
+    <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Display">
@@ -73,6 +74,7 @@
     </Reference>
     <Reference Include="ProtoImperative">
       <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoImperative.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ProtoScript">
       <HintPath>..\..\..\..\..\..\..\Program Files\Dynamo\Dynamo Core\1.1\ProtoScript.dll</HintPath>

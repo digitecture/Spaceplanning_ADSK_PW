@@ -469,7 +469,7 @@ namespace SpacePlanning
 
         //places KPU dept with window or external wall need
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock" })]
-        public static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
+        internal static Dictionary<string, object> FitKPUDept(Polygon2d poly, double kpuDepth,
             double area, double thresDistance = 10, int designSeed = 5, double circulationWidth = 3, bool stackOptionsDept = false, 
             Line2d exitLine = null, bool kpuPlacementMode = false)
         {
@@ -607,7 +607,7 @@ namespace SpacePlanning
 
         //places public dept based on area need and placement of an attractor point by the user 
         [MultiReturn(new[] { "PolyAfterSplit", "LeftOverPoly", "AreaAssignedToBlock", "ExitLine" })]
-        public static Dictionary<string, object> FitPublicDept(Polygon2d poly, Point2d attractorPoint,
+        internal static Dictionary<string, object> FitPublicDept(Polygon2d poly, Point2d attractorPoint,
            double area, int designSeed = 5)
         {
 

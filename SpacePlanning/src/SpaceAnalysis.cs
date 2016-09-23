@@ -382,7 +382,7 @@ namespace SpacePlanning
 
         //Provides information related to program data
         /// <summary>
-        /// Visualizes departments and programs on site as colored poly surfaces.
+        /// Visualizes departments on site as colored poly surfaces.
         /// </summary>
         /// <param name="deptDataInp"> List of Department data object.</param>
         /// <param name="height">Height of the surfaces.</param>
@@ -788,7 +788,7 @@ namespace SpacePlanning
 
         //Provides information related to program data
         /// <summary>
-        /// Provides analytics on Program data after spaces has been assigned.
+        /// Visualizes program polylines and origin points of program elements.
         /// </summary>
         /// <param name="deptData">List of Department Data Object</param>
         /// <param name="height">Height of the origin points.</param>

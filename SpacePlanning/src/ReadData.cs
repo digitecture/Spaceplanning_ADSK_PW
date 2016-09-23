@@ -285,7 +285,7 @@ namespace SpacePlanning
        
         // builds adjacency weight list based on user program adjacency
         [MultiReturn(new[] { "IdList","AdjList", "AdjWeightList"})]
-        public static Dictionary<string, object> FindPreferredProgs(List<string> idList, List<string> adjListInput)
+        internal static Dictionary<string, object> FindPreferredProgs(List<string> idList, List<string> adjListInput)
         {               
             List<string> itemAdjId = new List<string>();
             for (int i = 0; i < idList.Count; i++)

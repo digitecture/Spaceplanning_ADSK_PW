@@ -77,7 +77,7 @@ namespace SpacePlanning
         /// visualize circulation, circulation network
         /// </search>
         [MultiReturn(new[] { "DisplayGeomList" })]
-        public static Dictionary<string, object> VisualizeCirculation(List<Polygon2d> deptCirculationPoly, List<Polygon2d> progCirculationPoly, double height =0)
+        internal static Dictionary<string, object> VisualizeCirculationOldSystem(List<Polygon2d> deptCirculationPoly, List<Polygon2d> progCirculationPoly, double height =0)
         {
             List<Color> colorList = new List<Color>();
             colorList.Add(Color.ByARGB(255, 0, 255, 255)); // cyan
@@ -295,7 +295,7 @@ namespace SpacePlanning
         /// visualize department and programs,color surfaces
         /// </search>        
         [MultiReturn(new[] { "DisplayGeomList", "DisplayPolyList" })]
-        public static Dictionary<string, object> VisualizeDepartmentCirculation(List<DeptData> deptDataInp, double height = 0,
+        public static Dictionary<string, object> VisualizeCirculation(List<DeptData> deptDataInp, double height = 0,
             int colorScheme = 0, int opacity = 10)
         {
 
@@ -686,7 +686,7 @@ namespace SpacePlanning
         }
 
         [MultiReturn(new[] { "DisplayGeomList" })]
-        public static Dictionary<string, object> VisualizeDeptProgramsIn3D(List<DeptData> deptDataInp, double height = 0, int transparency = 255, int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
+        internal static Dictionary<string, object> VisualizeDeptProgramsIn3D(List<DeptData> deptDataInp, double height = 0, int transparency = 255, int colorScheme = 0, bool colorProgramSeparate = false, int opacity = 10)
         {
             List<DeptData> deptData = deptDataInp;
             deptDataInp = deptData.Select(x => new DeptData(x)).ToList(); // example of deep copy

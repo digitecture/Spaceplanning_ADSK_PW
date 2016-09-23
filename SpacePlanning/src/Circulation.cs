@@ -13,7 +13,7 @@ namespace SpacePlanning
     /// <summary>
     /// Class to compute and generate circulation networks in space plans.
     /// </summary>
-    public static class Circulation
+    internal static class Circulation
     {
         #region - Public Methods
         //Builds Dept Topology Matrix , finds all the shared edges between dept polys, and updates department polygon2d's.
